@@ -167,6 +167,21 @@ details p { color: var(--soft); padding: 0 40px 24px 0; }
 .cta { position: relative; overflow: hidden; }
 .cta::before { content: ""; position: absolute; left: 50%; bottom: -320px; width: 900px; height: 600px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .2), rgba(255, 178, 36, 0)); pointer-events: none; }
 .cta > .wrap { position: relative; align-items: center; text-align: center; gap: 22px; }
+/* demo request form (sent by /api/contact through Resend) */
+.form { width: min(640px, 100%); display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left; }
+.form label { display: grid; gap: 6px; font-size: 14px; color: var(--soft); min-width: 0; }
+.form label.full { grid-column: 1 / -1; }
+.form *, .form *::before { box-sizing: border-box; }
+.form input, .form textarea, .form select { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 12px 14px; width: 100%; min-width: 0; }
+.form textarea { min-height: 120px; resize: vertical; }
+.form input:focus, .form textarea:focus, .form select:focus { outline: none; border-color: var(--accent); }
+.form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form .row { grid-column: 1 / -1; justify-self: stretch; justify-content: flex-start; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.form .btn[disabled] { opacity: .6; cursor: wait; }
+#formMsg { font-size: 15px; color: var(--soft); }
+#formMsg.bad { color: #ff7a6b; }
+.sent { width: min(640px, 100%); border: 1px solid var(--accent); background: var(--accent-ground); padding: 22px; }
+@media (max-width: 560px) { .form { grid-template-columns: 1fr; } }
 .contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-items: center; }
 .contact code { font: 500 17px var(--body); border: 1px solid var(--line2); padding: 12px 18px; user-select: all; background: var(--bg); }
 footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
@@ -379,11 +394,17 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   <div class="wrap">
     <h2>See it on your own screens.</h2>
     <p class="lede">Tell us what's on your set and we'll show you how Showcaller Studio would run it.</p>
-    <div class="contact">
-      <code id="mail">[YOUR CONTACT EMAIL]</code>
-      <button type="button" class="btn primary" id="copy">Copy address</button>
-    </div>
-    <div class="small" id="copied" aria-live="polite"></div>
+    <form class="form" id="demoForm" novalidate>
+      <label>Your name<input name="name" autocomplete="name" required maxlength="120"></label>
+      <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
+      <label>Company or production<input name="company" autocomplete="organization" maxlength="160"></label>
+      <label>Phone (optional)<input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+      <label class="full">What's on your set?<textarea name="message" required maxlength="5000" placeholder="For example: four TVs behind the desk and an LED wall, run from one laptop"></textarea></label>
+      <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <input type="hidden" name="plan" id="formPlan">
+      <div class="row"><button type="submit" class="btn primary" id="formBtn">Book a demo</button><span id="formMsg" role="status" aria-live="polite"></span></div>
+    </form>
+    <div class="sent" id="formSent" hidden><b>Thanks, we've got it.</b><br><span class="small">We'll reply to the email you gave, usually within one working day.</span></div>
   </div>
 </section>
 
@@ -440,11 +461,25 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   };
   price();
 
-  // ---- contact: copy the address ----
-  $('#copy').onclick = async () => {
-    const text = $('#mail').textContent;
-    try { await navigator.clipboard.writeText(text); $('#copied').textContent = 'Copied.'; }
-    catch { const r = document.createRange(); r.selectNodeContents($('#mail')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('#copied').textContent = 'Selected. Press copy on your keyboard.'; }
+  // ---- demo request: posted to /api/contact (a Cloudflare Pages Function that sends it with Resend) ----
+  const form = $('#demoForm'), started = Date.now();
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = $('#formMsg'), btn = $('#formBtn');
+    const d = Object.fromEntries(new FormData(form));
+    msg.className = '';
+    if (!d.name.trim() || !d.message.trim()) { msg.className = 'bad'; msg.textContent = 'Add your name and a line about your set.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) { msg.className = 'bad'; msg.textContent = 'That email doesn\u2019t look right.'; return; }
+    d.plan = ($('#cNote') && $('#cNote').textContent) || ''; d.ms = Date.now() - started;
+    btn.disabled = true; msg.textContent = 'Sending\u2026';
+    try {
+      const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'It didn\u2019t send.');
+      form.hidden = true; $('#formSent').hidden = false;
+    } catch (err) {
+      msg.className = 'bad'; msg.textContent = (err.message || 'It didn\u2019t send.') + ' Please try again in a minute.';
+    } finally { btn.disabled = false; }
   };
 
   // ---- the run-through plays by itself; if the browser won't, the poster and controls remain ----
