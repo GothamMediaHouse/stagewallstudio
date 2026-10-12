@@ -151,6 +151,16 @@ ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; wi
 .stepper button { width: 46px; height: 46px; background: transparent; color: var(--fg); border: 0; font: 500 22px var(--body); cursor: pointer; }
 .stepper button:hover { background: var(--raised); }
 .stepper output { min-width: 52px; text-align: center; font: 600 18px var(--display); font-variant-numeric: tabular-nums; color: var(--fg); }
+.rent { border: 1px solid var(--line2); background: var(--panel); padding: 26px 28px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: center; }
+.rent-copy { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.rent-copy h3 { font-size: 20px; }
+.rent-copy p { color: var(--soft); font-size: 15.5px; }
+.rent-prices { display: flex; flex-wrap: wrap; gap: 28px; }
+.rent-prices .price { border-bottom: 0; padding-bottom: 0; }
+.rent-prices .price b { font-size: 38px; }
+[hidden] { display: none !important; }
+.terms { display: flex; flex-wrap: wrap; gap: 10px; }
+.calc { margin-top: 14px; }
 .total { flex: 0 1 320px; display: flex; flex-direction: column; gap: 6px; }
 .total b { font: 600 clamp(44px, 6vw, 60px)/1 var(--display); letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
 
@@ -318,7 +328,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="head">
       <div class="eyebrow">Pricing</div>
       <h2>One price per set computer</h2>
-      <p class="lede">Billed yearly. Every license includes updates and support for the year, and drives as many screens as the computer can.</p>
+      <p class="lede">Yearly for your own studio, or rent it for a single show. Every license includes updates and support, and drives as many screens as the computer can.</p>
     </div>
     <div class="plans">
       <div class="plan">
@@ -343,17 +353,33 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <button type="button" class="btn" data-pick="proj">Price this</button>
       </div>
       <div class="plan best">
-        <h3>Everything <span class="tag">SAVE $180</span></h3>
-        <div class="price"><b>$1,190</b><span class="small">per computer, per year</span></div>
+        <h3>Everything <span class="tag">SAVE $380</span></h3>
+        <div class="price"><b>$990</b><span class="small">per computer, per year</span></div>
         <p>Showcaller Studio with both add-ons, for studios that do it all.</p>
         <ul class="ticks"><li>Monitors, LED, Projection, Signage and Multiviewer</li><li>Every tool on this page</li><li>One key, one renewal date</li></ul>
         <button type="button" class="btn primary" data-pick="led proj">Price this</button>
       </div>
     </div>
+    <div class="rent">
+      <div class="rent-copy">
+        <h3>Renting for a show</h3>
+        <p>Everything included: monitors, LED and projection. The key ends on the date you choose, and the show never goes dark because of it.</p>
+      </div>
+      <div class="rent-prices">
+        <div class="price"><b>$79</b><span class="small">per computer, per week</span></div>
+        <div class="price"><b>$149</b><span class="small">per computer, per month</span></div>
+      </div>
+      <button type="button" class="btn" data-term="week">Price a rental</button>
+    </div>
     <div class="calc" id="calc">
       <div class="opts">
         <h3>Work out your price</h3>
-        <div class="checks">
+        <div class="terms" role="radiogroup" aria-label="How long">
+          <label class="chk" for="tYear"><input type="radio" name="term" id="tYear" value="year" checked> Yearly</label>
+          <label class="chk" for="tMonth"><input type="radio" name="term" id="tMonth" value="month"> Monthly rental</label>
+          <label class="chk" for="tWeek"><input type="radio" name="term" id="tWeek" value="week"> Weekly rental</label>
+        </div>
+        <div class="checks" id="cAdds">
           <label class="chk" for="cLed"><input type="checkbox" id="cLed"> LED add-on</label>
           <label class="chk" for="cProj"><input type="checkbox" id="cProj"> Projection add-on</label>
         </div>
@@ -367,7 +393,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         </div>
       </div>
       <div class="total">
-        <span class="small">Your price per year</span>
+        <span class="small" id="cPer">Your price per year</span>
         <b id="cTotal">$590</b>
         <span class="small" id="cNote">Showcaller Studio on 1 computer</span>
       </div>
@@ -382,6 +408,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="faq">
       <details open><summary>What do I need to run it?</summary><p>A Windows PC or a Mac with a video output for each screen. The computer's own display is kept for the operator and never used as a monitor.</p></details>
       <details><summary>Does it need the internet?</summary><p>No. It runs on your computer and your network. Web sources and phone alerts need a connection; everything else works offline.</p></details>
+      <details><summary>Can I rent it for one show?</summary><p>Yes. A rental is $79 a week or $149 a month per computer, with LED and projection included. You get a key that ends on the date you choose, and switching to a yearly license later keeps all your looks and settings.</p></details>
       <details><summary>What happens if my license runs out during a show?</summary><p>The show carries on. Showcaller Studio never takes a picture off a monitor over licensing; it reminds you on the control page until you renew.</p></details>
       <details><summary>Can I try it first?</summary><p>Yes. Every copy has a demo for each kind of show, with sample media, and we'll walk you through it on a call.</p></details>
       <details><summary>Can I add LED or Projection later?</summary><p>Yes. An add-on is a new key for the same computer. Nothing is reinstalled and your shows stay as they are.</p></details>
@@ -442,23 +469,29 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   setType(0);
 
   // ---- price calculator ----
-  const BASE = 590, ADD = 390, ALL = 1190;
+  const BASE = 590, ADD = 390, ALL = 990, RENT = { week: 79, month: 149 };
   let n = 1;
+  const term = () => document.querySelector('input[name="term"]:checked').value;
   function price() {
-    const led = $('#cLed').checked, proj = $('#cProj').checked;
-    const each = led && proj ? ALL : BASE + (led ? ADD : 0) + (proj ? ADD : 0);
+    const t = term(), rent = t !== 'year', led = $('#cLed').checked, proj = $('#cProj').checked;
+    const each = rent ? RENT[t] : led && proj ? ALL : BASE + (led ? ADD : 0) + (proj ? ADD : 0);
+    $('#cAdds').hidden = rent;
     $('#cN').textContent = n;
+    $('#cPer').textContent = `Your price per ${t}`;
     $('#cTotal').textContent = '$' + (each * n).toLocaleString('en-US');
-    const what = led && proj ? 'Everything' : 'Showcaller Studio' + (led ? ' + LED' : '') + (proj ? ' + Projection' : '');
-    $('#cNote').textContent = `${what} on ${n} computer${n === 1 ? '' : 's'}` + (n > 1 ? ` ($${each.toLocaleString('en-US')} each)` : '') + (led && proj ? ', with the $180 saving' : '');
+    const what = rent ? `Rental, everything included,` : led && proj ? 'Everything' : 'Showcaller Studio' + (led ? ' + LED' : '') + (proj ? ' + Projection' : '');
+    $('#cNote').textContent = `${what} on ${n} computer${n === 1 ? '' : 's'}` + (n > 1 ? ` ($${each.toLocaleString('en-US')} each)` : '') + (!rent && led && proj ? ', with the $380 saving' : '');
   }
   $('#cLed').onchange = $('#cProj').onchange = price;
+  for (const r of document.querySelectorAll('input[name="term"]')) r.onchange = price;
   $('#cMinus').onclick = () => { n = Math.max(1, n - 1); price(); };
   $('#cPlus').onclick = () => { n = Math.min(20, n + 1); price(); };
   for (const b of document.querySelectorAll('[data-pick]')) b.onclick = () => {
+    $('#tYear').checked = true;
     $('#cLed').checked = b.dataset.pick.includes('led'); $('#cProj').checked = b.dataset.pick.includes('proj'); price();
     $('#calc').scrollIntoView({ block: 'center' });
   };
+  for (const b of document.querySelectorAll('[data-term]')) b.onclick = () => { $('#tWeek').checked = true; price(); $('#calc').scrollIntoView({ block: 'center' }); };
   price();
 
   // ---- demo request: posted to /api/contact (a Cloudflare Pages Function that sends it with Resend) ----
