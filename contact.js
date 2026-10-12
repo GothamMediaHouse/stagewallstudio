@@ -1,5 +1,5 @@
-// POST /api/contact: the "Book a demo" form. Sends the request to the team through Resend.
-// Settings (Cloudflare Pages → Settings → Variables and secrets):
+// The "Book a demo" form handler, used by worker.js for POST /api/contact. Sends the request through Resend.
+// Settings (Cloudflare → Workers & Pages → stagewallstudio → Settings → Variables and secrets):
 //   RESEND_API_KEY  (secret)  an API key from resend.com
 //   CONTACT_TO                where requests go, e.g. you@yourcompany.com (comma-separate several)
 //   CONTACT_FROM   (optional) defaults to "Showcaller Studio <hello@showcallerstudio.com>";
@@ -8,7 +8,7 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), { status
 const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').trim().slice(0, n);
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export async function onRequestPost({ request, env }) {
+export async function contact(request, env) {
   let d;
   try { d = await request.json(); } catch { return json({ error: 'That request couldn’t be read.' }, 400); }
   // Spam: a hidden field people never fill in, and forms sent faster than a person could type
@@ -37,4 +37,4 @@ export async function onRequestPost({ request, env }) {
   return json({ ok: true });
 }
 
-export const onRequest = () => json({ error: 'Use POST' }, 405);
+export { json };

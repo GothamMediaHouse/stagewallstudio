@@ -1,0 +1,8 @@
+{
+  "name": "stagewallstudio",
+  "main": "worker.js",
+  "compatibility_date": "2025-09-01",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  // Keep the variables set in the Cloudflare dashboard (CONTACT_TO, CONTACT_FROM) when this deploys
+  "keep_vars": true
+}
