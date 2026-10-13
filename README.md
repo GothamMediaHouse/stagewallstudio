@@ -32,3 +32,11 @@ The **Buy now** button under the price calculator stays hidden until these are s
 3. `LICENSE_SIGNING_KEY` (secret): the one line in `web-store-key-for-cloudflare.txt` in the private Admin folder. Never put it anywhere else.
 
 Prices are worked out in `store.js` (and shown by the calculator in `index.html`): keep the two in step.
+
+## Showcaller Multiview (free download)
+
+`public/multiview/` is the page for the free multiviewer app; `multiview.js` handles its download form (`POST /api/multiview`) and the version check the app makes (`GET /api/multiview/latest`). The form emails the visitor the download links and sends a note to `CONTACT_TO`, using the Resend settings above. Until the links are set it collects emails for a waiting list instead.
+
+- `MULTIVIEW_VERSION`: the current version, e.g. `1.4.1`. Copies of the app older than this show "Update available".
+- `MULTIVIEW_MAC_ARM_URL`, `MULTIVIEW_MAC_INTEL_URL`, `MULTIVIEW_WIN_URL` (optional): public download links for each installer (any https link, e.g. a Cloudflare R2 bucket or a Google Drive file shared with "Anyone with the link").
+- `MULTIVIEW_NOTES` (optional): one line on what's new, shown in the app's update note.
