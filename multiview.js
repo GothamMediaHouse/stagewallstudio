@@ -11,7 +11,7 @@
 import { json } from './contact.js';
 
 const PAGE = 'https://showcallerstudio.com/multiview/';
-const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, n);
+export const clean = (v, n) => String(v ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, n);
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const httpsOnly = (u) => (/^https:\/\/\S+$/.test(String(u || '')) ? String(u) : '');
 
@@ -20,12 +20,13 @@ function links(env) {
   return l.macArm ? l : null;
 }
 
-async function send(env, body) {
+export async function send(env, body) {
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: env.CONTACT_FROM || 'Showcaller Studio <hello@showcallerstudio.com>', ...body }),
-  });
+  }).catch((e) => { console.log('resend', e.message); return null; }); // Resend unreachable: say it didn't send
+  if (!r) return false;
   if (!r.ok) console.log('resend', r.status, await r.text().catch(() => ''));
   return r.ok;
 }

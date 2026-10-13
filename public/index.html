@@ -182,7 +182,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a href="#features">Features</a>
       <a href="#pricing">Free trial</a>
       <a href="#questions">Questions</a>
-      <a href="/multiview/">Free multiviewer</a>
+      <a href="/tools/">Free tools</a>
     </nav>
     <a class="btn primary sm" href="#contact">Book a demo</a>
   </div>
@@ -423,7 +423,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   // ---- highlight the section being read ----
   const links = [...document.querySelectorAll('#nav a')];
   const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) for (const a of links) a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); }, { rootMargin: '-40% 0px -55% 0px' });
-  for (const a of links) { const s = document.querySelector(a.getAttribute('href')); if (s) io.observe(s); }
+  for (const a of links) { const h = a.getAttribute('href'); const s = h.startsWith('#') && document.querySelector(h); if (s) io.observe(s); }
 })();
 </script>
 

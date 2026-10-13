@@ -6,6 +6,7 @@ The public site for Showcaller Studio (formerly StageWall) by Gotham Media House
 - `worker.js`: serves `public/` and handles the demo request form at `/api/contact`
 - `contact.js`: the form handler (sends the request through Resend)
 - `gmh-inquiry.js`: the gothammediahouse.com project inquiry form handler (see below)
+- `multiview.js`, `tools.js`: the free apps' sign-up forms and version checks (see below)
 - `store.js`: buying online through Stripe Checkout (license key made and emailed after payment)
 - `public/thanks.html`: the page after paying, which shows the key
 - `wrangler.jsonc`: the Cloudflare Worker settings
@@ -40,3 +41,12 @@ Prices are worked out in `store.js` (and shown by the calculator in `index.html`
 - `MULTIVIEW_VERSION`: the current version, e.g. `1.4.1`. Copies of the app older than this show "Update available".
 - `MULTIVIEW_MAC_ARM_URL`, `MULTIVIEW_MAC_INTEL_URL`, `MULTIVIEW_WIN_URL` (optional): public download links for each installer (any https link, e.g. a Cloudflare R2 bucket or a Google Drive file shared with "Anyone with the link").
 - `MULTIVIEW_NOTES` (optional): one line on what's new, shown in the app's update note.
+
+## Free tools
+
+`public/tools/` lists the free tools; `public/led-wall-calculator/` is the LED wall calculator (all in the page, nothing sent to the Worker). The panel presets and their sources are at the top of its script: keep a source note on any you add.
+
+`tools.js` handles the "Get notified" forms on the tools page (`POST /api/notify` with `tool`: `multiview`, `timer`, `testkit` or `companion`) and emails `CONTACT_TO` saying which tool, using the Resend settings above. `multiview` goes through the Multiview handler, so it behaves as the form on `/multiview/` does; `/api/multiview` is unchanged. It also answers the version checks the coming apps make, in the same shape as `/api/multiview/latest`:
+
+- `GET /api/timer/latest`: version from `TIMER_VERSION` (and `TIMER_NOTES`), `null` until set
+- `GET /api/testkit/latest`: version from `TESTKIT_VERSION` (and `TESTKIT_NOTES`), `null` until set
