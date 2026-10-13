@@ -1,8 +1,9 @@
-// Showcaller Studio website: static files from public/, plus the demo request form, the online store
-// and the gothammediahouse.com project inquiry form.
+// Showcaller Studio website: static files from public/, plus the demo request form, the online store,
+// the gothammediahouse.com project inquiry form, and the free Multiview app's download form and version check.
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
+import { multiviewDownload, multiviewLatest } from './multiview.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
@@ -10,6 +11,8 @@ const ROUTES = {
   '/api/stripe-webhook': ['POST', webhook],
   '/api/order': ['GET', orderStatus],
   '/api/store': ['GET', storeOpen],
+  '/api/multiview': ['POST', multiviewDownload],
+  '/api/multiview/latest': ['GET', multiviewLatest],
 };
 
 export default {
