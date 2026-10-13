@@ -62,10 +62,11 @@ export async function multiviewDownload(request, env) {
   return json({ ok: true, emailed: ok, version: v, links: l });
 }
 
-// GET /api/multiview/latest: what the app checks to offer an update.
+// GET /api/multiview/latest: what the app checks to offer an update. downloads tells the page whether
+// to say "coming soon" or offer the download.
 export function multiviewLatest(request, env) {
   const v = clean(env.MULTIVIEW_VERSION, 20);
-  return new Response(JSON.stringify({ version: /^\d+\.\d+\.\d+$/.test(v) ? v : null, notes: clean(env.MULTIVIEW_NOTES, 300), page: PAGE }), {
+  return new Response(JSON.stringify({ version: /^\d+\.\d+\.\d+$/.test(v) ? v : null, notes: clean(env.MULTIVIEW_NOTES, 300), page: PAGE, downloads: !!links(env) }), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' },
   });
 }

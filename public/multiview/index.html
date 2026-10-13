@@ -199,17 +199,17 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a href="#questions">Questions</a>
       <a href="/">Showcaller Studio</a>
     </nav>
-    <a class="btn primary sm" href="#download">Download free</a>
+    <a class="btn primary sm" href="#download" data-open="Download free">Coming soon</a>
   </div>
 </header>
 
 <section class="hero" id="top" style="border-top:0">
   <div class="wrap">
-    <div class="eyebrow">Free from Showcaller Studio</div>
+    <div class="eyebrow" data-open="Free from Showcaller Studio">Coming soon · Free from Showcaller Studio</div>
     <h1>Every camera in one window.</h1>
     <p class="lede">Showcaller Multiview shows the NDI cameras on your network side by side, lets you steer PTZ cameras, and takes in SRT, RTMP and YouTube streams. Free for Mac and Windows.</p>
     <div class="row">
-      <a class="btn primary" href="#download">Download free</a>
+      <a class="btn primary" href="#download" data-open="Download free">Get notified</a>
       <a class="btn" href="#features">See what it does</a>
     </div>
     <figure style="width:100%">
@@ -270,13 +270,13 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 
 <section class="cta" id="download">
   <div class="wrap">
-    <h2>Get Showcaller Multiview.</h2>
-    <p class="lede" id="dlLede">Tell us where to send it and the download links come straight to your inbox.</p>
+    <h2 data-open="Get Showcaller Multiview.">Coming soon.</h2>
+    <p class="lede" id="dlLede" data-open="Tell us where to send it and the download links come straight to your inbox.">Showcaller Multiview is almost ready. Leave your email and we'll send you the download the day it's out.</p>
     <form class="mvform" id="mvForm" novalidate>
       <label>Name (optional)<input name="name" autocomplete="name" maxlength="120"></label>
       <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
       <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
-      <div class="go"><button type="submit" class="btn primary" id="mvBtn">Send me the download</button><span id="mvMsg" role="status" aria-live="polite"></span></div>
+      <div class="go"><button type="submit" class="btn primary" id="mvBtn" data-open="Send me the download">Tell me when it's ready</button><span id="mvMsg" role="status" aria-live="polite"></span></div>
       <p class="small" style="grid-column:1/-1">We'll only email you about Showcaller apps. No spam, and you can ask us to stop any time.</p>
     </form>
     <div class="dl" id="mvLinks" hidden>
@@ -307,6 +307,10 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 (() => {
   const $ = (s) => document.querySelector(s);
   const form = $('#mvForm'), started = Date.now();
+  // Downloads open once the links are set in Cloudflare: switch the page from "coming soon" to download wording.
+  fetch('/api/multiview/latest').then((r) => r.json()).then((j) => {
+    if (j.downloads) document.querySelectorAll('[data-open]').forEach((el) => { el.textContent = el.dataset.open; });
+  }).catch(() => {});
   const button = (label, href) => { const a = document.createElement('a'); a.className = 'btn'; a.href = href; a.textContent = label; return a; };
   form.onsubmit = async (e) => {
     e.preventDefault();
