@@ -129,46 +129,11 @@ ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; wi
 .step h3 { font-size: 21px; }
 .step p { color: var(--soft); font-size: 16px; }
 
-/* pricing */
-.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 14px; }
-.plan { background: var(--panel); border: 1px solid var(--line2); padding: 30px 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.plan.best { border: 1px solid var(--accent); background: var(--accent-ground); box-shadow: 0 0 0 1px var(--accent); }
-.plan h3 { font-size: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.tag { background: var(--accent); color: var(--on-accent); font: 700 10.5px var(--body); letter-spacing: .1em; padding: 4px 8px; }
-.price { display: flex; flex-direction: column; gap: 4px; padding-bottom: 16px; border-bottom: 1px solid var(--line2); }
-.price b { font: 600 46px/1 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.plan > p { color: var(--soft); font-size: 15.5px; }
-.plan ul.ticks { font-size: 15px; gap: 8px; }
-.plan .btn { margin-top: auto; }
-.calc { border: 1px solid var(--line2); padding: clamp(22px, 3vw, 34px); display: flex; flex-wrap: wrap; gap: 26px 48px; align-items: center; justify-content: space-between; }
-.calc .opts { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-.checks { display: flex; flex-wrap: wrap; gap: 10px; }
-.chk { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 16px; border: 1px solid var(--line2); cursor: pointer; font-weight: 500; font-size: 15.5px; }
-.chk:has(input:checked) { border-color: var(--accent); background: var(--accent-ground); }
-.chk input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; margin: 0; }
-.stepline { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; color: var(--soft); }
-.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line2); }
-.stepper button { width: 46px; height: 46px; background: transparent; color: var(--fg); border: 0; font: 500 22px var(--body); cursor: pointer; }
-.stepper button:hover { background: var(--raised); }
-.stepper output { min-width: 52px; text-align: center; font: 600 18px var(--display); font-variant-numeric: tabular-nums; color: var(--fg); }
-.rent { border: 1px solid var(--line2); background: var(--panel); padding: 26px 28px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: center; }
-.rent-copy { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.rent-copy h3 { font-size: 20px; }
-.rent-copy p { color: var(--soft); font-size: 15.5px; }
-.rent-prices { display: flex; flex-wrap: wrap; gap: 28px; }
-.rent-prices .price { border-bottom: 0; padding-bottom: 0; }
-.rent-prices .price b { font-size: 38px; }
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 26px 48px; align-items: center; justify-content: space-between; }
+.trial ul.ticks { flex: 1 1 340px; min-width: 0; font-size: 16px; gap: 10px; }
+.trial-go { flex: 0 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 [hidden] { display: none !important; }
-.terms { display: flex; flex-wrap: wrap; gap: 10px; }
-.calc { margin-top: 14px; }
-.total { flex: 0 1 320px; display: flex; flex-direction: column; gap: 6px; }
-.total b { font: 600 clamp(44px, 6vw, 60px)/1 var(--display); letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
-.total .btn { margin-top: 12px; align-self: flex-start; }
-.total .btn[disabled] { opacity: .6; cursor: wait; }
-#buyMsg { font-size: 14px; color: var(--soft); }
-#buyMsg.bad { color: #ff7a6b; }
-.startline input { font: 500 16px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 10px 12px; min-height: 46px; color-scheme: dark; }
-.startline input:focus { outline: none; border-color: var(--accent); }
 
 /* questions */
 .faq { display: flex; flex-direction: column; max-width: 860px; }
@@ -215,7 +180,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <nav id="nav">
       <a href="#types">What it runs</a>
       <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
+      <a href="#pricing">Free trial</a>
       <a href="#questions">Questions</a>
     </nav>
     <a class="btn primary sm" href="#contact">Book a demo</a>
@@ -229,7 +194,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <p class="lede">Showcaller Studio puts video, stills, live cameras, web pages and graphics on set monitors, LED walls and projectors. One computer drives the screens. The crew runs them from a laptop, tablet or phone.</p>
     <div class="row">
       <a class="btn primary" href="#contact">Book a demo</a>
-      <a class="btn" href="#pricing">See pricing</a>
+      <a class="btn" href="#pricing">Try it free</a>
     </div>
     <figure style="width:100%">
       <div class="frame">
@@ -332,85 +297,22 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 <section id="pricing">
   <div class="wrap">
     <div class="head">
-      <div class="eyebrow">Pricing</div>
-      <h2>One price per set computer</h2>
-      <p class="lede">Yearly for your own studio, or rent it for a single show. Every license includes updates and support, and drives as many screens as the computer can.</p>
+      <div class="eyebrow">Free trial · Beta</div>
+      <h2>Try everything free for 30 days</h2>
+      <p class="lede">Showcaller Studio is in beta. Every new install runs for 30 days with everything unlocked, including LED and Projection, so you can build a real show on your own screens before you decide.</p>
     </div>
-    <div class="plans">
-      <div class="plan">
-        <h3>Showcaller Studio</h3>
-        <div class="price"><b>$590</b><span class="small">per computer, per year</span></div>
-        <p>Monitors, Signage and Multiviewer shows, and everything under Features.</p>
-        <ul class="ticks"><li>All source types, looks and cues</li><li>Span, set maps and TV walls</li><li>Stream Deck, OSC, MIDI, switcher follow</li><li>Playlists and the schedule</li></ul>
-        <button type="button" class="btn" data-pick="">Price this</button>
-      </div>
-      <div class="plan">
-        <h3>LED add-on</h3>
-        <div class="price"><b>+$390</b><span class="small">per computer, per year</span></div>
-        <p>For LED walls fed from a processor.</p>
-        <ul class="ticks"><li>Regions from an imported pixel map</li><li>Turned panels, wall trim, wall layouts</li><li>28 test patterns, still and moving</li><li>Network commands, including Art-Net</li></ul>
-        <button type="button" class="btn" data-pick="led">Price this</button>
-      </div>
-      <div class="plan">
-        <h3>Projection add-on</h3>
-        <div class="price"><b>+$390</b><span class="small">per computer, per year</span></div>
-        <p>For projectors on set pieces and objects.</p>
-        <ul class="ticks"><li>Corner pin, mesh warp and masks</li><li>Several surfaces from one projector</li><li>Real-size layout, so circles stay round</li><li>Unfolded template and a sample video</li></ul>
-        <button type="button" class="btn" data-pick="proj">Price this</button>
-      </div>
-      <div class="plan best">
-        <h3>Everything <span class="tag">SAVE $380</span></h3>
-        <div class="price"><b>$990</b><span class="small">per computer, per year</span></div>
-        <p>Showcaller Studio with both add-ons, for studios that do it all.</p>
-        <ul class="ticks"><li>Monitors, LED, Projection, Signage and Multiviewer</li><li>Every tool on this page</li><li>One key, one renewal date</li></ul>
-        <button type="button" class="btn primary" data-pick="led proj">Price this</button>
+    <div class="trial">
+      <ul class="ticks">
+        <li>Monitors, LED, Projection, Signage and Multiviewer</li>
+        <li>Every source type, look, cue and control option</li>
+        <li>No card and no key needed to start</li>
+        <li>Your looks and settings carry over when you license it</li>
+      </ul>
+      <div class="trial-go">
+        <a class="btn primary" href="#contact" id="trialBtn">Get the free trial</a>
+        <span class="small">Tell us about your set and we'll send the installer for Mac or Windows.</span>
       </div>
     </div>
-    <div class="rent">
-      <div class="rent-copy">
-        <h3>Renting for a show</h3>
-        <p>Everything included: monitors, LED and projection. The key ends on the date you choose, and the show never goes dark because of it.</p>
-      </div>
-      <div class="rent-prices">
-        <div class="price"><b>$79</b><span class="small">per computer, per week</span></div>
-        <div class="price"><b>$149</b><span class="small">per computer, per month</span></div>
-      </div>
-      <button type="button" class="btn" data-term="week">Price a rental</button>
-    </div>
-    <div class="calc" id="calc">
-      <div class="opts">
-        <h3>Work out your price</h3>
-        <div class="terms" role="radiogroup" aria-label="How long">
-          <label class="chk" for="tYear"><input type="radio" name="term" id="tYear" value="year" checked> Yearly</label>
-          <label class="chk" for="tMonth"><input type="radio" name="term" id="tMonth" value="month"> Monthly rental</label>
-          <label class="chk" for="tWeek"><input type="radio" name="term" id="tWeek" value="week"> Weekly rental</label>
-        </div>
-        <div class="checks" id="cAdds">
-          <label class="chk" for="cLed"><input type="checkbox" id="cLed"> LED add-on</label>
-          <label class="chk" for="cProj"><input type="checkbox" id="cProj"> Projection add-on</label>
-        </div>
-        <label class="stepline startline" id="cStartRow" hidden>
-          <span>First show day</span>
-          <input type="date" id="cStart">
-        </label>
-        <div class="stepline">
-          <span id="cLabel">Set computers</span>
-          <span class="stepper" role="group" aria-labelledby="cLabel">
-            <button type="button" id="cMinus" aria-label="One fewer computer">−</button>
-            <output id="cN">1</output>
-            <button type="button" id="cPlus" aria-label="One more computer">+</button>
-          </span>
-        </div>
-      </div>
-      <div class="total">
-        <span class="small" id="cPer">Your price per year</span>
-        <b id="cTotal">$590</b>
-        <span class="small" id="cNote">Showcaller Studio on 1 computer</span>
-        <button type="button" class="btn primary" id="buyBtn" hidden>Buy now</button>
-        <span class="small" id="buyMsg" hidden>Pay by card. Your key arrives by email right away.</span>
-      </div>
-    </div>
-    <p class="small">Prices in US dollars. A linked second computer needs its own license. Installation and on-site setup by Gotham Media House are quoted separately.</p>
   </div>
 </section>
 
@@ -420,9 +322,9 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="faq">
       <details open><summary>What do I need to run it?</summary><p>A Windows PC or a Mac with a video output for each screen. The computer's own display is kept for the operator and never used as a monitor.</p></details>
       <details><summary>Does it need the internet?</summary><p>No. It runs on your computer and your network. Web sources and phone alerts need a connection; everything else works offline.</p></details>
-      <details><summary>Can I rent it for one show?</summary><p>Yes. A rental is $79 a week or $149 a month per computer, with LED and projection included. You get a key that ends on the date you choose, and switching to a yearly license later keeps all your looks and settings.</p></details>
+      <details><summary>Can I use it for just one show?</summary><p>Yes. Licenses can be yearly or end on a date you choose, so a single production is covered. While we're in beta, get in touch and we'll work out what fits your show.</p></details>
       <details><summary>What happens if my license runs out during a show?</summary><p>The show carries on. Showcaller Studio never takes a picture off a monitor over licensing; it reminds you on the control page until you renew.</p></details>
-      <details><summary>Can I try it first?</summary><p>Yes. Every copy has a demo for each kind of show, with sample media, and we'll walk you through it on a call.</p></details>
+      <details><summary>Can I try it first?</summary><p>Yes. Every new install is a free 30-day trial with everything unlocked, and it comes with a demo for each kind of show, with sample media. We're happy to walk you through it on a call.</p></details>
       <details><summary>Can I add LED or Projection later?</summary><p>Yes. An add-on is a new key for the same computer. Nothing is reinstalled and your shows stay as they are.</p></details>
       <details><summary>Who makes it?</summary><p>Gotham Media House, a video production company with 20 years in broadcast. Showcaller Studio was built to run our own studio sets, then offered to other studios.</p></details>
     </div>
@@ -480,50 +382,8 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('.tab'); if (b) setType(Number(b.dataset.t)); });
   setType(0);
 
-  // ---- price calculator ----
-  const BASE = 590, ADD = 390, ALL = 990, RENT = { week: 79, month: 149 };
-  let n = 1;
-  const term = () => document.querySelector('input[name="term"]:checked').value;
-  function price() {
-    const t = term(), rent = t !== 'year', led = $('#cLed').checked, proj = $('#cProj').checked;
-    const each = rent ? RENT[t] : led && proj ? ALL : BASE + (led ? ADD : 0) + (proj ? ADD : 0);
-    $('#cAdds').hidden = rent;
-    $('#cStartRow').hidden = !rent;
-    $('#cN').textContent = n;
-    $('#cPer').textContent = `Your price per ${t}`;
-    $('#cTotal').textContent = '$' + (each * n).toLocaleString('en-US');
-    const what = rent ? `Rental, everything included,` : led && proj ? 'Everything' : 'Showcaller Studio' + (led ? ' + LED' : '') + (proj ? ' + Projection' : '');
-    $('#cNote').textContent = `${what} on ${n} computer${n === 1 ? '' : 's'}` + (n > 1 ? ` ($${each.toLocaleString('en-US')} each)` : '') + (!rent && led && proj ? ', with the $380 saving' : '');
-  }
-  $('#cLed').onchange = $('#cProj').onchange = price;
-  for (const r of document.querySelectorAll('input[name="term"]')) r.onchange = price;
-  $('#cMinus').onclick = () => { n = Math.max(1, n - 1); price(); };
-  $('#cPlus').onclick = () => { n = Math.min(20, n + 1); price(); };
-  for (const b of document.querySelectorAll('[data-pick]')) b.onclick = () => {
-    $('#tYear').checked = true;
-    $('#cLed').checked = b.dataset.pick.includes('led'); $('#cProj').checked = b.dataset.pick.includes('proj'); price();
-    $('#calc').scrollIntoView({ block: 'center' });
-  };
-  for (const b of document.querySelectorAll('[data-term]')) b.onclick = () => { $('#tWeek').checked = true; price(); $('#calc').scrollIntoView({ block: 'center' }); };
-  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  $('#cStart').value = $('#cStart').min = ymd(new Date());
-  price();
-
-  // ---- buy online: /api/checkout opens a Stripe Checkout page for what the calculator shows ----
-  fetch('/api/store').then((r) => r.json()).then((j) => { if (j.open) $('#buyBtn').hidden = $('#buyMsg').hidden = false; }).catch(() => {});
-  $('#buyBtn').onclick = async () => {
-    const btn = $('#buyBtn'), msg = $('#buyMsg');
-    const d = { term: term(), led: $('#cLed').checked, proj: $('#cProj').checked, n, start: $('#cStart').value };
-    btn.disabled = true; msg.className = 'small'; msg.textContent = 'Opening checkout\u2026';
-    try {
-      const r = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.url) throw new Error(j.error || 'Checkout didn\u2019t open.');
-      location.href = j.url;
-    } catch (err) {
-      msg.className = 'small bad'; msg.textContent = err.message; btn.disabled = false;
-    }
-  };
+  // ---- free trial: note it on the form so the request says what it's for ----
+  $('#trialBtn').onclick = () => { $('#formPlan').value = 'Free trial'; };
 
   // ---- demo request: posted to /api/contact (a Cloudflare Pages Function that sends it with Resend) ----
   const form = $('#demoForm'), started = Date.now();
@@ -534,7 +394,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     msg.className = '';
     if (!d.name.trim() || !d.message.trim()) { msg.className = 'bad'; msg.textContent = 'Add your name and a line about your set.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) { msg.className = 'bad'; msg.textContent = 'That email doesn\u2019t look right.'; return; }
-    d.plan = ($('#cNote') && $('#cNote').textContent) || ''; d.ms = Date.now() - started;
+    d.plan = d.plan || ''; d.ms = Date.now() - started;
     btn.disabled = true; msg.textContent = 'Sending\u2026';
     try {
       const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
