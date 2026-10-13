@@ -1,2 +1,12 @@
 /media/*
   Cache-Control: public, max-age=604800
+
+/multiview/join/
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
+  Cache-Control: no-store
+
+/multiview/join/*
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
+  Cache-Control: no-store
