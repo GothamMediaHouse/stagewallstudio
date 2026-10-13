@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LED Wall Calculator: resolution, power, pixel map | Showcaller</title>
+<meta name="description" content="Free LED wall calculator: pick a panel and the number of columns and rows to get the wall's resolution, size, aspect ratio, processor ports, power, circuits, weight and viewing distance, and download a pixel map PNG.">
+<link rel="canonical" href="https://showcallerstudio.com/led-wall-calculator/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="LED Wall Calculator, free">
+<meta property="og:description" content="Resolution, size, power, ports and weight for any LED wall, plus a pixel map PNG at the wall's exact resolution.">
+<meta property="og:url" content="https://showcallerstudio.com/led-wall-calculator/">
+<meta property="og:image" content="https://showcallerstudio.com/media/led-sc.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Same look as the home page (copied from index.html), plus the calculator's own rules at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut: clamp(20px, 4vw, 40px);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -.03em; }
+h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s, transform .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+
+/* top bar */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body, Inter, sans-serif); letter-spacing: .42em; text-transform: uppercase; color: #ffb224; padding-left: 1px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* opener */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: 20%; width: min(1100px, 120vw); height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .13), rgba(255, 178, 36, 0)); pointer-events: none; }
+.hero .wrap { position: relative; display: flex; flex-direction: column; gap: 18px; padding-block: clamp(44px, 6vw, 76px) clamp(28px, 4vw, 44px); }
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(56px, 7vw, 96px); display: flex; flex-direction: column; gap: clamp(26px, 3.5vw, 40px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+ul.ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--soft); font-size: 16px; }
+ul.ticks li { padding-left: 26px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 11px; height: 5px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 22px 48px; align-items: center; justify-content: space-between; }
+.trial .txt { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.trial .txt p { color: var(--soft); }
+.trial .go { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px; }
+[hidden] { display: none !important; }
+
+/* questions */
+.faq { display: flex; flex-direction: column; max-width: 860px; }
+details { border-top: 1px solid var(--line2); }
+details:last-child { border-bottom: 1px solid var(--line2); }
+summary { cursor: pointer; padding: 22px 40px 22px 0; font: 600 19px var(--display); letter-spacing: -.01em; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; right: 6px; top: 30px; width: 10px; height: 10px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); transition: transform .2s; }
+details[open] summary::after { transform: rotate(-135deg); top: 35px; }
+details p { color: var(--soft); padding: 0 40px 24px 0; }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+
+/* LED wall calculator */
+*, *::before, *::after { box-sizing: border-box; }
+.calc { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: clamp(20px, 3vw, 36px); align-items: start; }
+@media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } }
+.inputs { border: 1px solid var(--line2); background: var(--panel); padding: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; position: sticky; top: 84px; }
+@media (max-width: 900px) { .inputs { position: static; } }
+.inputs .full { grid-column: 1 / -1; }
+.inputs label, .inputs .lbl { display: grid; gap: 6px; font-size: 14px; color: var(--soft); min-width: 0; }
+.inputs input, .inputs select { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 11px 12px; width: 100%; min-width: 0; border-radius: 0; }
+.inputs select { appearance: none; -webkit-appearance: none; padding-right: 36px; background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%); background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+.inputs input:focus, .inputs select:focus { outline: none; border-color: var(--accent); }
+.inputs .note { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.custom { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; border-top: 1px solid var(--line2); padding-top: 16px; }
+.custom .note { grid-column: 1 / -1; }
+.seg { display: flex; border: 1px solid var(--line2); }
+.seg label { flex: 1 1 0; display: block; position: relative; text-align: center; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 6px; font: 600 14.5px var(--body); color: var(--soft); white-space: nowrap; }
+.seg label + label span { border-left: 1px solid var(--line2); }
+.seg input:checked + span { background: var(--accent-ground); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -4px; }
+.out { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+.big b { font: 600 clamp(34px, 4.4vw, 52px)/1.05 var(--display); letter-spacing: -.03em; }
+.big span { color: var(--soft); font-size: 17px; }
+.preview { border: 1px solid var(--line2); background: #000; display: flex; justify-content: center; align-items: center; padding: 10px; min-height: 120px; }
+.preview canvas { display: block; max-width: 100%; height: auto; image-rendering: auto; }
+.cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (max-width: 620px) { .cells { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cell b { font-size: 17px; } }
+.cell { background: var(--bg); padding: 16px 16px 15px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cell small { font: 600 11.5px var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cell b { font: 600 19px/1.3 var(--display); letter-spacing: -.01em; overflow-wrap: anywhere; }
+.cell span { font-size: 14px; color: var(--soft); line-height: 1.45; overflow-wrap: anywhere; }
+.box { border: 1px solid var(--line2); background: var(--panel); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.box h3 { font-size: 18px; }
+.box .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.box .opts { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; font-size: 15px; color: var(--soft); }
+.box .opts select { font: 400 15px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 9px 10px; max-width: 100%; }
+.warn { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; font-size: 14.5px; color: var(--soft); }
+.warn.bad { border-left-color: #ff7a6b; }
+textarea.sum { font: 400 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--soft); background: var(--bg); border: 1px solid var(--line2); padding: 12px; width: 100%; min-height: 230px; resize: vertical; }
+#copyMsg, #mapMsg { font-size: 14.5px; color: var(--soft); }
+.assume { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px 40px; }
+.cols2 div { display: flex; flex-direction: column; gap: 8px; }
+.cols2 p { color: var(--soft); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav>
+      <a href="#calc">Calculator</a>
+      <a href="#notes">How it works</a>
+      <a href="/tools/">Free tools</a>
+      <a href="/">Showcaller Studio</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top" style="border-top:0">
+  <div class="wrap">
+    <div class="eyebrow">Free tool · LED walls</div>
+    <h1>LED wall calculator</h1>
+    <p class="lede">Pick the panel and how many columns and rows. You get the wall's resolution, size, processor ports, power, circuits, weight and viewing distance, and a pixel map at the wall's exact resolution.</p>
+  </div>
+</section>
+
+<section id="calc" style="border-top:0">
+  <div class="wrap" style="padding-top:0">
+    <div class="calc">
+      <form class="inputs" id="f" novalidate onsubmit="return false">
+        <label class="full">Panel<select id="panel"></select></label>
+        <label>Columns<input id="cols" type="number" inputmode="numeric" min="1" max="400" step="1" value="10"></label>
+        <label>Rows<input id="rows" type="number" inputmode="numeric" min="1" max="400" step="1" value="6"></label>
+        <div class="custom" id="custom" hidden>
+          <label>Panel width <em class="u-len" style="font-style:normal">mm</em><input id="cw" type="number" inputmode="decimal" min="1" step="any"></label>
+          <label>Panel height <em class="u-len" style="font-style:normal">mm</em><input id="ch" type="number" inputmode="decimal" min="1" step="any"></label>
+          <label>Pixels wide<input id="cx" type="number" inputmode="numeric" min="1" step="1"></label>
+          <label>Pixels high<input id="cy" type="number" inputmode="numeric" min="1" step="1"></label>
+          <label>Max watts / panel<input id="cmax" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>Typical watts / panel<input id="ctyp" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label class="full">Weight per panel <em class="u-wt" style="font-style:normal">kg</em><input id="ckg" type="number" inputmode="decimal" min="0" step="any"></label>
+          <p class="note">Take these from your rental house's spec sheet for the exact panel.</p>
+        </div>
+        <div class="lbl full">Units
+          <div class="seg" role="radiogroup" aria-label="Units">
+            <label><input type="radio" name="u" value="m"><span>Metric</span></label>
+            <label><input type="radio" name="u" value="i"><span>Imperial</span></label>
+          </div>
+        </div>
+        <div class="lbl full">Mains voltage
+          <div class="seg" role="radiogroup" aria-label="Mains voltage">
+            <label><input type="radio" name="v" value="120"><span>120 V</span></label>
+            <label><input type="radio" name="v" value="208"><span>208 V</span></label>
+            <label><input type="radio" name="v" value="230"><span>230 V</span></label>
+          </div>
+        </div>
+        <div class="lbl full">Frame rate
+          <div class="seg" role="radiogroup" aria-label="Frame rate">
+            <label><input type="radio" name="hz" value="50"><span>50 Hz</span></label>
+            <label><input type="radio" name="hz" value="60"><span>60 Hz</span></label>
+          </div>
+        </div>
+        <p class="note full" id="specNote"></p>
+      </form>
+
+      <div class="out" aria-live="polite">
+        <div class="big"><b id="oRes">1760 × 1056</b><span id="oResSub"></span></div>
+        <div class="preview"><canvas id="pv" width="640" height="384" aria-label="Preview of the pixel map"></canvas></div>
+        <div class="cells" id="cells"></div>
+        <div id="warns"></div>
+
+        <div class="box" id="mapBox">
+          <h3>Pixel map and test card</h3>
+          <p class="small">A PNG at the wall's exact resolution, one pixel per LED. Load it on the processor or the media server output to check the mapping: every panel is outlined and numbered column-row, with the pixel position of its top-left corner.</p>
+          <div class="opts">
+            <label>Data path arrows
+              <select id="path">
+                <option value="">None</option>
+                <option value="rtl">Rows, from top left</option>
+                <option value="rbl">Rows, from bottom left</option>
+                <option value="ctl">Columns, from top left</option>
+                <option value="cbl">Columns, from bottom left</option>
+              </select>
+            </label>
+            <label>Preview
+              <select id="pvKind"><option value="map">Pixel map</option><option value="card">Test card</option></select>
+            </label>
+          </div>
+          <div class="row">
+            <button type="button" class="btn primary" id="dlMap">Download pixel map</button>
+            <button type="button" class="btn" id="dlCard">Download test card</button>
+            <span id="mapMsg" role="status"></span>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Share it</h3>
+          <p class="small">The page address keeps every setting, so the link opens this same wall. The summary below is ready to paste into an email or a spec.</p>
+          <textarea class="sum" id="sum" readonly aria-label="Summary of the wall"></textarea>
+          <div class="row">
+            <button type="button" class="btn" id="copySum">Copy summary</button>
+            <button type="button" class="btn" id="copyLink">Copy link</button>
+            <span id="copyMsg" role="status"></span>
+          </div>
+        </div>
+
+        <p class="assume" id="assume"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="trial">
+      <div class="txt">
+        <div class="eyebrow">Showcaller Studio</div>
+        <h2 style="font-size:clamp(24px,2.6vw,32px)">Running the content on this wall?</h2>
+        <p>Showcaller Studio maps any wall, plays looks and cues, and runs from your phone. Start a free trial.</p>
+      </div>
+      <div class="go">
+        <a class="btn primary" href="/#pricing">Start a free trial</a>
+        <a class="btn" href="/#contact">Book a demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="notes">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">How it works</div><h2>What the numbers mean.</h2></div>
+    <div class="cols2">
+      <div><h3>Resolution and size</h3><p>Each panel has a fixed number of pixels, so the wall's resolution is pixels per panel times columns and rows. Its size is the panel size times the same. Pixel pitch is the panel width divided by its pixels.</p></div>
+      <div><h3>Outputs</h3><p>"Straight" counts how many 1920 × 1080 or 3840 × 2160 outputs the wall needs if you cut it into output-sized tiles. Most processors can also fold a long wall into one output, so the pixel count gives the least it could take.</p></div>
+      <div><h3>Processor ports</h3><p>A 1 Gb Ethernet port on an LED processor carries about 650,000 pixels at 60 Hz in 8-bit colour (about 780,000 at 50 Hz). Panels can't be split across ports, so the count goes by whole panels. 10-bit, high frame rates and HDR carry fewer.</p></div>
+      <div><h3>Power and circuits</h3><p>Max power is every pixel at full white; typical is what the maker quotes for normal video, usually a third to half of max. Plan circuits on max. Each circuit is loaded to 80% of its breaker: 20 A at 120 V and 208 V, 16 A at 230 V.</p></div>
+      <div><h3>Weight</h3><p>Panels only. Add frames, rigging, ground stack or flown hardware, cable and the processor from your rental house's numbers.</p></div>
+      <div><h3>Viewing distance</h3><p>A rule of thumb: the nearest an audience should sit is about the pixel pitch in millimetres as metres (2.6 mm, about 2.6 m), and a comfortable distance is about three times that. Cameras have their own rules for moiré.</p></div>
+    </div>
+    <div class="faq">
+      <details><summary>Where do the panel figures come from?</summary><p>Pixels and size are from each maker's spec page. Power and weight are from the manufacturer spec too, but rental houses use different versions and revisions, so check your rental house's sheet before you order power. Choose Custom panel to type in your own.</p></details>
+      <details><summary>Why doesn't my wall fit a 4K output when the pixel count is under 8.3 million?</summary><p>An output is 3840 pixels wide. A wall wider than that has to be folded or split into several outputs, even if the total pixels would fit. The calculator shows both the straight count and the least it could take.</p></details>
+      <details><summary>What is a pixel map for?</summary><p>You load it full screen on the output that feeds the processor. If every panel shows its own number in the right place, the processor's mapping matches the wall. The arrows show the data path so the crew can check the cabling against it.</p></details>
+      <details><summary>The pixel map won't download for a very big wall.</summary><p>Browsers limit the size of an image they can draw. Most desktop browsers manage up to about 16,000 pixels on a side; iPhones and iPads give up at about 16 million pixels in total. Use a desktop browser for big walls, or make the map in sections.</p></details>
+      <details><summary>Is it free?</summary><p>Yes, with no sign-up. It runs in your browser and nothing you enter is sent anywhere. Have a look at the other <a href="/tools/">free tools</a> too.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">A free tool from <a href="/">Showcaller Studio</a>.</span></div></footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  // ---- panels: pixels and size from the maker's spec page; power and weight from the manufacturer spec
+  //      too, but rental stock varies, so the page says to check the rental house's sheet ----
+  // mm: panel width × height; px: pixels wide × high; max/typ: watts per panel; kg: per panel
+  const PRESETS = [
+    // roevisual.com/en/products/black-pearl-2v2 (2.84 mm, 176×176, 500×500 mm, 9.35 kg, 190 W max / 95 W avg)
+    { id: 'bp2v2', make: 'ROE Visual', name: 'Black Pearl BP2V2', mm: [500, 500], px: [176, 176], max: 190, typ: 95, kg: 9.35 },
+    // roevisual.com/nl-en/products/carbon-full-spectrum-led-panels (CB5MKII 5.77 mm, 104×208, 600×1200 mm, 12.2 kg, 480/240 W)
+    { id: 'cb5mk2', make: 'ROE Visual', name: 'Carbon CB5 MKII', mm: [600, 1200], px: [104, 208], max: 480, typ: 240, kg: 12.2 },
+    // same page (CB5MKII Half 104×104, 600×600 mm, 6.5 kg, 250/125 W)
+    { id: 'cb5mk2h', make: 'ROE Visual', name: 'Carbon CB5 MKII half', mm: [600, 600], px: [104, 104], max: 250, typ: 125, kg: 6.5 },
+    // roevisual.com/nl-en/ruby (RB2.6 2.604 mm, 192×192, 500×500 mm, 8.5 kg, 160/80 W)
+    { id: 'rb26', make: 'ROE Visual', name: 'Ruby RB2.6', mm: [500, 500], px: [192, 192], max: 160, typ: 80, kg: 8.5 },
+    // roevisual.com/zh-cn/products/vanish-8-touring (V8T 8.9 mm, 112×112, 1000×1000 mm, 18.2 kg, 480/240 W)
+    { id: 'v8t', make: 'ROE Visual', name: 'Vanish V8T', mm: [1000, 1000], px: [112, 112], max: 480, typ: 240, kg: 18.2 },
+    // Absen Polaris indoor datasheet (novelty.fr/download/materiel_fiches_techniques/absen_pl2-5_ft.pdf):
+    // PL2.5 Pro 200×200, 500×500 mm, 9.6 kg, 510/170 W/m² (× 0.25 m² = 127.5/42.5 W)
+    { id: 'pl25pro', make: 'Absen', name: 'PL2.5 Pro (Polaris)', mm: [500, 500], px: [200, 200], max: 127.5, typ: 42.5, kg: 9.6 },
+    // same datasheet: PL2.9 168×168, 9 kg, 450/150 W/m² (112.5/37.5 W)
+    { id: 'pl29', make: 'Absen', name: 'PL2.9 (Polaris)', mm: [500, 500], px: [168, 168], max: 112.5, typ: 37.5, kg: 9 },
+    // same datasheet: PL3.9 128×128, 9 kg, 510/170 W/m² (127.5/42.5 W)
+    { id: 'pl39', make: 'Absen', name: 'PL3.9 (Polaris)', mm: [500, 500], px: [128, 128], max: 127.5, typ: 42.5, kg: 9 },
+    // infiled.com/products-infiled/il-rss-irdbmk2-2-6-lite/ (2.6 mm, 192×192, 500×500 mm, 8 kg, 150/50 W)
+    { id: 'dbmk2', make: 'INFiLED', name: 'DBmk2 2.6 Lite', mm: [500, 500], px: [192, 192], max: 150, typ: 50, kg: 8 },
+    // infiled.com/products-infiled/il-rss-irar3-9-ad/ (3.91 mm, 128×256, 500×1000 mm, 11.3 kg, 360/120 W)
+    { id: 'ar39', make: 'INFiLED', name: 'AR3.9 AD', mm: [500, 1000], px: [128, 256], max: 360, typ: 120, kg: 11.3 },
+    // unilumin.com/media/upload/UpadIV.pdf (UpadIV2 2.6 mm, 192×192, 500×500 mm, 6.3 kg, 120/40 W;
+    // the sheet's power row is unlabelled by model, 120/40 W matches 4Wall's Upad IV 2.6 sheet)
+    { id: 'upad4', make: 'Unilumin', name: 'Upad IV 2.6', mm: [500, 500], px: [192, 192], max: 120, typ: 40, kg: 6.3 },
+    // generic panels: common sizes, with round planning figures for power and weight (not a real product)
+    { id: 'g26', make: 'Generic', name: '2.6 mm, 500 × 500', mm: [500, 500], px: [192, 192], max: 180, typ: 60, kg: 8, generic: true },
+    { id: 'g39', make: 'Generic', name: '3.9 mm, 500 × 500', mm: [500, 500], px: [128, 128], max: 180, typ: 60, kg: 8, generic: true },
+    { id: 'g39t', make: 'Generic', name: '3.9 mm, 500 × 1000', mm: [500, 1000], px: [128, 256], max: 360, typ: 120, kg: 13, generic: true },
+  ];
+  const CUSTOM = 'custom';
+  const PORT_PX = 650000; // pixels per 1G port at 60 Hz, 8-bit; scaled by 60/hz
+  const LIMIT_SIDE = 16384, LIMIT_AREA = 268435456, IOS_AREA = 16777216;
+
+  // ---- fill the panel list ----
+  const sel = $('#panel');
+  const groups = {};
+  for (const p of PRESETS) {
+    if (!groups[p.make]) { groups[p.make] = document.createElement('optgroup'); groups[p.make].label = p.make; sel.append(groups[p.make]); }
+    const o = document.createElement('option'); o.value = p.id; o.textContent = `${p.generic ? 'Generic' : p.make} ${p.name}`; groups[p.make].append(o);
+  }
+  const oc = document.createElement('option'); oc.value = CUSTOM; oc.textContent = 'Custom panel…'; sel.append(oc);
+
+  // ---- state, from the address if it has one ----
+  const us = /^en-US$/i.test(navigator.language || '');
+  const S = { p: 'bp2v2', c: 10, r: 6, u: us ? 'i' : 'm', v: us ? 120 : 230, hz: us ? 60 : 50, path: '', cw: 500, ch: 500, cx: 176, cy: 176, cmax: 190, ctyp: 95, ckg: 9.35 };
+  const q = new URLSearchParams(location.search);
+  const num = (v, d, lo, hi) => { const n = Number(v); return Number.isFinite(n) && n >= lo && n <= hi ? n : d; };
+  if (q.has('p')) S.p = PRESETS.some((p) => p.id === q.get('p')) || q.get('p') === CUSTOM ? q.get('p') : S.p;
+  S.c = Math.round(num(q.get('c'), S.c, 1, 400)); S.r = Math.round(num(q.get('r'), S.r, 1, 400));
+  if (q.get('u') === 'm' || q.get('u') === 'i') S.u = q.get('u');
+  if (['120', '208', '230'].includes(q.get('v'))) S.v = Number(q.get('v'));
+  if (['50', '60'].includes(q.get('hz'))) S.hz = Number(q.get('hz'));
+  if (['rtl', 'rbl', 'ctl', 'cbl'].includes(q.get('path'))) S.path = q.get('path');
+  for (const [k, lo, hi] of [['cw', 1, 5000], ['ch', 1, 5000], ['cx', 1, 4096], ['cy', 1, 4096], ['cmax', 0, 10000], ['ctyp', 0, 10000], ['ckg', 0, 500]]) S[k] = num(q.get(k), S[k], lo, hi);
+  S.cx = Math.round(S.cx); S.cy = Math.round(S.cy);
+
+  // ---- formatting ----
+  const n0 = (n) => Math.round(n).toLocaleString('en-US');
+  const nf = (n, d) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const ftin = (m) => { let i = Math.round(m / 0.0254); const f = Math.floor(i / 12); i -= f * 12; return `${f}′ ${i}″`; };
+  const len = (m, alt) => (S.u === 'm') !== !!alt ? `${nf(m, 2)} m` : ftin(m);
+  const kgs = (kg) => S.u === 'm' ? `${n0(kg)} kg` : `${n0(kg * 2.20462)} lb`;
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const RATIOS = [['32:9', 32 / 9], ['3:1', 3], ['21:9', 64 / 27], ['2:1', 2], ['16:9', 16 / 9], ['16:10', 1.6], ['3:2', 1.5], ['4:3', 4 / 3], ['5:4', 1.25], ['1:1', 1], ['4:5', .8], ['3:4', .75], ['9:16', 9 / 16]];
+
+  function panel() {
+    if (S.p !== CUSTOM) return PRESETS.find((p) => p.id === S.p);
+    return { id: CUSTOM, make: 'Custom', name: 'panel', mm: [S.cw, S.ch], px: [S.cx, S.cy], max: S.cmax, typ: S.ctyp, kg: S.ckg };
+  }
+
+  // ---- the numbers ----
+  function compute() {
+    const P = panel(), c = S.c, r = S.r;
+    const W = P.px[0] * c, H = P.px[1] * r, panels = c * r, total = W * H;
+    const wm = P.mm[0] * c / 1000, hm = P.mm[1] * r / 1000, diag = Math.hypot(wm, hm);
+    const pitch = P.mm[0] / P.px[0], pitchV = P.mm[1] / P.px[1];
+    const g = gcd(W, H), rw = W / g, rh = H / g, ar = W / H;
+    const near = RATIOS.reduce((b, x) => (Math.abs(Math.log(x[1] / ar)) < Math.abs(Math.log(b[1] / ar)) ? x : b));
+    const tiles = (ow, oh) => ({ straight: Math.ceil(W / ow) * Math.ceil(H / oh), across: Math.ceil(W / ow), down: Math.ceil(H / oh), least: Math.ceil(total / (ow * oh)) });
+    const hd = tiles(1920, 1080), uhd = tiles(3840, 2160);
+    const portPx = Math.round(PORT_PX * 60 / S.hz), perPanel = P.px[0] * P.px[1];
+    const perPort = Math.floor(portPx / perPanel);
+    const ports = perPort >= 1 ? Math.ceil(panels / perPort) : Math.ceil(total / portPx);
+    const maxW = P.max * panels, typW = P.typ * panels;
+    const breaker = S.v === 230 ? 16 : 20, usable = breaker * 0.8 * S.v;
+    const perCircuit = P.max > 0 ? Math.floor(usable / P.max) : 0;
+    const circuits = P.max <= 0 ? 0 : perCircuit >= 1 ? Math.ceil(panels / perCircuit) : Math.ceil(maxW / usable);
+    return { P, c, r, W, H, panels, total, wm, hm, diag, pitch, pitchV, rw, rh, ar, near, hd, uhd, portPx, perPort, ports, maxW, typW, breaker, usable, perCircuit, circuits, kg: P.kg * panels, vmin: pitch, vok: pitch * 3 };
+  }
+
+  const fitText = (t, w, h, label) => (t.straight === 1 ? `Fits one ${label} output` : `${t.straight} × ${label} straight (${t.across} across × ${t.down} down)`);
+  const leastText = (t, label) => (t.straight > 1 && t.least < t.straight ? `At least ${t.least} if the processor folds it` : t.straight === 1 ? `${label}` : 'No fewer by folding');
+
+  function cells(x) {
+    const ratio = x.rw <= 64 && x.rh <= 64 ? `${x.rw}:${x.rh}` : `${nf(x.ar, 3)}:1`;
+    const amps = (w) => `${nf(w / S.v, 1)} A at ${S.v} V`;
+    return [
+      ['Size', S.u === 'm' ? `${nf(x.wm, 2)} × ${nf(x.hm, 2)} m` : `${ftin(x.wm)} × ${ftin(x.hm)}`, S.u === 'm' ? `${ftin(x.wm)} × ${ftin(x.hm)}` : `${nf(x.wm, 2)} × ${nf(x.hm, 2)} m`],
+      ['Diagonal', len(x.diag), `${len(x.diag, 1)} · ${nf(x.diag / 0.0254, 0)} in`],
+      ['Aspect ratio', ratio, `${nf(x.ar, 3)}:1, nearest ${x.near[0]}`],
+      ['Panels', `${n0(x.panels)}`, `${x.c} columns × ${x.r} rows, ${x.P.px[0]} × ${x.P.px[1]} px each`],
+      ['Pixel pitch', `${nf(x.pitch, 2)} mm`, Math.abs(x.pitch - x.pitchV) > 0.01 ? `${nf(x.pitchV, 2)} mm vertically` : `${n0(1e6 / (x.pitch * x.pitchV))} px per m²`],
+      ['1080p outputs', x.hd.straight === 1 ? 'Fits one' : `${x.hd.straight} straight`, x.hd.straight === 1 ? `Within 1920 × 1080` : `${x.hd.across} across × ${x.hd.down} down · ${leastText(x.hd, '')}`],
+      ['4K outputs', x.uhd.straight === 1 ? 'Fits one' : `${x.uhd.straight} straight`, x.uhd.straight === 1 ? `Within 3840 × 2160` : `${x.uhd.across} across × ${x.uhd.down} down · ${leastText(x.uhd, '')}`],
+      ['Processor ports', `≈ ${x.ports} × 1G`, x.perPort >= 1 ? `Up to ${x.perPort} panels a port at ${S.hz} Hz, 8-bit` : `By pixel count at ${S.hz} Hz, 8-bit`],
+      ['Power', `${n0(x.maxW)} W max`, `${amps(x.maxW)} · typical ${n0(x.typW)} W, ${nf(x.typW / S.v, 1)} A`],
+      ['Circuits', x.circuits ? `${x.circuits} × ${x.breaker} A` : 'n/a', x.circuits ? (x.perCircuit >= 1 ? `Up to ${x.perCircuit} panels each, loaded to 80%` : 'By total load, at 80%') : 'Add the panel wattage'],
+      ['Weight', kgs(x.kg), `Panels only · ${S.u === 'm' ? `${n0(x.kg * 2.20462)} lb` : `${n0(x.kg)} kg`}`],
+      ['Viewing distance', `${len(x.vmin)} minimum`, `${len(x.vok)} comfortable (${len(x.vmin, 1)} / ${len(x.vok, 1)})`],
+    ];
+  }
+
+  function summary(x) {
+    const P = x.P, name = P.id === CUSTOM ? `custom ${P.mm[0]} × ${P.mm[1]} mm panels` : `${P.make} ${P.name}`;
+    const both = (m) => `${len(m)} (${len(m, 1)})`;
+    return [
+      `LED wall: ${x.c} × ${x.r} ${name} (${nf(x.pitch, 2)} mm), ${n0(x.panels)} panels`,
+      `Resolution: ${x.W} × ${x.H} px (${n0(x.total)} px)`,
+      `Size: ${both(x.wm)} × ${both(x.hm)}, diagonal ${both(x.diag)}`,
+      `Aspect ratio: ${x.rw <= 64 && x.rh <= 64 ? `${x.rw}:${x.rh}` : `${nf(x.ar, 3)}:1`} (nearest ${x.near[0]})`,
+      `Outputs: ${fitText(x.hd, 1920, 1080, '1080p')}; ${fitText(x.uhd, 3840, 2160, '4K')}`,
+      `Processor: about ${x.ports} × 1G ports at ${S.hz} Hz, 8-bit (≈${n0(x.portPx)} px per port${x.perPort >= 1 ? `, ${x.perPort} panels each` : ''})`,
+      `Power: ${n0(x.maxW)} W max (${nf(x.maxW / S.v, 1)} A at ${S.v} V), ${n0(x.typW)} W typical (${nf(x.typW / S.v, 1)} A)`,
+      `Circuits: ${x.circuits ? `${x.circuits} × ${x.breaker} A at ${S.v} V, loaded to 80% on max power` : 'n/a'}`,
+      `Weight: ${S.u === 'm' ? `${n0(x.kg)} kg (${n0(x.kg * 2.20462)} lb)` : `${n0(x.kg * 2.20462)} lb (${n0(x.kg)} kg)`}, panels only`,
+      `Viewing distance: ${both(x.vmin)} minimum, ${both(x.vok)} comfortable`,
+      `Power and weight from the manufacturer spec; check your rental house's sheet.`,
+      ``,
+      `Worked out with the free LED Wall Calculator from Showcaller Studio:`,
+      shareUrl(),
+    ].join('\n');
+  }
+
+  function shareUrl() {
+    const p = new URLSearchParams({ p: S.p, c: S.c, r: S.r, u: S.u, v: S.v, hz: S.hz });
+    if (S.path) p.set('path', S.path);
+    if (S.p === CUSTOM) for (const k of ['cw', 'ch', 'cx', 'cy', 'cmax', 'ctyp', 'ckg']) p.set(k, String(+S[k].toFixed(3)));
+    return `${location.origin}${location.pathname}?${p}`;
+  }
+
+  // ---- drawing: the same code draws the preview (scaled down) and the full-size PNG ----
+  const PAL = [['#1f4f8f', '#2b7a5f'], ['#86304f', '#9a5b17']];
+  function order(c, r, path) {
+    const out = [];
+    const byRow = path[0] === 'r', fromBottom = path[1] === 'b';
+    const outer = byRow ? r : c, inner = byRow ? c : r;
+    for (let a = 0; a < outer; a++) for (let b0 = 0; b0 < inner; b0++) {
+      const b = a % 2 ? inner - 1 - b0 : b0;
+      if (byRow) out.push([b, fromBottom ? r - 1 - a : a]);
+      else out.push([a, fromBottom ? r - 1 - b : b]);
+    }
+    return out;
+  }
+  function arrow(ctx, x1, y1, x2, y2, s) {
+    const a = Math.atan2(y2 - y1, x2 - x1), mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    ctx.beginPath();
+    ctx.moveTo(mx + Math.cos(a) * s, my + Math.sin(a) * s);
+    ctx.lineTo(mx + Math.cos(a + 2.5) * s, my + Math.sin(a + 2.5) * s);
+    ctx.lineTo(mx + Math.cos(a - 2.5) * s, my + Math.sin(a - 2.5) * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  function centreMarks(ctx, x, lw) {
+    const W = x.W, H = x.H, R = Math.min(W, H) / 2 - lw * 2;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = lw * 1.5;
+    ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, Math.max(R, 1), 0, Math.PI * 2); ctx.stroke();
+  }
+  function infoBox(ctx, x, lw) {
+    const W = x.W, H = x.H, P = x.P;
+    const fs = Math.max(12, Math.round(Math.min(W, H) * 0.07)), fs2 = Math.max(9, Math.round(fs * 0.42));
+    const l1 = `${W} × ${H}`, l2 = `${x.c} × ${x.r} panels · ${P.id === CUSTOM ? `${P.px[0]} × ${P.px[1]} px panels` : `${P.make} ${P.name}`}`;
+    ctx.font = `700 ${fs}px Inter, Arial, sans-serif`; const w1 = ctx.measureText(l1).width;
+    ctx.font = `600 ${fs2}px Inter, Arial, sans-serif`; const w2 = ctx.measureText(l2).width;
+    const bw = Math.min(W - lw * 4, Math.max(w1, w2) + fs), bh = fs * 1.25 + fs2 * 1.6, cy = H / 2 + Math.min(W, H) * 0.2;
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(W / 2 - bw / 2, cy - bh / 2, bw, bh);
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `700 ${fs}px Inter, Arial, sans-serif`; ctx.fillText(l1, W / 2, cy - bh / 2 + fs * 0.7, bw - fs * 0.4);
+    ctx.font = `600 ${fs2}px Inter, Arial, sans-serif`; ctx.fillStyle = '#ffd34d'; ctx.fillText(l2, W / 2, cy + bh / 2 - fs2 * 0.95, bw - fs * 0.4);
+  }
+  function drawMap(ctx, x, path) {
+    const pw = x.P.px[0], ph = x.P.px[1], lw = Math.max(1, Math.round(Math.min(pw, ph) / 64));
+    const fs = Math.max(8, Math.round(Math.min(pw, ph) * 0.2)), fsS = Math.round(fs * 0.48);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let r = 0; r < x.r; r++) for (let c = 0; c < x.c; c++) {
+      const px = c * pw, py = r * ph;
+      ctx.fillStyle = PAL[r % 2][c % 2]; ctx.fillRect(px, py, pw, ph);
+      ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = lw; ctx.strokeRect(px + lw / 2, py + lw / 2, pw - lw, ph - lw);
+      ctx.fillStyle = '#ffffff'; ctx.font = `700 ${fs}px Inter, Arial, sans-serif`;
+      ctx.fillText(`${c + 1}-${r + 1}`, px + pw / 2, py + ph / 2, pw - lw * 4);
+      if (fsS >= 8) {
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `500 ${fsS}px Inter, Arial, sans-serif`; ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillText(`${px},${py}`, px + lw * 3, py + lw * 3, pw - lw * 6);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      }
+    }
+    centreMarks(ctx, x, lw);
+    if (path) {
+      const o = order(x.c, x.r, path), s = Math.max(4, Math.min(pw, ph) * 0.12);
+      // runs pass beside the panel numbers, and the turns at each end hug the wall's edge
+      const edge = (i, n) => (n > 1 && i === 0 ? 0.12 : n > 1 && i === n - 1 ? 0.88 : 0.5);
+      const pt = path[0] === 'r' ? ([c, r]) => [c * pw + pw * edge(c, x.c), r * ph + ph * 0.8] : ([c, r]) => [c * pw + pw * 0.86, r * ph + ph * edge(r, x.r)];
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath(); o.forEach((p, i) => { const [X, Y] = pt(p); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); });
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = lw * 5; ctx.stroke();
+      ctx.strokeStyle = '#ffd400'; ctx.lineWidth = lw * 2.5; ctx.stroke();
+      ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#000000'; ctx.lineWidth = lw;
+      for (let i = 1; i < o.length; i++) { const [a, b] = pt(o[i - 1]), [c2, d] = pt(o[i]); arrow(ctx, a, b, c2, d, s); }
+      const [sx, sy] = pt(o[0]); ctx.beginPath(); ctx.arc(sx, sy, s * 0.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+    infoBox(ctx, x, lw);
+  }
+  function drawCard(ctx, x) {
+    const W = x.W, H = x.H, pw = x.P.px[0], ph = x.P.px[1], lw = Math.max(1, Math.round(Math.min(pw, ph) / 64));
+    ctx.fillStyle = '#3a3a3a'; ctx.fillRect(0, 0, W, H);
+    // greyscale steps along the top, colour bars through the middle, a ramp along the bottom
+    const band = H / 6;
+    for (let i = 0; i < 11; i++) { const v = Math.round(i * 25.5); ctx.fillStyle = `rgb(${v},${v},${v})`; ctx.fillRect(Math.floor(W * i / 11), band * 0.5, Math.ceil(W / 11) + 1, band); }
+    const bars = ['#bfbfbf', '#bfbf00', '#00bfbf', '#00bf00', '#bf00bf', '#bf0000', '#0000bf'];
+    bars.forEach((b, i) => { ctx.fillStyle = b; ctx.fillRect(Math.floor(W * i / 7), band * 2, Math.ceil(W / 7) + 1, band * 2); });
+    const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#000'); g.addColorStop(1, '#fff');
+    ctx.fillStyle = g; ctx.fillRect(0, band * 4.5, W, band);
+    // panel seams, every edge pixel lit, and corner marks
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let c = 1; c < x.c; c++) { ctx.moveTo(c * pw + 0.5, 0); ctx.lineTo(c * pw + 0.5, H); }
+    for (let r = 1; r < x.r; r++) { ctx.moveTo(0, r * ph + 0.5); ctx.lineTo(W, r * ph + 0.5); }
+    ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+    const k = Math.max(4, Math.round(Math.min(pw, ph) * 0.5));
+    ctx.fillStyle = '#ff0000'; ctx.fillRect(0, 0, k, lw * 2); ctx.fillRect(0, 0, lw * 2, k);
+    ctx.fillStyle = '#00ff00'; ctx.fillRect(W - k, 0, k, lw * 2); ctx.fillRect(W - lw * 2, 0, lw * 2, k);
+    ctx.fillStyle = '#0000ff'; ctx.fillRect(0, H - lw * 2, k, lw * 2); ctx.fillRect(0, H - k, lw * 2, k);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(W - k, H - lw * 2, k, lw * 2); ctx.fillRect(W - lw * 2, H - k, lw * 2, k);
+    centreMarks(ctx, x, lw);
+    infoBox(ctx, x, lw);
+  }
+
+  // ---- the preview ----
+  const pv = $('#pv');
+  function preview(x) {
+    const box = pv.parentElement.clientWidth - 22, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const maxH = Math.min(420, window.innerHeight * 0.5);
+    const s = Math.min(box / x.W, maxH / x.H);
+    const cw = Math.max(1, Math.round(x.W * s)), ch = Math.max(1, Math.round(x.H * s));
+    pv.style.width = cw + 'px'; pv.style.height = ch + 'px';
+    pv.width = Math.round(cw * dpr); pv.height = Math.round(ch * dpr);
+    const ctx = pv.getContext('2d');
+    ctx.setTransform(pv.width / x.W, 0, 0, pv.height / x.H, 0, 0);
+    if ($('#pvKind').value === 'card') drawCard(ctx, x); else drawMap(ctx, x, S.path);
+  }
+
+  // ---- show it all ----
+  let X;
+  function render() {
+    X = compute();
+    $('#oRes').textContent = `${X.W} × ${X.H}`;
+    $('#oResSub').textContent = `pixels · ${n0(X.total)} in all`;
+    const frag = document.createDocumentFragment();
+    for (const [k, b, s] of cells(X)) {
+      const d = document.createElement('div'); d.className = 'cell';
+      const a = document.createElement('small'); a.textContent = k;
+      const bb = document.createElement('b'); bb.textContent = b;
+      const ss = document.createElement('span'); ss.textContent = s;
+      d.append(a, bb, ss); frag.append(d);
+    }
+    $('#cells').replaceChildren(frag);
+    const P = X.P;
+    $('#specNote').textContent = P.id === CUSTOM ? 'Custom panel: the numbers are only as good as what you type in.'
+      : P.generic ? 'Generic panel: pixels and size are typical for this pitch; power and weight are round planning figures. Use your rental house’s sheet for the real ones.'
+      : `${P.make} ${P.name}: ${P.mm[0]} × ${P.mm[1]} mm, ${P.px[0]} × ${P.px[1]} px, ${P.max} W max, ${P.typ} W typical, ${P.kg} kg. Power and weight from manufacturer spec, check your rental house’s sheet.`;
+    // warnings
+    const w = [];
+    const big = X.W > LIMIT_SIDE || X.H > LIMIT_SIDE || X.total > LIMIT_AREA;
+    if (big) w.push(['bad', `At ${X.W} × ${X.H} the wall is bigger than browsers can draw in one image (about 16,384 pixels a side). Download the pixel map in sections: work out part of the wall at a time.`]);
+    else if (X.total > IOS_AREA) w.push(['', `This pixel map is over 16 million pixels. Desktop browsers manage it; iPhones and iPads may not. Download it on a computer.`]);
+    if (X.W > 7680 || X.H > 4320) w.push(['', 'Wider or taller than an 8K output: plan on several outputs or a processor that takes several inputs.']);
+    $('#warns').replaceChildren(...w.map(([c, t]) => { const p = document.createElement('p'); p.className = 'warn ' + c; p.textContent = t; return p; }));
+    $('#dlMap').disabled = $('#dlCard').disabled = big;
+    $('#assume').textContent = `Assumptions: about ${n0(PORT_PX)} pixels per 1 Gb port at 60 Hz, 8-bit (${n0(X.portPx)} at ${S.hz} Hz), counted by whole panels. Circuits loaded to 80% of a ${X.breaker} A breaker at ${S.v} V (${n0(X.usable)} W each) on max power. Viewing distance: pixel pitch in mm as metres for the minimum, three times that for comfortable. Weight is panels only.`;
+    $('#sum').value = summary(X);
+    try { history.replaceState(null, '', shareUrl().slice(location.origin.length)); } catch {}
+    preview(X);
+  }
+
+  // ---- inputs ----
+  const radios = (name) => [...document.querySelectorAll(`input[name="${name}"]`)];
+  const setRadio = (name, v) => radios(name).forEach((r) => { r.checked = r.value === String(v); });
+  const LEN = () => (S.u === 'm' ? 1 : 25.4), WT = () => (S.u === 'm' ? 1 : 0.453592);
+  function showCustom() {
+    $('#custom').hidden = S.p !== CUSTOM;
+    document.querySelectorAll('.u-len').forEach((e) => { e.textContent = S.u === 'm' ? 'mm' : 'in'; });
+    document.querySelectorAll('.u-wt').forEach((e) => { e.textContent = S.u === 'm' ? 'kg' : 'lb'; });
+    $('#cw').value = +(S.cw / LEN()).toFixed(3); $('#ch').value = +(S.ch / LEN()).toFixed(3);
+    $('#cx').value = S.cx; $('#cy').value = S.cy; $('#cmax').value = S.cmax; $('#ctyp').value = S.ctyp;
+    $('#ckg').value = +(S.ckg / WT()).toFixed(2);
+  }
+  sel.value = S.p; $('#cols').value = S.c; $('#rows').value = S.r; $('#path').value = S.path;
+  setRadio('u', S.u); setRadio('v', S.v); setRadio('hz', S.hz);
+  showCustom();
+
+  sel.onchange = () => {
+    const prev = panel();
+    S.p = sel.value;
+    if (S.p === CUSTOM) Object.assign(S, { cw: prev.mm[0], ch: prev.mm[1], cx: prev.px[0], cy: prev.px[1], cmax: prev.max, ctyp: prev.typ, ckg: prev.kg });
+    showCustom(); render();
+  };
+  const intIn = (el, key) => { el.oninput = () => { const v = Math.round(Number(el.value)); if (v >= 1 && v <= 400) { S[key] = v; render(); } }; el.onblur = () => { el.value = S[key]; }; };
+  intIn($('#cols'), 'c'); intIn($('#rows'), 'r');
+  const custIn = (id, conv, lo, hi, int) => { const el = $('#' + id); el.oninput = () => { let v = Number(el.value) * conv(); if (int) v = Math.round(v); if (el.value !== '' && v >= lo && v <= hi) { S[id] = v; render(); } }; };
+  custIn('cw', LEN, 1, 5000); custIn('ch', LEN, 1, 5000); custIn('cx', () => 1, 1, 4096, true); custIn('cy', () => 1, 1, 4096, true);
+  custIn('cmax', () => 1, 0, 10000); custIn('ctyp', () => 1, 0, 10000); custIn('ckg', WT, 0, 500);
+  radios('u').forEach((r) => { r.onchange = () => { S.u = r.value; showCustom(); render(); }; });
+  radios('v').forEach((r) => { r.onchange = () => { S.v = Number(r.value); render(); }; });
+  radios('hz').forEach((r) => { r.onchange = () => { S.hz = Number(r.value); render(); }; });
+  $('#path').onchange = () => { S.path = $('#path').value; render(); };
+  $('#pvKind').onchange = () => preview(X);
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => preview(X), 120); });
+
+  // ---- downloads: drawn at the wall's exact resolution ----
+  function download(kind) {
+    const msg = $('#mapMsg'), x = X;
+    msg.textContent = 'Drawing…';
+    setTimeout(() => {
+      const cv = document.createElement('canvas'); cv.width = x.W; cv.height = x.H;
+      const ctx = cv.getContext('2d');
+      if (!ctx) { msg.textContent = 'This browser couldn’t make an image that big.'; return; }
+      if (kind === 'card') drawCard(ctx, x); else drawMap(ctx, x, S.path);
+      cv.toBlob((b) => {
+        if (!b) { msg.textContent = 'This browser couldn’t make an image that big. Try a desktop browser.'; return; }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+        a.download = `${kind === 'card' ? 'test-card' : 'pixel-map'}-${x.W}x${x.H}.png`;
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+        msg.textContent = `Saved ${a.download}`;
+      }, 'image/png');
+    }, 30);
+  }
+  $('#dlMap').onclick = () => download('map');
+  $('#dlCard').onclick = () => download('card');
+
+  // ---- copying ----
+  async function copy(text, done) {
+    const msg = $('#copyMsg');
+    try { await navigator.clipboard.writeText(text); msg.textContent = done; }
+    catch { const s = $('#sum'); s.focus(); s.select(); msg.textContent = 'Select the text and copy it.'; }
+  }
+  $('#copySum').onclick = () => copy($('#sum').value, 'Summary copied.');
+  $('#copyLink').onclick = () => copy(shareUrl(), 'Link copied.');
+
+  render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => preview(X));
+})();
+</script>
+</body>
+</html>
