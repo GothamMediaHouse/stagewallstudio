@@ -163,6 +163,12 @@ ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; wi
 .calc { margin-top: 14px; }
 .total { flex: 0 1 320px; display: flex; flex-direction: column; gap: 6px; }
 .total b { font: 600 clamp(44px, 6vw, 60px)/1 var(--display); letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.total .btn { margin-top: 12px; align-self: flex-start; }
+.total .btn[disabled] { opacity: .6; cursor: wait; }
+#buyMsg { font-size: 14px; color: var(--soft); }
+#buyMsg.bad { color: #ff7a6b; }
+.startline input { font: 500 16px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 10px 12px; min-height: 46px; color-scheme: dark; }
+.startline input:focus { outline: none; border-color: var(--accent); }
 
 /* questions */
 .faq { display: flex; flex-direction: column; max-width: 860px; }
@@ -383,6 +389,10 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
           <label class="chk" for="cLed"><input type="checkbox" id="cLed"> LED add-on</label>
           <label class="chk" for="cProj"><input type="checkbox" id="cProj"> Projection add-on</label>
         </div>
+        <label class="stepline startline" id="cStartRow" hidden>
+          <span>First show day</span>
+          <input type="date" id="cStart">
+        </label>
         <div class="stepline">
           <span id="cLabel">Set computers</span>
           <span class="stepper" role="group" aria-labelledby="cLabel">
@@ -396,6 +406,8 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <span class="small" id="cPer">Your price per year</span>
         <b id="cTotal">$590</b>
         <span class="small" id="cNote">Showcaller Studio on 1 computer</span>
+        <button type="button" class="btn primary" id="buyBtn" hidden>Buy now</button>
+        <span class="small" id="buyMsg" hidden>Pay by card. Your key arrives by email right away.</span>
       </div>
     </div>
     <p class="small">Prices in US dollars. A linked second computer needs its own license. Installation and on-site setup by Gotham Media House are quoted separately.</p>
@@ -476,6 +488,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     const t = term(), rent = t !== 'year', led = $('#cLed').checked, proj = $('#cProj').checked;
     const each = rent ? RENT[t] : led && proj ? ALL : BASE + (led ? ADD : 0) + (proj ? ADD : 0);
     $('#cAdds').hidden = rent;
+    $('#cStartRow').hidden = !rent;
     $('#cN').textContent = n;
     $('#cPer').textContent = `Your price per ${t}`;
     $('#cTotal').textContent = '$' + (each * n).toLocaleString('en-US');
@@ -492,7 +505,25 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     $('#calc').scrollIntoView({ block: 'center' });
   };
   for (const b of document.querySelectorAll('[data-term]')) b.onclick = () => { $('#tWeek').checked = true; price(); $('#calc').scrollIntoView({ block: 'center' }); };
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  $('#cStart').value = $('#cStart').min = ymd(new Date());
   price();
+
+  // ---- buy online: /api/checkout opens a Stripe Checkout page for what the calculator shows ----
+  fetch('/api/store').then((r) => r.json()).then((j) => { if (j.open) $('#buyBtn').hidden = $('#buyMsg').hidden = false; }).catch(() => {});
+  $('#buyBtn').onclick = async () => {
+    const btn = $('#buyBtn'), msg = $('#buyMsg');
+    const d = { term: term(), led: $('#cLed').checked, proj: $('#cProj').checked, n, start: $('#cStart').value };
+    btn.disabled = true; msg.className = 'small'; msg.textContent = 'Opening checkout\u2026';
+    try {
+      const r = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.url) throw new Error(j.error || 'Checkout didn\u2019t open.');
+      location.href = j.url;
+    } catch (err) {
+      msg.className = 'small bad'; msg.textContent = err.message; btn.disabled = false;
+    }
+  };
 
   // ---- demo request: posted to /api/contact (a Cloudflare Pages Function that sends it with Resend) ----
   const form = $('#demoForm'), started = Date.now();

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thank you · Showcaller Studio</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* The page after a Stripe purchase: the license key, how to enter it. Same look as the home page. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --panel: #14151a; --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --gut: clamp(20px, 4vw, 40px);
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: var(--gut); }
+header { border-bottom: 1px solid var(--line); }
+header .wrap { padding-block: 12px; max-width: 1200px; }
+.brand { display: inline-flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body); letter-spacing: .42em; text-transform: uppercase; color: var(--accent); padding-left: 1px; }
+main .wrap { padding-block: clamp(48px, 8vw, 96px); display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(34px, 5vw, 52px)/1.05 var(--display); letter-spacing: -.03em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: 19px; line-height: 1.5; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; font-size: 15.5px; border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding-block: 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; min-width: 0; font-variant-numeric: tabular-nums; }
+.key { border: 1px solid var(--accent); background: var(--accent-ground); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.key code { font: 13.5px/1.55 var(--mono); word-break: break-all; color: var(--fg); user-select: all; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; font: 600 15px var(--body); cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); align-self: flex-start; text-decoration: none; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line2); }
+ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; color: var(--soft); }
+.small { font-size: 14px; color: var(--muted); }
+.spin { width: 22px; height: 22px; border: 2px solid var(--line2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="/" aria-label="Showcaller Studio home">
+    <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+    <span class="lock">Showcaller<span class="studio">Studio</span></span>
+  </a>
+</div></header>
+<main><div class="wrap">
+  <div class="eyebrow">Order complete</div>
+  <h1>Thank you. Here’s your license key.</h1>
+
+  <div id="wait" style="display:flex;gap:14px;align-items:center">
+    <div class="spin" aria-hidden="true"></div>
+    <p class="lede" id="waitMsg">Making your key…</p>
+  </div>
+
+  <div id="done" hidden style="display:flex;flex-direction:column;gap:22px">
+    <p class="lede">A copy is on its way to <b id="email"></b>. Keep it with your show files.</p>
+    <dl class="facts">
+      <dt>Licensed to</dt><dd id="to"></dd>
+      <dt>Key</dt><dd id="kid"></dd>
+      <dt>Ends</dt><dd id="exp"></dd>
+    </dl>
+    <div class="key">
+      <code id="key"></code>
+      <button type="button" class="btn" id="copy">Copy key</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h2 style="font:600 20px var(--display);margin:0">To enter it</h2>
+      <ol>
+        <li>Open Showcaller Studio on the set computer.</li>
+        <li>Go to Settings → License.</li>
+        <li>Paste the whole key (it starts with UPS2-) and press Save.</li>
+      </ol>
+    </div>
+    <p class="small">Don’t have the app installed yet? Reply to the email with your key and we’ll send the installer.</p>
+  </div>
+
+  <div id="fail" hidden style="display:flex;flex-direction:column;gap:16px">
+    <p class="lede" id="failMsg"></p>
+    <a class="btn ghost" href="/#contact">Contact us</a>
+  </div>
+</div></main>
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const id = new URLSearchParams(location.search).get('s') || '';
+  const fail = (t) => { $('#wait').hidden = true; $('#fail').hidden = false; $('#failMsg').textContent = t; };
+  if (!id) return fail('This page shows your license key after you buy online. If you’ve just paid, check your email for the key.');
+  let tries = 0;
+  async function check() {
+    tries++;
+    try {
+      const r = await fetch('/api/order?s=' + encodeURIComponent(id));
+      const j = await r.json().catch(() => ({}));
+      if (j.key) {
+        $('#wait').hidden = true; $('#done').hidden = false;
+        $('#key').textContent = j.key; $('#to').textContent = j.to || ''; $('#kid').textContent = j.id || ''; $('#exp').textContent = j.exp || '';
+        $('#email').textContent = j.email || 'your email';
+        return;
+      }
+      if (!r.ok && r.status !== 502) return fail('We couldn’t find that order. If you’ve paid, your key will arrive by email; if it doesn’t, contact us.');
+      if (j.pending && !j.paid) $('#waitMsg').textContent = 'Waiting for the payment to go through…';
+    } catch {}
+    if (tries < 40) setTimeout(check, tries < 10 ? 1500 : 4000);
+    else fail('Your payment went through, but the key is taking longer than usual. It will arrive by email; if it isn’t there within the hour, contact us.');
+  }
+  check();
+  $('#copy').onclick = async () => {
+    const t = $('#key').textContent;
+    try { await navigator.clipboard.writeText(t); $('#copy').textContent = 'Copied'; }
+    catch { const r = document.createRange(); r.selectNodeContents($('#key')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('#copy').textContent = 'Selected: press Ctrl+C or ⌘C'; }
+    setTimeout(() => { $('#copy').textContent = 'Copy key'; }, 2500);
+  };
+})();
+</script>
+</body>
+</html>
