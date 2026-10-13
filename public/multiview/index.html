@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Showcaller Multiview · A free NDI multiviewer for Mac and Windows</title>
-<meta name="description" content="See every NDI camera on your network in one window, with PTZ control, SRT, RTMP and YouTube streams, and Tailscale for remote viewing. Free, from Showcaller Studio.">
+<meta name="description" content="See every NDI camera on your network in one window, with PTZ control, ATEM switcher control, SRT, RTMP and YouTube streams, and Tailscale for remote viewing. Free, from Showcaller Studio.">
 <link rel="canonical" href="https://showcallerstudio.com/multiview/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Showcaller Multiview, free">
@@ -112,6 +112,7 @@ ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; wi
 .ftxt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .ftxt h3 { font-size: clamp(25px, 2.6vw, 32px); line-height: 1.12; letter-spacing: -.02em; }
 .ftxt p { color: var(--soft); }
+.addon { align-self: flex-start; font: 600 12px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 4px 9px; }
 .phonewrap { display: flex; justify-content: center; }
 .phonewrap .shot { width: min(300px, 80%); border-radius: 30px; overflow: hidden; border-width: 6px; border-color: #23242b; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -249,6 +250,15 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         </div>
         <figure class="shot"><img src="/media/multiview-streams.jpg" width="1280" height="524" alt="A 3 by 2 grid mixing an NDI camera with SRT, RTMP and HLS streams" loading="lazy"></figure>
       </div>
+      <div class="feature flip">
+        <div class="ftxt">
+          <span class="addon">Showcaller Studio license</span>
+          <h3>Switch your ATEM from the multiviewer.</h3>
+          <p>Type in your ATEM's IP address and a switcher bar appears under the tiles. Link a tile to an ATEM input and it lights red on program and green on preview. Unlocks with a Showcaller Studio license key; the rest of the multiviewer stays free.</p>
+          <ul class="ticks"><li>Program and preview rows, cut, auto and fade to black</li><li>Mix, dip or wipe, plus record and ISO on the SDI Extreme ISO</li><li>Click a tile to preview it, Space to cut, Return for auto</li></ul>
+        </div>
+        <figure class="shot"><img src="/media/multiview-atem.jpg" width="1240" height="380" alt="The ATEM switcher bar with program, preview, cut, auto, fade to black and record buttons" loading="lazy"></figure>
+      </div>
     </div>
     <div class="grid">
       <div class="feat"><h3>Watch from anywhere</h3><p>Built-in Tailscale status and invite codes, so a client can watch your cameras from home without Remote Desktop.</p></div>
@@ -293,8 +303,9 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   <div class="wrap">
     <div class="head"><div class="eyebrow">Questions</div><h2>Good to know.</h2></div>
     <div class="faq">
-      <details><summary>Is it really free?</summary><p>Yes, for any use. If you need screens on a set, LED walls or projection run from one place, have a look at <a href="/">Showcaller Studio</a>.</p></details>
+      <details><summary>Is it really free?</summary><p>Yes, for any use. The one paid part is ATEM switcher control, which unlocks with a Showcaller Studio license key. If you need screens on a set, LED walls or projection run from one place, have a look at <a href="/">Showcaller Studio</a>.</p></details>
       <details><summary>Which cameras work?</summary><p>Anything that sends NDI, including NDI PTZ cameras from BirdDog, PTZOptics, Panasonic, Sony and others, plus NDI from software like OBS, vMix and Showcaller Studio. Camera control needs a PTZ camera that accepts it over NDI.</p></details>
+      <details><summary>Which ATEM switchers can it control?</summary><p>ATEM switchers that take control over the network, such as the ATEM Mini range, Television Studio and Constellation models, and the SDI Extreme ISO. Record and ISO buttons appear on models that record. Put the multiviewer on the same network as the switcher and type in its IP address.</p></details>
       <details><summary>Does it play sound?</summary><p>YouTube tiles have a sound button. NDI and other streams are picture only.</p></details>
       <details><summary>Can a client watch from home?</summary><p>Yes, if your cameras' network is on Tailscale. Make an invite code in the app's settings and send it to them. They paste it in and the cameras appear.</p></details>
     </div>
