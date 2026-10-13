@@ -5,6 +5,7 @@ The public site for Showcaller Studio (formerly StageWall) by Gotham Media House
 - `public/`: the site itself (`index.html`, `media/`, icons, `_headers`)
 - `worker.js`: serves `public/` and handles the demo request form at `/api/contact`
 - `contact.js`: the form handler (sends the request through Resend)
+- `gmh-inquiry.js`: the gothammediahouse.com project inquiry form handler (see below)
 - `wrangler.jsonc`: the Cloudflare Worker settings
 
 Hosted as a Cloudflare Worker (stagewallstudio) connected to this repo: every push to `main` deploys.
@@ -16,3 +17,7 @@ The form emails each request through [Resend](https://resend.com), with the visi
 - `RESEND_API_KEY` (secret): a Resend API key
 - `CONTACT_TO`: where requests go (comma-separate several)
 - `CONTACT_FROM`: the sender, e.g. `Showcaller Studio <hello@gothammediahouse.com>`; its domain must be verified in Resend (defaults to hello@showcallerstudio.com)
+
+## gothammediahouse.com inquiry form
+
+The project inquiry form on gothammediahouse.com (a static GitHub Pages site) posts to `/api/gmh-inquiry` on this Worker (`gmh-inquiry.js`), so it can reuse the Resend settings above. Only requests from gothammediahouse.com are allowed by CORS. Inquiries are sent from the `CONTACT_FROM` address under the name "Gotham Media House website" to `info@gothammediahouse.com`; set `GMH_INQUIRY_TO` to send them somewhere else.
