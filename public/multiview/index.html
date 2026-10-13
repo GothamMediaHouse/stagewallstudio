@@ -230,7 +230,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <div class="ftxt">
           <h3>Pick a layout, pick the cameras.</h3>
           <p>Nine layouts from one big picture to a 4×4 grid. Click a tile to give it a camera, double-click to see it full size, Esc to go back.</p>
-          <ul class="ticks"><li>Finds NDI sources on its own</li><li>Light preview streams for small tiles, full quality when big</li><li>Names, clock and full screen</li><li>Remembers everything for next time</li></ul>
+          <ul class="ticks"><li>Finds NDI sources on its own</li><li>Audio meters on every camera, and listen to any one</li><li>Light preview streams for small tiles, full quality when big</li><li>Names, clock and full screen</li><li>Remembers everything for next time</li></ul>
         </div>
         <figure class="shot"><img src="/media/multiview-grid.jpg" width="1280" height="524" alt="Three camera tiles in the one big plus two small layout" loading="lazy"></figure>
       </div>
@@ -306,7 +306,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <details><summary>Is it really free?</summary><p>Yes, for any use. The one paid part is ATEM switcher control, which unlocks with a Showcaller Studio license key. If you need screens on a set, LED walls or projection run from one place, have a look at <a href="/">Showcaller Studio</a>.</p></details>
       <details><summary>Which cameras work?</summary><p>Anything that sends NDI, including NDI PTZ cameras from BirdDog, PTZOptics, Panasonic, Sony and others, plus NDI from software like OBS, vMix and Showcaller Studio. Camera control needs a PTZ camera that accepts it over NDI.</p></details>
       <details><summary>Which ATEM switchers can it control?</summary><p>ATEM switchers that take control over the network, such as the ATEM Mini range, Television Studio and Constellation models, and the SDI Extreme ISO. Record and ISO buttons appear on models that record. Put the multiviewer on the same network as the switcher and type in its IP address.</p></details>
-      <details><summary>Does it play sound?</summary><p>YouTube tiles have a sound button. NDI and other streams are picture only.</p></details>
+      <details><summary>Does it play sound?</summary><p>Yes. Every NDI camera with sound shows a level meter on its tile, and you can listen to one tile at a time through your speakers. YouTube tiles have their own sound button. SRT, RTMP and other streams are picture only.</p></details>
       <details><summary>Can a client watch from home?</summary><p>Yes, if your cameras' network is on Tailscale. Make an invite code in the app's settings and send it to them. They paste it in and the cameras appear.</p></details>
     </div>
     <p class="legal">NDI® is a registered trademark of Vizrt NDI AB. Showcaller Multiview includes FFmpeg, licensed under the GNU GPL; its license and the source of the build used are linked in the app's folder and at <a href="https://ffmpeg.org/download.html">ffmpeg.org</a>. YouTube is a trademark of Google LLC.</p>
