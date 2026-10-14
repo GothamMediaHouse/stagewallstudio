@@ -107,6 +107,8 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .notify .btn[disabled] { opacity: .6; cursor: wait; }
 .notify .msg { grid-column: 1 / -1; font-size: 14.5px; color: var(--muted); min-height: 1.4em; }
 .notify .msg.bad { color: #ff7a6b; }
+.tool .pro { font-size: 14.5px; color: var(--muted); border-left: 2px solid var(--accent); padding-left: 12px; }
+.tool .pro b { color: var(--accent); font: 600 11px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; margin-right: 6px; }
 @media (max-width: 440px) { .notify { grid-template-columns: minmax(0, 1fr); } }
 .done { border: 1px solid var(--accent); background: var(--accent-ground); padding: 16px 18px; font-size: 15px; display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
 </style>
@@ -132,7 +134,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   <div class="wrap">
     <div class="eyebrow">Free tools</div>
     <h1>Free tools for shows and sets.</h1>
-    <p class="lede">Small, useful things from the people behind Showcaller Studio, free to use. One is ready now; leave your email on the others and we'll tell you the day each one is out.</p>
+    <p class="lede">Small, useful things from the people behind Showcaller Studio, free to use. A few pro features unlock with a Showcaller Studio license, marked Pro below. One tool is ready now; leave your email on the others and we'll tell you the day each one is out.</p>
   </div>
 </section>
 
@@ -154,6 +156,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <h3>Showcaller Multiview</h3>
         <p>A free NDI multiviewer. Every NDI camera on your network in one window, with PTZ control, and SRT, RTMP and YouTube streams next to them.</p>
         <ul class="ticks"><li>Nine layouts, names, clock and full screen</li><li>PTZ joystick and presets from the tile</li><li>Tailscale for watching from another network</li></ul>
+        <p class="pro"><b>Pro</b>ATEM switcher control and tally, with a Showcaller Studio license.</p>
         <div class="acts">
           <a class="btn primary" href="/multiview/#download" data-open="Download free">Get notified</a>
           <a class="btn" href="/multiview/">See what it does</a>
@@ -166,6 +169,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <h3>Showcaller Timer</h3>
         <p>A presenter countdown and stage timer you run from your phone. Keep the running order, send messages to the presenter, and use any browser as the stage display.</p>
         <ul class="ticks"><li>Phone remote and running order</li><li>Messages to the presenter</li><li>Bitfocus Companion and OSC control</li></ul>
+        <p class="pro"><b>Pro</b>A confidence monitor stage display, a producer page for the gallery, and running the show in Backtime from the timer. Comes with a Showcaller Studio license; every copy starts with a 14-day free trial.</p>
         <form class="notify" data-tool="timer" novalidate>
           <input name="email" type="email" autocomplete="email" maxlength="200" placeholder="Your email" aria-label="Email for Showcaller Timer" required>
           <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
@@ -213,7 +217,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <div class="txt">
         <div class="eyebrow">Showcaller Studio</div>
         <h2 style="font-size:clamp(24px,2.6vw,32px)">Every screen on your set, run from one page.</h2>
-        <p>Video, stills, live cameras and graphics on set monitors, LED walls and projectors, run from a laptop, tablet or phone. Try everything free for 14 days.</p>
+        <p>Video, stills, live cameras and graphics on set monitors, LED walls and projectors, run from a laptop, tablet or phone. Try everything free for 14 days. A Studio license also unlocks the Pro features in Showcaller Timer and Multiview.</p>
       </div>
       <div class="go">
         <a class="btn primary" href="/#pricing">Start a free trial</a>
