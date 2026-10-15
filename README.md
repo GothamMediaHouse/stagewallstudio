@@ -44,7 +44,7 @@ Prices are worked out in `store.js` (and shown by the calculator in `index.html`
 
 ## Free tools
 
-`public/tools/` lists the free tools; `public/led-wall-calculator/` is the LED wall calculator (all in the page, nothing sent to the Worker). The panel presets and their sources are at the top of its script: keep a source note on any you add.
+`public/tools/` lists the free tools; `public/led-wall-calculator/` is the LED wall calculator (all in the page, nothing sent to the Worker). `public/input-list/` is the Input List & Stage Plot Builder, also all in the page: the show is packed into the address after `#p=` (deflate-raw, base64url) and kept in localStorage, and the PDF is the browser's print of the `#sheet` element. The panel presets and their sources are at the top of its script: keep a source note on any you add.
 
 `tools.js` handles the "Get notified" forms on the tools page (`POST /api/notify` with `tool`: `multiview`, `timer`, `testkit` or `companion`) and emails `CONTACT_TO` saying which tool, using the Resend settings above. `multiview` goes through the Multiview handler, so it behaves as the form on `/multiview/` does; `/api/multiview` is unchanged. It also answers the version checks the coming apps make, in the same shape as `/api/multiview/latest`:
 

@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Input List & Stage Plot Builder: free, in your browser | Showcaller</title>
+<meta name="description" content="Free input list and stage plot maker for live shows: list every channel with mic, stand and phantom power, drag wedges, mics, risers and power drops onto the stage, then download a one-file PDF for the audio crew and the venue.">
+<link rel="canonical" href="https://showcallerstudio.com/input-list/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Input List & Stage Plot Builder, free">
+<meta property="og:description" content="The channel list and the stage plot for a show, in one PDF for the audio crew and the venue.">
+<meta property="og:url" content="https://showcallerstudio.com/input-list/">
+<meta property="og:image" content="https://showcallerstudio.com/media/poster4.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Same look as the home page (copied from index.html), plus the calculator's own rules at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut: clamp(20px, 4vw, 40px);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -.03em; }
+h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s, transform .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+
+/* top bar */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body, Inter, sans-serif); letter-spacing: .42em; text-transform: uppercase; color: #ffb224; padding-left: 1px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* opener */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: 20%; width: min(1100px, 120vw); height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .13), rgba(255, 178, 36, 0)); pointer-events: none; }
+.hero .wrap { position: relative; display: flex; flex-direction: column; gap: 18px; padding-block: clamp(44px, 6vw, 76px) clamp(28px, 4vw, 44px); }
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(56px, 7vw, 96px); display: flex; flex-direction: column; gap: clamp(26px, 3.5vw, 40px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+ul.ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--soft); font-size: 16px; }
+ul.ticks li { padding-left: 26px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 11px; height: 5px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 22px 48px; align-items: center; justify-content: space-between; }
+.trial .txt { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.trial .txt p { color: var(--soft); }
+.trial .go { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px; }
+[hidden] { display: none !important; }
+
+/* questions */
+.faq { display: flex; flex-direction: column; max-width: 860px; }
+details { border-top: 1px solid var(--line2); }
+details:last-child { border-bottom: 1px solid var(--line2); }
+summary { cursor: pointer; padding: 22px 40px 22px 0; font: 600 19px var(--display); letter-spacing: -.01em; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; right: 6px; top: 30px; width: 10px; height: 10px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); transition: transform .2s; }
+details[open] summary::after { transform: rotate(-135deg); top: 35px; }
+details p { color: var(--soft); padding: 0 40px 24px 0; }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+
+
+/* Input list and stage plot builder */
+*, *::before, *::after { box-sizing: border-box; }
+.btn.xs { min-height: 42px; padding: 0 16px; font-size: 14px; }
+.blk { display: flex; flex-direction: column; gap: 16px; }
+.blk > .bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: end; justify-content: space-between; }
+.blk > .bar h2 { font-size: clamp(24px, 2.6vw, 32px); }
+.count { font-size: 14.5px; color: var(--muted); }
+.fld { display: grid; gap: 5px; min-width: 0; }
+.fld > span { font-size: 13px; color: var(--soft); }
+input.in, select.in { font: 400 15.5px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 9px 10px; width: 100%; min-width: 0; border-radius: 0; }
+select.in { appearance: none; -webkit-appearance: none; padding-right: 30px; background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+input.in:focus, select.in:focus { outline: none; border-color: var(--accent); }
+input[type="date"].in { color-scheme: dark; }
+.show { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.6fr); gap: 12px; border: 1px solid var(--line2); background: var(--panel); padding: 16px; }
+@media (max-width: 900px) { .show { grid-template-columns: 1fr 1fr; } .show .fld:first-child { grid-column: 1 / -1; } }
+
+.grid { border: 1px solid var(--line2); background: var(--panel); }
+.grid .hd, .row { display: grid; gap: 8px; align-items: center; padding: 8px 12px; }
+.chs .hd, .chs .row { grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.4fr) minmax(0, 1fr) 46px minmax(0, .6fr) minmax(0, 1.4fr) 128px; }
+.outs .hd, .outs .row { grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.6fr) 128px; }
+.grid .hd { font: 600 11px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line2); padding-block: 12px; }
+.row + .row { border-top: 1px solid var(--line); }
+.row .no { font: 600 17px var(--display); color: var(--accent); font-variant-numeric: tabular-nums; text-align: center; }
+.row label { display: grid; gap: 4px; min-width: 0; }
+.row label > span { display: none; font-size: 13px; color: var(--soft); }
+.row .ph48 { display: flex; justify-content: center; }
+.row .ph48 input { width: 22px; height: 22px; accent-color: var(--accent); margin: 0; }
+.row .acts { display: flex; gap: 4px; justify-content: flex-end; }
+.row .acts .btn { min-height: 40px; width: 40px; padding: 0; font-size: 17px; line-height: 1; }
+.gfoot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; border-top: 1px solid var(--line2); }
+.gfoot select.in { width: auto; min-width: 230px; }
+@media (max-width: 900px) {
+  .grid .hd { display: none; }
+  .chs .row, .outs .row { grid-template-columns: 30px repeat(4, minmax(0, 1fr)) 128px; gap: 8px; padding-block: 14px; align-items: end; }
+  .row label > span { display: block; }
+  .row > :nth-child(2) > span { display: none; }
+  .row .no { text-align: left; align-self: center; }
+  .row > :nth-child(2) { grid-column: 2 / 6; }
+  .chs .row > :nth-child(3) { grid-column: 1 / 5; }
+  .chs .row > :nth-child(4) { grid-column: 5 / 7; }
+  .chs .row > :nth-child(5) { grid-column: 1 / 4; align-self: center; }
+  .chs .row > :nth-child(6) { grid-column: 4 / 7; }
+  .chs .row > :nth-child(7) { grid-column: 1 / -1; }
+  .outs .row > :nth-child(3) { grid-column: 1 / 4; }
+  .outs .row > :nth-child(4) { grid-column: 4 / 7; }
+  .outs .row > :nth-child(5) { grid-column: 1 / -1; }
+  .row .acts { grid-column: 6; grid-row: 1; }
+  .row .ph48 { justify-content: flex-start; gap: 10px; align-items: center; }
+  .row .ph48::after { content: "Phantom power (48V)"; font-size: 14px; color: var(--soft); }
+}
+
+.plotwrap { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 960px) { .plotwrap { grid-template-columns: minmax(0, 1fr); } }
+.plot { border: 1px solid var(--line2); background: var(--bg); }
+.plot svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.plot svg:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.plot svg [data-i] { cursor: grab; }
+.plot svg.dragging, .plot svg.dragging [data-i] { cursor: grabbing; }
+.side { display: flex; flex-direction: column; gap: 14px; }
+.panel { border: 1px solid var(--line2); background: var(--panel); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel h3 { font-size: 16px; }
+.pal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 960px) { .pal { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); } }
+.pal button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; background: var(--bg); border: 1px solid var(--line2); color: var(--soft); font: 500 12.5px/1.2 var(--body); cursor: pointer; min-height: 64px; }
+.pal button:hover { border-color: var(--accent); color: var(--fg); }
+.pal svg { width: 34px; height: 26px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.hint { font-size: 13.5px; color: var(--muted); }
+
+.out { border: 1px solid var(--line2); background: var(--panel); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.out .btns { gap: 10px; }
+#msg { font-size: 14.5px; color: var(--soft); }
+.cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px 40px; }
+.cols2 div { display: flex; flex-direction: column; gap: 8px; }
+.cols2 p { color: var(--soft); font-size: 16px; }
+
+/* the printed sheet: built from the same data, only shown when printing */
+#sheet { display: none; }
+@media print {
+  @page { margin: 12mm; }
+  html, body { background: #fff !important; color: #111 !important; }
+  body > *:not(#sheet) { display: none !important; }
+  #sheet { display: block; font: 10.5pt/1.4 var(--body); color: #111; }
+  #sheet .sh-top { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 10px; }
+  #sheet h1 { font: 600 20pt/1.1 var(--display); letter-spacing: -.02em; color: #111; }
+  #sheet .sh-sub { color: #444; margin-top: 4px; }
+  #sheet .sh-who { text-align: right; color: #222; }
+  #sheet .sh-who b { display: block; font: 600 8pt var(--body); letter-spacing: .12em; text-transform: uppercase; color: #666; }
+  #sheet .sh-plot svg { width: 100%; height: auto; max-height: 120mm; display: block; }
+  #sheet h2 { font: 600 12.5pt var(--display); margin: 12px 0 6px; color: #111; break-after: avoid; }
+  #sheet table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  #sheet th { text-align: left; font: 600 7.5pt var(--body); letter-spacing: .1em; text-transform: uppercase; color: #555; border-bottom: 1.5px solid #111; padding: 4px 6px; }
+  #sheet td { border-bottom: 1px solid #ccc; padding: 4px 6px; vertical-align: top; }
+  #sheet tr { break-inside: avoid; }
+  #sheet td.c { font-weight: 600; width: 32px; }
+  #sheet td.p { width: 36px; text-align: center; font-weight: 600; }
+  #sheet .sh-foot { margin-top: 12px; font-size: 8pt; color: #777; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav>
+      <a href="#inputs">Inputs</a>
+      <a href="#plot">Stage plot</a>
+      <a href="#export">PDF</a>
+      <a href="/tools/">Free tools</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top" style="border-top:0">
+  <div class="wrap">
+    <div class="eyebrow">Free tool · Audio</div>
+    <h1>Input list & stage plot builder</h1>
+    <p class="lede">List every channel with its mic, stand and phantom power, drag the wedges, mics and risers onto the stage, then download one PDF for the audio crew and the venue. It all stays in your browser, and the link opens the same show for anyone you send it to.</p>
+  </div>
+</section>
+
+<section style="border-top:0">
+  <div class="wrap" style="padding-top:0">
+    <div class="blk">
+      <div class="show" id="show">
+        <label class="fld"><span>Show</span><input class="in" data-k="name" maxlength="60" placeholder="Show or event name"></label>
+        <label class="fld"><span>Venue</span><input class="in" data-k="venue" maxlength="60" placeholder="Venue and room"></label>
+        <label class="fld"><span>Date</span><input class="in" data-k="date" type="date"></label>
+        <label class="fld"><span>Audio contact</span><input class="in" data-k="a1" maxlength="40" placeholder="Name"></label>
+        <label class="fld"><span>Phone or email</span><input class="in" data-k="tel" maxlength="60" placeholder="How to reach them"></label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inputs" style="border-top:0">
+  <div class="wrap" style="padding-top:0">
+    <div class="blk">
+      <div class="bar"><h2>Inputs</h2><span class="count" id="chCount"></span></div>
+      <div class="grid chs">
+        <div class="hd" aria-hidden="true"><span>Ch</span><span>Input</span><span>Mic or DI</span><span>Stand</span><span title="Phantom power">48V</span><span>Box</span><span>Notes</span><span></span></div>
+        <div id="chs"></div>
+        <div class="gfoot">
+          <button type="button" class="btn xs" id="addCh">Add a channel</button>
+          <select class="in" id="tpl" aria-label="Add a set of inputs"><option value="">Add a set of inputs…</option></select>
+          <span class="small">Box is the stage box or snake channel, if it isn't the same as the channel.</span>
+        </div>
+      </div>
+
+      <div class="bar" style="margin-top:20px"><h2>Mixes</h2><span class="count" id="outCount"></span></div>
+      <div class="grid outs">
+        <div class="hd" aria-hidden="true"><span>#</span><span>Mix</span><span>Type</span><span>For</span><span>Notes</span><span></span></div>
+        <div id="outs"></div>
+        <div class="gfoot"><button type="button" class="btn xs" id="addOut">Add a mix</button><span class="small">Wedges, in-ears, the PA and the feeds to video, the stream and the recorder.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plot" class="alt">
+  <div class="wrap">
+    <div class="blk">
+      <div class="bar"><h2>Stage plot</h2><span class="count">The audience is at the bottom. Drag things to move them.</span></div>
+      <div class="plotwrap">
+        <div class="plot"><svg id="svg" tabindex="0" aria-label="Stage plot. Select a thing, then use the arrow keys to move it, R to turn it and Delete to remove it."></svg></div>
+        <div class="side">
+          <div class="panel">
+            <h3>Stage</h3>
+            <div class="two">
+              <label class="fld"><span>Width</span><input class="in" id="stW" type="number" inputmode="decimal" min="2" max="100" step="any"></label>
+              <label class="fld"><span>Depth</span><input class="in" id="stD" type="number" inputmode="decimal" min="2" max="60" step="any"></label>
+            </div>
+            <label class="fld"><span>Units</span><select class="in" id="stU"><option value="ft">Feet</option><option value="m">Metres</option></select></label>
+          </div>
+          <div class="panel" id="insp"></div>
+          <div class="panel">
+            <h3>Add to the stage</h3>
+            <div class="pal" id="pal"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="export">
+  <div class="wrap">
+    <div class="out">
+      <h2 style="font-size:clamp(24px,2.6vw,32px)">Send it</h2>
+      <p class="small">The PDF puts the show details, the stage plot, the inputs and the mixes on one sheet; choose Save as PDF in the print window. The link keeps everything, so it opens this same show for the venue or the next engineer. Your work is also kept in this browser.</p>
+      <div class="btns">
+        <button type="button" class="btn primary" id="pdf">Download PDF</button>
+        <button type="button" class="btn" id="copyLink">Copy link</button>
+        <button type="button" class="btn" id="csv">Inputs as CSV</button>
+        <button type="button" class="btn" id="png">Stage plot as PNG</button>
+        <button type="button" class="btn" id="copyText">Copy as text</button>
+      </div>
+      <div class="btns">
+        <button type="button" class="btn xs" id="example">Load the example</button>
+        <button type="button" class="btn xs" id="blank">Start a new show</button>
+        <span id="msg" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="trial">
+      <div class="txt">
+        <div class="eyebrow">Showcaller Studio</div>
+        <h2 style="font-size:clamp(24px,2.6vw,32px)">Run the screens on the same show.</h2>
+        <p>Showcaller Studio puts the slides, videos and graphics on every screen in the room, from one Mac. There are more free tools for LED walls, NDI and timing too.</p>
+      </div>
+      <div class="go">
+        <a class="btn primary" href="/">See Showcaller Studio</a>
+        <a class="btn" href="/tools/">All free tools</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="notes">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">Good to know</div><h2>Making an input list the crew can use.</h2></div>
+    <div class="cols2">
+      <div><h3>One line per channel</h3><p>Give every channel its own line, stereo sources included: playback left and right are two channels. Name inputs the way they'll be written on the desk scribble strip.</p></div>
+      <div><h3>Phantom power</h3><p>Condenser mics, lavalier and headset capsules on a cable, and active DI boxes need 48V. Picking one from the list ticks it for you; check anything you typed yourself.</p></div>
+      <div><h3>Wireless counts</h3><p>The count at the top adds up the wireless channels, so the RF plan and the batteries are easy to work out. Add spares in the notes.</p></div>
+      <div><h3>The stage plot</h3><p>Draw it from the audience's side, with downstage at the bottom, as the venue expects. Mark power drops, so the stage manager knows where to run the circuits.</p></div>
+      <div><h3>Sharing</h3><p>Nothing is uploaded. The whole show is packed into the link, so copy the link to share it and keep it to edit later.</p></div>
+      <div><h3>Mixes</h3><p>List every wedge, in-ear and feed, with who it's for. Add the record, stream and video feeds, which are easy to forget on corporate shows.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">A free tool from <a href="/">Showcaller Studio</a>.</span></div></footer>
+
+<div id="sheet"></div>
+
+<datalist id="dlSrc"></datalist>
+<datalist id="dlStand"></datalist>
+<datalist id="dlOut"></datalist>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // ---- lists ----
+  // Picking one of these sets 48V: true needs phantom power, false doesn't.
+  const SOURCES = [
+    ['Wireless handheld', false], ['Wireless lav', false], ['Wireless headset', false],
+    ['SM58', false], ['Beta 58A', false], ['SM57', false], ['Beta 57A', false], ['Beta 52A', false], ['Beta 91A', true],
+    ['e604', false], ['e609', false], ['e906', false], ['MD 421', false], ['RE20', false], ['SM7B', false],
+    ['KSM9', true], ['KM 184', true], ['SM81', true], ['C414', true], ['MKH 416', true],
+    ['Gooseneck (podium)', true], ['DPA 4060 lav (wired)', true], ['DPA 4088 headset (wired)', true],
+    ['Active DI', true], ['Passive DI', false], ['Stereo DI', true], ['Laptop DI (stereo)', true],
+    ['Line', false], ['Playback', false], ['Video playback', false], ['Talkback mic', false], ['Audience mic', true],
+  ];
+  const P48 = new Map(SOURCES.map(([n, p]) => [n.toLowerCase(), p]));
+  const STANDS = ['Tall boom', 'Short boom', 'Straight', 'Table stand', 'Clip', 'Podium', 'Hanging', 'Kick port', 'Floor', 'None'];
+  const OUT_TYPES = ['PA', 'Front fill', 'Delay', 'Sub', 'Wedge', 'IEM stereo', 'IEM mono', 'Side fill', 'Drum fill', 'Record', 'Stream', 'Video feed', 'Hearing loop', 'Press feed', 'Green room'];
+
+  // Sets of inputs to add in one go.
+  const TEMPLATES = [
+    ['Panel (moderator and four guests)', [['Moderator', 'Wireless handheld', 'None'], ['Guest 1', 'Wireless lav', 'None'], ['Guest 2', 'Wireless lav', 'None'], ['Guest 3', 'Wireless lav', 'None'], ['Guest 4', 'Wireless lav', 'None']]],
+    ['Keynote (podium, headset, spare)', [['Podium', 'Gooseneck (podium)', 'Podium'], ['Presenter', 'Wireless headset', 'None'], ['Spare handheld', 'Wireless handheld', 'None']]],
+    ['Audience Q&A (two runners)', [['Q&A runner 1', 'Wireless handheld', 'None'], ['Q&A runner 2', 'Wireless handheld', 'None']]],
+    ['Laptop and video playback', [['Laptop L', 'Laptop DI (stereo)', 'None'], ['Laptop R', 'Laptop DI (stereo)', 'None'], ['Video L', 'Video playback', 'None'], ['Video R', 'Video playback', 'None']]],
+    ['Drum kit (8 mics)', [['Kick in', 'Beta 91A', 'None'], ['Kick out', 'Beta 52A', 'Short boom'], ['Snare top', 'SM57', 'Clip'], ['Snare bottom', 'e604', 'Clip'], ['Hi-hat', 'KM 184', 'Short boom'], ['Tom 1', 'e604', 'Clip'], ['Floor tom', 'e604', 'Clip'], ['OH L', 'KM 184', 'Tall boom'], ['OH R', 'KM 184', 'Tall boom']]],
+    ['Band (bass, guitars, keys, vocals)', [['Bass DI', 'Active DI', 'None'], ['Guitar 1', 'SM57', 'Short boom'], ['Guitar 2', 'e906', 'None'], ['Keys L', 'Active DI', 'None'], ['Keys R', 'Active DI', 'None'], ['Lead vocal', 'Beta 58A', 'Tall boom'], ['BV 1', 'SM58', 'Tall boom'], ['BV 2', 'SM58', 'Tall boom']]],
+    ['Acoustic duo', [['Acoustic guitar DI', 'Active DI', 'None'], ['Acoustic guitar mic', 'KM 184', 'Short boom'], ['Vocal 1', 'Beta 58A', 'Tall boom'], ['Vocal 2', 'Beta 58A', 'Tall boom']]],
+    ['Talkback and audience mics', [['Talkback', 'Talkback mic', 'None'], ['Audience L', 'Audience mic', 'Hanging'], ['Audience R', 'Audience mic', 'Hanging']]],
+  ];
+
+  // Things for the stage plot; w and d are in metres.
+  const TYPES = {
+    person: { name: 'Person', w: 0.6, d: 0.6 },
+    mic: { name: 'Mic stand', w: 0.45, d: 0.45 },
+    wedge: { name: 'Wedge', w: 0.7, d: 0.45 },
+    iem: { name: 'IEM pack', w: 0.3, d: 0.3 },
+    di: { name: 'DI box', w: 0.3, d: 0.2 },
+    power: { name: 'Power', w: 0.35, d: 0.35 },
+    drums: { name: 'Drum kit', w: 2.0, d: 1.8 },
+    keys: { name: 'Keyboard', w: 1.4, d: 0.45 },
+    amp: { name: 'Amp', w: 0.7, d: 0.35 },
+    lectern: { name: 'Lectern', w: 0.65, d: 0.5 },
+    table: { name: 'Table', w: 1.8, d: 0.75, size: true },
+    chair: { name: 'Chair', w: 0.5, d: 0.5 },
+    speaker: { name: 'Speaker', w: 0.6, d: 0.45 },
+    box: { name: 'Stage box', w: 0.5, d: 0.3 },
+    riser: { name: 'Riser', w: 2.44, d: 1.83, size: true },
+    screen: { name: 'Screen', w: 3.0, d: 0.2, size: true },
+    text: { name: 'Text', w: 1.2, d: 0.35 },
+  };
+
+  // ---- the example show ----
+  const EXAMPLE = {
+    show: { name: 'Leadership Summit, general session', venue: 'Grand Ballroom', date: '', a1: '', tel: '' },
+    stage: { w: 9.7536, d: 4.8768, u: 'ft' },
+    ch: [
+      ['Podium', 'Gooseneck (podium)', 'Podium', 1, '', ''], ['Host', 'Wireless handheld', 'None', 0, '', 'Spare on ch 12'],
+      ['Panel 1', 'Wireless lav', 'None', 0, '', ''], ['Panel 2', 'Wireless lav', 'None', 0, '', ''], ['Panel 3', 'Wireless lav', 'None', 0, '', ''], ['Moderator', 'Wireless lav', 'None', 0, '', ''],
+      ['Q&A 1', 'Wireless handheld', 'None', 0, '', 'Runner, house left'], ['Q&A 2', 'Wireless handheld', 'None', 0, '', 'Runner, house right'],
+      ['Laptop L', 'Laptop DI (stereo)', 'None', 1, '', 'At the podium'], ['Laptop R', 'Laptop DI (stereo)', 'None', 1, '', ''],
+      ['Video', 'Video playback', 'None', 0, '', 'Mono, from video world'], ['Spare handheld', 'Wireless handheld', 'None', 0, '', ''],
+    ].map(([n, src, st, p48, box, note]) => ({ n, src, st, p48, box, note })),
+    out: [
+      ['Main PA', 'PA', 'Room', 'L/R'], ['Front fills', 'Front fill', 'First rows', ''], ['Podium wedge', 'Wedge', 'Podium', 'Voice only, low'],
+      ['Stream', 'Stream', 'Video world', 'Program mix, -14 LUFS'], ['Record', 'Record', 'Recorder', 'Program mix'],
+    ].map(([n, t, who, note]) => ({ n, t, who, note })),
+    items: [
+      { t: 'screen', x: 4.88, y: 0.35, r: 0, w: 4.5, d: 0.2, l: 'LED wall', c: '' },
+      { t: 'riser', x: 6.2, y: 2.1, r: 0, w: 4.88, d: 2.44, l: 'Riser 16×8', c: '' },
+      { t: 'table', x: 6.2, y: 2.45, r: 0, w: 3.6, d: 0.6, l: 'Panel table', c: '' },
+      { t: 'chair', x: 4.85, y: 1.75, r: 0, l: '', c: '6' }, { t: 'chair', x: 5.75, y: 1.75, r: 0, l: '', c: '3' },
+      { t: 'chair', x: 6.65, y: 1.75, r: 0, l: '', c: '4' }, { t: 'chair', x: 7.55, y: 1.75, r: 0, l: '', c: '5' },
+      { t: 'lectern', x: 1.9, y: 2.6, r: 20, l: 'Podium', c: '1, 9-10' },
+      { t: 'wedge', x: 1.95, y: 3.55, r: 20, l: '', c: '' },
+      { t: 'power', x: 1.2, y: 1.3, r: 0, l: '', c: '' }, { t: 'power', x: 8.6, y: 1.3, r: 0, l: '', c: '' },
+      { t: 'box', x: 9.2, y: 0.5, r: 0, l: 'Stage box', c: '' },
+      { t: 'person', x: 3.3, y: 3.3, r: 0, l: 'Host', c: '2' },
+    ],
+  };
+  const BLANK = { show: { name: '', venue: '', date: '', a1: '', tel: '' }, stage: { w: 9.7536, d: 6.096, u: 'ft' }, ch: [], out: [], items: [] };
+
+  // ---- state ----
+  const str = (v, n) => String(v ?? '').slice(0, n);
+  const num = (v, d, lo, hi) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
+  function clean(o) {
+    o = o && typeof o === 'object' ? o : {};
+    const sh = o.show || {}, st = o.stage || {};
+    const stage = { w: num(st.w, 9.75, 2, 100), d: num(st.d, 6, 2, 60), u: st.u === 'm' ? 'm' : 'ft' };
+    return {
+      show: { name: str(sh.name, 60), venue: str(sh.venue, 60), date: /^\d{4}-\d\d-\d\d$/.test(sh.date) ? sh.date : '', a1: str(sh.a1, 40), tel: str(sh.tel, 60) },
+      stage,
+      ch: (Array.isArray(o.ch) ? o.ch : []).slice(0, 96).map((c) => ({ n: str(c.n, 40), src: str(c.src, 40), st: str(c.st, 24), p48: c.p48 ? 1 : 0, box: str(c.box, 12), note: str(c.note, 60) })),
+      out: (Array.isArray(o.out) ? o.out : []).slice(0, 48).map((c) => ({ n: str(c.n, 40), t: str(c.t, 24), who: str(c.who, 40), note: str(c.note, 60) })),
+      items: (Array.isArray(o.items) ? o.items : []).filter((it) => TYPES[it?.t]).slice(0, 150).map((it) => {
+        const T = TYPES[it.t], x = { t: it.t, x: num(it.x, stage.w / 2, 0, stage.w), y: num(it.y, stage.d / 2, 0, stage.d), r: ((Math.round(num(it.r, 0, -3600, 3600)) % 360) + 360) % 360, l: str(it.l, 40), c: str(it.c, 20) };
+        if (T.size) { x.w = num(it.w, T.w, 0.2, 40); x.d = num(it.d, T.d, 0.1, 40); }
+        return x;
+      }),
+    };
+  }
+  let S = clean(EXAMPLE);
+  let sel = -1;
+
+  // The whole show is packed into the address after #, compressed when the browser can.
+  const b64u = (bytes) => { let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const unb64u = (s) => { const t = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(t, (c) => c.charCodeAt(0)); };
+  const round = (n, d = 3) => Math.round(n * 10 ** d) / 10 ** d;
+  const plain = () => ({ ...S, items: S.items.map((it) => { const o = { ...it, x: round(it.x), y: round(it.y) }; if (o.w != null) { o.w = round(o.w); o.d = round(o.d); } return o; }) });
+  async function pack() {
+    const json = JSON.stringify(plain());
+    if (window.CompressionStream) {
+      try { const buf = await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer(); return 'z' + b64u(new Uint8Array(buf)); } catch {}
+    }
+    return 'j' + b64u(new TextEncoder().encode(json));
+  }
+  async function unpack(s) {
+    const bytes = unb64u(s.slice(1));
+    if (s[0] === 'z') return JSON.parse(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text());
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  let packed = '', saveT = 0;
+  function save() {
+    clearTimeout(saveT);
+    saveT = setTimeout(async () => {
+      packed = await pack();
+      try { history.replaceState(null, '', `#p=${packed}`); } catch {}
+      try { localStorage.setItem('showcaller-input-list', JSON.stringify(plain())); } catch {}
+    }, 250);
+  }
+  const shareUrl = async () => `${location.origin}${location.pathname}#p=${await pack()}`;
+
+  // ---- lengths ----
+  const FT = 0.3048;
+  const toU = (m) => (S.stage.u === 'ft' ? m / FT : m);
+  const fromU = (v) => (S.stage.u === 'ft' ? v * FT : v);
+  const lenTxt = (m) => (S.stage.u === 'ft' ? `${round(m / FT, 1)} ft` : `${round(m, 2)} m`);
+  const lenShort = (m) => (S.stage.u === 'ft' ? `${round(m / FT, 1)}` : `${round(m, 2)}`);
+
+  // ---- show details ----
+  for (const el of document.querySelectorAll('#show [data-k]')) {
+    el.oninput = () => { S.show[el.dataset.k] = el.value.slice(0, Number(el.maxLength) > 0 ? el.maxLength : 60); save(); };
+  }
+  function drawShow() { for (const el of document.querySelectorAll('#show [data-k]')) el.value = S.show[el.dataset.k]; }
+
+  // ---- inputs and mixes ----
+  const fillList = (id, list) => $(id).replaceChildren(...list.map((v) => { const o = document.createElement('option'); o.value = v; return o; }));
+  fillList('#dlSrc', SOURCES.map(([n]) => n)); fillList('#dlStand', STANDS); fillList('#dlOut', OUT_TYPES);
+  for (const [i, [name]] of TEMPLATES.entries()) { const o = document.createElement('option'); o.value = i; o.textContent = name; $('#tpl').append(o); }
+
+  function rowActs(list, i, redraw) {
+    const d = document.createElement('div'); d.className = 'acts wide';
+    for (const [t, lbl, fn] of [
+      ['↑', 'Move up', () => { if (i > 0) { [list[i - 1], list[i]] = [list[i], list[i - 1]]; redraw(i - 1); } }],
+      ['↓', 'Move down', () => { if (i < list.length - 1) { [list[i + 1], list[i]] = [list[i], list[i + 1]]; redraw(i + 1); } }],
+      ['×', 'Remove', () => { list.splice(i, 1); redraw(-1); }],
+    ]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = t; b.title = lbl; b.setAttribute('aria-label', `${lbl}, row ${i + 1}`); b.onclick = fn; d.append(b); }
+    return d;
+  }
+  function field(obj, k, label, max, opts = {}) {
+    const l = document.createElement('label'); if (opts.wide) l.className = 'wide';
+    const sp = document.createElement('span'); sp.textContent = label;
+    const inp = document.createElement('input'); inp.className = 'in'; inp.maxLength = max; inp.value = obj[k]; inp.setAttribute('aria-label', label);
+    if (opts.list) inp.setAttribute('list', opts.list);
+    if (opts.ph) inp.placeholder = opts.ph;
+    inp.oninput = () => { obj[k] = inp.value.slice(0, max); opts.on?.(inp); counts(); save(); };
+    l.append(sp, inp); return l;
+  }
+  function drawCh(focus) {
+    $('#chs').replaceChildren(...S.ch.map((c, i) => {
+      const r = document.createElement('div'); r.className = 'row';
+      const no = document.createElement('div'); no.className = 'no'; no.textContent = i + 1;
+      const ph = document.createElement('label'); ph.className = 'ph48';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!c.p48; cb.setAttribute('aria-label', `Phantom power, channel ${i + 1}`);
+      cb.onchange = () => { c.p48 = cb.checked ? 1 : 0; counts(); save(); };
+      ph.append(cb);
+      r.append(no,
+        field(c, 'n', 'Input', 40, { ph: 'Name' }),
+        field(c, 'src', 'Mic or DI', 40, { list: 'dlSrc', on: (inp) => { const p = P48.get(inp.value.trim().toLowerCase()); if (p != null) { c.p48 = p ? 1 : 0; cb.checked = p; } } }),
+        field(c, 'st', 'Stand', 24, { list: 'dlStand' }),
+        ph,
+        field(c, 'box', 'Box', 12),
+        field(c, 'note', 'Notes', 60, { wide: true }),
+        rowActs(S.ch, i, (f) => { drawCh(f); save(); }));
+      return r;
+    }));
+    if (!S.ch.length) { const p = document.createElement('p'); p.className = 'row small'; p.style.display = 'block'; p.textContent = 'No channels yet. Add one, or add a set of inputs.'; $('#chs').append(p); }
+    if (focus >= 0) $('#chs').children[focus]?.querySelector('input')?.focus();
+    counts();
+  }
+  function drawOut(focus) {
+    $('#outs').replaceChildren(...S.out.map((c, i) => {
+      const r = document.createElement('div'); r.className = 'row';
+      const no = document.createElement('div'); no.className = 'no'; no.textContent = i + 1;
+      r.append(no, field(c, 'n', 'Mix', 40, { ph: 'Name' }), field(c, 't', 'Type', 24, { list: 'dlOut' }), field(c, 'who', 'For', 40), field(c, 'note', 'Notes', 60, { wide: true }), rowActs(S.out, i, (f) => { drawOut(f); save(); }));
+      return r;
+    }));
+    if (focus >= 0) $('#outs').children[focus]?.querySelector('input')?.focus();
+    counts();
+  }
+  const isRF = (c) => /wireless|\brf\b|radio/i.test(c.src);
+  function counts() {
+    const n = S.ch.length, p = S.ch.filter((c) => c.p48).length, rf = S.ch.filter(isRF).length;
+    $('#chCount').textContent = n ? `${n} channel${n === 1 ? '' : 's'} · ${p} on 48V · ${rf} wireless` : '';
+    $('#outCount').textContent = S.out.length ? `${S.out.length} mix${S.out.length === 1 ? '' : 'es'}` : '';
+  }
+  $('#addCh').onclick = () => { if (S.ch.length >= 96) return; S.ch.push({ n: '', src: '', st: '', p48: 0, box: '', note: '' }); drawCh(S.ch.length - 1); save(); };
+  $('#addOut').onclick = () => { if (S.out.length >= 48) return; S.out.push({ n: '', t: '', who: '', note: '' }); drawOut(S.out.length - 1); save(); };
+  $('#tpl').onchange = () => {
+    const t = TEMPLATES[$('#tpl').value]; $('#tpl').value = ''; if (!t) return;
+    const start = S.ch.length;
+    for (const [n, src, st] of t[1]) if (S.ch.length < 96) S.ch.push({ n, src, st, p48: P48.get(src.toLowerCase()) ? 1 : 0, box: '', note: '' });
+    drawCh(-1); save();
+    $('#chs').children[start]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+
+  // ---- the stage plot ----
+  const THEMES = {
+    dark: { page: '#0b0c0e', stage: '#14151a', edge: '#393a44', grid: '#1f2026', fill: '#1d1e24', line: '#c5c6cf', soft: '#9495a0', text: '#f1f1f4', accent: '#ffb224', onAccent: '#0b0c0e', riser: '#191a20' },
+    light: { page: '#ffffff', stage: '#ffffff', edge: '#111111', grid: '#e7e7ea', fill: '#f2f2f4', line: '#222222', soft: '#666666', text: '#111111', accent: '#d48a00', onAccent: '#ffffff', riser: '#f7f7f8' },
+  };
+  const FONT = 'Inter, system-ui, -apple-system, Segoe UI, sans-serif';
+  const mk = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent?.append(e); return e; };
+  const size = (it) => (TYPES[it.t].size ? { w: it.w, d: it.d } : { w: TYPES[it.t].w, d: TYPES[it.t].d });
+  function extent(it) {
+    const { w, d } = size(it), a = (it.r * Math.PI) / 180, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    return { hx: (w * c + d * s) * 50, hy: (w * s + d * c) * 50 };
+  }
+
+  // One shape per type, centred on 0,0 in centimetres, with the front facing the audience (down).
+  function shape(g, it, th, fs) {
+    const { w: wm, d: dm } = size(it), w = wm * 100, d = dm * 100, sw = Math.max(1.5, fs * 0.09);
+    const base = { fill: th.fill, stroke: th.line, 'stroke-width': sw, 'stroke-linejoin': 'round' };
+    const rect = (x, y, ww, hh, extra = {}) => mk('rect', { x, y, width: ww, height: hh, ...base, ...extra }, g);
+    const circ = (cx, cy, r, extra = {}) => mk('circle', { cx, cy, r, ...base, ...extra }, g);
+    const path = (dd, extra = {}) => mk('path', { d: dd, ...base, ...extra }, g);
+    const txt = (t, y = 0, k = 0.62, extra = {}) => { const e = mk('text', { x: 0, y, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': FONT, 'font-size': fs * k, 'font-weight': 600, fill: th.line, ...extra }, g); e.textContent = t; return e; };
+    switch (it.t) {
+      case 'person': circ(0, 0, w / 2); path(`M${-w * 0.18} ${w * 0.38} L0 ${w * 0.56} L${w * 0.18} ${w * 0.38}`, { fill: th.line }); break;
+      case 'mic': circ(0, 0, w * 0.16, { fill: th.line }); path(`M0 0 L${w * 0.08} ${w * 0.46}`, { fill: 'none' }); circ(w * 0.08, w * 0.46, w * 0.07, { fill: th.accent, stroke: th.accent }); break;
+      case 'wedge': path(`M${-w / 2} ${d / 2} L${w / 2} ${d / 2} L${w * 0.32} ${-d / 2} L${-w * 0.32} ${-d / 2} Z`); path(`M${-w * 0.25} ${-d * 0.1} L${w * 0.25} ${-d * 0.1}`, { fill: 'none', stroke: th.soft }); break;
+      case 'iem': rect(-w / 2, -d / 2 + d * 0.15, w, d * 0.85, { rx: w * 0.12 }); path(`M${w * 0.28} ${-d / 2 + d * 0.15} L${w * 0.28} ${-d / 2 - d * 0.2}`, { fill: 'none' }); break;
+      case 'di': rect(-w / 2, -d / 2, w, d); txt('DI', 0, 0.48); break;
+      case 'power': rect(-w / 2, -d / 2, w, d, { fill: th.accent, stroke: th.accent }); path(`M${w * 0.06} ${-d * 0.36} L${-w * 0.16} ${d * 0.04} L${w * 0.02} ${d * 0.04} L${-w * 0.06} ${d * 0.36} L${w * 0.16} ${-d * 0.06} L${-w * 0.02} ${-d * 0.06} Z`, { fill: th.onAccent, stroke: 'none' }); break;
+      case 'drums': {
+        rect(-w / 2, -d / 2, w, d, { fill: 'none', stroke: th.soft, 'stroke-dasharray': `${sw * 3} ${sw * 2}` });
+        circ(0, d * 0.05, d * 0.2);
+        circ(-w * 0.17, -d * 0.2, d * 0.1); circ(w * 0.12, -d * 0.22, d * 0.11); circ(w * 0.3, d * 0.15, d * 0.14);
+        circ(-w * 0.3, d * 0.22, d * 0.1);
+        for (const [x, y, r] of [[-w * 0.37, -d * 0.3, d * 0.13], [w * 0.38, -d * 0.3, d * 0.15], [-w * 0.42, d * 0.02, d * 0.08]]) circ(x, y, r, { fill: 'none', stroke: th.soft });
+        break;
+      }
+      case 'keys': rect(-w / 2, -d / 2, w, d); for (let k = 1; k < 14; k++) path(`M${-w / 2 + (w * k) / 14} ${-d / 2 + d * 0.15} L${-w / 2 + (w * k) / 14} ${d / 2}`, { fill: 'none', stroke: th.soft, 'stroke-width': sw * 0.6 }); break;
+      case 'amp': rect(-w / 2, -d / 2, w, d); rect(-w * 0.4, -d * 0.05, w * 0.8, d * 0.4, { fill: 'none', stroke: th.soft }); break;
+      case 'lectern': path(`M${-w / 2} ${d / 2} L${w / 2} ${d / 2} L${w * 0.4} ${-d / 2} L${-w * 0.4} ${-d / 2} Z`); path(`M${-w * 0.3} ${-d * 0.2} L${w * 0.3} ${-d * 0.2}`, { fill: 'none', stroke: th.soft }); break;
+      case 'table': rect(-w / 2, -d / 2, w, d); break;
+      case 'chair': rect(-w * 0.4, -d * 0.3, w * 0.8, d * 0.7); rect(-w * 0.4, -d / 2, w * 0.8, d * 0.18, { fill: th.line }); break;
+      case 'speaker': rect(-w / 2, -d / 2, w, d); circ(0, d * 0.05, Math.min(w, d) * 0.3, { fill: 'none' }); break;
+      case 'box': rect(-w / 2, -d / 2, w, d); for (let k = 0; k < 4; k++) circ(-w * 0.3 + (w * 0.6 * k) / 3, 0, d * 0.1, { fill: th.line, stroke: 'none' }); break;
+      case 'riser': rect(-w / 2, -d / 2, w, d, { fill: th.riser, stroke: th.soft, 'stroke-dasharray': `${sw * 4} ${sw * 2.5}` }); break;
+      case 'screen': rect(-w / 2, -d / 2, w, d, { fill: th.line, stroke: th.line }); break;
+      case 'text': break;
+    }
+  }
+
+  function render(svg, th, live) {
+    const W = S.stage.w * 100, D = S.stage.d * 100;
+    const fs = Math.max(12, Math.max(W, D) / 46);
+    const pad = fs * 1.5, top = fs * 2.4, bot = fs * 2.6;
+    svg.setAttribute('viewBox', `${-pad} ${-top} ${W + pad * 2} ${D + top + bot}`);
+    svg.replaceChildren();
+    mk('rect', { x: -pad, y: -top, width: W + pad * 2, height: D + top + bot, fill: th.page }, svg);
+    mk('rect', { x: 0, y: 0, width: W, height: D, fill: th.stage }, svg);
+    const step = S.stage.u === 'ft' ? FT * 200 : 100;
+    const grid = mk('g', { stroke: th.grid, 'stroke-width': Math.max(1, fs * 0.05) }, svg);
+    for (let x = step; x < W - 1; x += step) mk('line', { x1: x, y1: 0, x2: x, y2: D }, grid);
+    for (let y = step; y < D - 1; y += step) mk('line', { x1: 0, y1: y, x2: W, y2: y }, grid);
+    mk('rect', { x: 0, y: 0, width: W, height: D, fill: 'none', stroke: th.edge, 'stroke-width': Math.max(2, fs * 0.14) }, svg);
+    const label = (t, x, y, anchor, extra = {}) => { const e = mk('text', { x, y, 'text-anchor': anchor, 'font-family': FONT, 'font-size': fs * 0.8, 'font-weight': 600, 'letter-spacing': fs * 0.12, fill: th.soft, ...extra }, svg); e.textContent = t; return e; };
+    label('UPSTAGE', W / 2, -fs * 0.8, 'middle');
+    label(`${lenTxt(S.stage.w)} × ${lenTxt(S.stage.d)}`.toUpperCase(), W, -fs * 0.8, 'end', { 'letter-spacing': fs * 0.04 });
+    label('DOWNSTAGE · AUDIENCE', W / 2, D + fs * 1.6, 'middle', { fill: th.text });
+    label('STAGE LEFT', W, D + fs * 1.6, 'end', { 'font-size': fs * 0.62 });
+    label('STAGE RIGHT', 0, D + fs * 1.6, 'start', { 'font-size': fs * 0.62 });
+
+    const order = S.items.map((it, i) => i).sort((a, b) => (S.items[a].t === 'riser' ? 0 : 1) - (S.items[b].t === 'riser' ? 0 : 1) || a - b);
+    for (const i of order) {
+      const it = S.items[i], cx = it.x * 100, cy = it.y * 100, { hx, hy } = extent(it);
+      const g = mk('g', live ? { 'data-i': i } : {}, svg);
+      const body = mk('g', { transform: `translate(${cx} ${cy}) rotate(${it.r})` }, g);
+      const { w, d } = size(it);
+      if (live) mk('rect', { x: -w * 50 - fs * 0.3, y: -d * 50 - fs * 0.3, width: w * 100 + fs * 0.6, height: d * 100 + fs * 0.6, fill: 'transparent' }, body);
+      shape(body, it, th, fs);
+      if (live && i === sel) mk('rect', { x: -w * 50 - fs * 0.25, y: -d * 50 - fs * 0.25, width: w * 100 + fs * 0.5, height: d * 100 + fs * 0.5, fill: 'none', stroke: th.accent, 'stroke-width': Math.max(1.5, fs * 0.1), 'stroke-dasharray': `${fs * 0.3} ${fs * 0.2}` }, body);
+      // label and channels stay upright
+      if (it.t === 'text') {
+        const e = mk('text', { x: cx, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': FONT, 'font-size': fs * 1.05, 'font-weight': 600, fill: th.text }, g);
+        e.textContent = it.l || 'Text';
+      } else {
+        let lbl = it.l;
+        if (it.t === 'riser' || it.t === 'table' || it.t === 'screen') if (!lbl) lbl = `${TYPES[it.t].name} ${lenShort(it.w)}×${lenShort(it.d)}`;
+        if (it.t === 'power' && !lbl) lbl = 'Power';
+        if (lbl) {
+          const inside = it.t === 'riser';
+          const e = mk('text', { x: cx, y: inside ? cy + hy - fs * 0.6 : cy + hy + fs * 0.95, 'text-anchor': 'middle', 'font-family': FONT, 'font-size': fs * 0.72, 'font-weight': 500, fill: inside ? th.soft : th.text }, g);
+          e.textContent = lbl;
+        }
+      }
+      if (it.c) {
+        const t = it.c, pw = Math.max(fs * 1.15, fs * 0.5 * t.length + fs * 0.6), ph = fs * 1.05;
+        const px = cx + hx - pw * 0.25, py = cy - hy - ph * 0.55;
+        mk('rect', { x: px - pw / 2, y: py - ph / 2, width: pw, height: ph, rx: ph / 2, fill: th.accent }, g);
+        const e = mk('text', { x: px, y: py, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': FONT, 'font-size': fs * 0.66, 'font-weight': 700, fill: th.onAccent }, g);
+        e.textContent = t;
+      }
+    }
+    return svg;
+  }
+
+  const svg = $('#svg');
+  const drawPlot = () => render(svg, THEMES.dark, true);
+  function pt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+  let drag = null;
+  svg.addEventListener('pointerdown', (e) => {
+    const g = e.target.closest('[data-i]');
+    if (!g) { if (sel !== -1) { sel = -1; drawPlot(); drawInsp(); } return; }
+    const i = Number(g.dataset.i), p = pt(e);
+    sel = i; drag = { id: e.pointerId, dx: S.items[i].x * 100 - p.x, dy: S.items[i].y * 100 - p.y, moved: false };
+    svg.setPointerCapture(e.pointerId); svg.classList.add('dragging');
+    drawPlot(); drawInsp(); svg.focus({ preventScroll: true });
+    e.preventDefault();
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id || sel < 0) return;
+    const p = pt(e), it = S.items[sel];
+    it.x = Math.min(S.stage.w, Math.max(0, (p.x + drag.dx) / 100));
+    it.y = Math.min(S.stage.d, Math.max(0, (p.y + drag.dy) / 100));
+    drag.moved = true; drawPlot();
+  });
+  const endDrag = (e) => { if (!drag || e.pointerId !== drag.id) return; drag = null; svg.classList.remove('dragging'); save(); };
+  svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel', endDrag);
+  svg.addEventListener('keydown', (e) => {
+    if (sel < 0) { if (e.key === 'Tab') return; if (S.items.length && e.key.startsWith('Arrow')) { sel = 0; drawPlot(); drawInsp(); e.preventDefault(); } return; }
+    const it = S.items[sel], st = e.shiftKey ? 0.5 : 0.1;
+    const mv = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, -st], ArrowDown: [0, st] }[e.key];
+    if (mv) { it.x = Math.min(S.stage.w, Math.max(0, it.x + mv[0])); it.y = Math.min(S.stage.d, Math.max(0, it.y + mv[1])); }
+    else if (e.key === 'r' || e.key === 'R') it.r = (it.r + (e.shiftKey ? 345 : 15)) % 360;
+    else if (e.key === 'Delete' || e.key === 'Backspace') { S.items.splice(sel, 1); sel = -1; }
+    else if (e.key === 'Escape') sel = -1;
+    else return;
+    e.preventDefault(); drawPlot(); drawInsp(); save();
+  });
+
+  function iconSvg(t) {
+    const s = document.createElementNS(NS, 'svg'), T = TYPES[t];
+    const it = { t, x: 0, y: 0, r: 0, w: T.w, d: T.d }, k = Math.max(T.w, T.d);
+    s.setAttribute('viewBox', `${-k * 60} ${-k * 45} ${k * 120} ${k * 90}`); s.setAttribute('aria-hidden', 'true');
+    const th = { ...THEMES.dark, fill: '#26272e' };
+    if (t === 'text') { const e = mk('text', { x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': FONT, 'font-size': k * 50, 'font-weight': 700, fill: th.line }, s); e.textContent = 'Aa'; }
+    else shape(s, it, th, k * 18);
+    return s;
+  }
+  for (const [t, T] of Object.entries(TYPES)) {
+    const b = document.createElement('button'); b.type = 'button'; b.title = `Add a ${T.name.toLowerCase()}`;
+    const sp = document.createElement('span'); sp.textContent = T.name;
+    b.append(iconSvg(t), sp);
+    b.onclick = () => {
+      if (S.items.length >= 150) return;
+      const n = S.items.length % 6, it = { t, x: S.stage.w / 2 + (n - 2.5) * 0.3, y: S.stage.d / 2 + (n % 3 - 1) * 0.3, r: 0, l: t === 'text' ? 'Text' : '', c: '' };
+      if (T.size) { it.w = T.w; it.d = T.d; }
+      it.x = Math.min(S.stage.w, Math.max(0, it.x)); it.y = Math.min(S.stage.d, Math.max(0, it.y));
+      S.items.push(it); sel = S.items.length - 1; drawPlot(); drawInsp(); save();
+      if (matchMedia('(max-width: 960px)').matches) svg.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    $('#pal').append(b);
+  }
+
+  function drawInsp() {
+    const p = $('#insp');
+    if (sel < 0 || !S.items[sel]) {
+      p.innerHTML = '<h3>Selected</h3><p class="hint">Click something on the plot to name it, give it channel numbers, turn it or remove it. With the plot selected, the arrow keys move it, R turns it and Delete removes it.</p>';
+      return;
+    }
+    const it = S.items[sel], T = TYPES[it.t];
+    p.innerHTML = `<h3></h3>
+      <label class="fld"><span>Label</span><input class="in" id="iL" maxlength="40"></label>
+      <label class="fld"><span>Channels</span><input class="in" id="iC" maxlength="20" placeholder="e.g. 3 or 9-10"></label>
+      <div class="two" id="iSz"><label class="fld"><span></span><input class="in" id="iW" type="number" inputmode="decimal" step="any" min="0.1"></label><label class="fld"><span></span><input class="in" id="iD" type="number" inputmode="decimal" step="any" min="0.1"></label></div>
+      <div class="btns"><button type="button" class="btn xs" id="iRl" title="Turn left" aria-label="Turn left">↺ 15°</button><button type="button" class="btn xs" id="iRr" title="Turn right" aria-label="Turn right">↻ 15°</button><button type="button" class="btn xs" id="iDup">Duplicate</button><button type="button" class="btn xs" id="iDel">Remove</button></div>`;
+    p.querySelector('h3').textContent = T.name;
+    const L = p.querySelector('#iL'), C = p.querySelector('#iC');
+    L.value = it.l; C.value = it.c;
+    if (it.t === 'riser') L.placeholder = 'e.g. Drum riser';
+    L.oninput = () => { it.l = L.value.slice(0, 40); drawPlot(); save(); };
+    C.oninput = () => { it.c = C.value.slice(0, 20); drawPlot(); save(); };
+    if (T.size) {
+      const u = S.stage.u === 'ft' ? 'ft' : 'm';
+      p.querySelector('#iW').previousElementSibling.textContent = `Width (${u})`;
+      p.querySelector('#iD').previousElementSibling.textContent = `Depth (${u})`;
+      for (const [id, k, lo, hi] of [['#iW', 'w', 0.2, 40], ['#iD', 'd', 0.1, 40]]) {
+        const inp = p.querySelector(id); inp.value = round(toU(it[k]), 2);
+        inp.oninput = () => { const v = fromU(Number(inp.value)); if (Number.isFinite(v) && v >= lo && v <= hi) { it[k] = v; drawPlot(); save(); } };
+      }
+    } else p.querySelector('#iSz').remove();
+    p.querySelector('#iRl').onclick = () => { it.r = (it.r + 345) % 360; drawPlot(); save(); };
+    p.querySelector('#iRr').onclick = () => { it.r = (it.r + 15) % 360; drawPlot(); save(); };
+    p.querySelector('#iDup').onclick = () => { if (S.items.length >= 150) return; const c = { ...it, x: Math.min(S.stage.w, it.x + 0.5), y: Math.min(S.stage.d, it.y) }; S.items.push(c); sel = S.items.length - 1; drawPlot(); drawInsp(); save(); };
+    p.querySelector('#iDel').onclick = () => { S.items.splice(sel, 1); sel = -1; drawPlot(); drawInsp(); save(); };
+  }
+
+  // stage size
+  function drawStage() { $('#stW').value = round(toU(S.stage.w), 2); $('#stD').value = round(toU(S.stage.d), 2); $('#stU').value = S.stage.u; }
+  for (const [id, k, lo, hi] of [['#stW', 'w', 2, 100], ['#stD', 'd', 2, 60]]) {
+    $(id).oninput = () => {
+      const v = fromU(Number($(id).value)); if (!Number.isFinite(v) || v < lo || v > hi) return;
+      S.stage[k] = v;
+      for (const it of S.items) { it.x = Math.min(S.stage.w, it.x); it.y = Math.min(S.stage.d, it.y); }
+      drawPlot(); save();
+    };
+    $(id).onblur = drawStage;
+  }
+  $('#stU').onchange = () => { S.stage.u = $('#stU').value; drawStage(); drawPlot(); drawInsp(); save(); };
+
+  // ---- output ----
+  const msg = (t) => { $('#msg').textContent = t; };
+  async function copy(text, done) {
+    try { await navigator.clipboard.writeText(text); msg(done); }
+    catch { window.prompt('Copy this:', text); }
+  }
+  function download(name, blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  const slug = () => (S.show.name || 'show').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'show';
+  const dateTxt = () => { if (!S.show.date) return ''; const d = new Date(`${S.show.date}T12:00:00`); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); };
+
+  function buildSheet() {
+    const sh = $('#sheet'); sh.replaceChildren();
+    const el = (tag, cls, text, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; parent?.append(e); return e; };
+    const topEl = el('div', 'sh-top', null, sh);
+    const l = el('div', null, null, topEl);
+    el('h1', null, S.show.name || 'Input list & stage plot', l);
+    el('div', 'sh-sub', [S.show.venue, dateTxt()].filter(Boolean).join(' · ') || ' ', l);
+    const r = el('div', 'sh-who', null, topEl);
+    if (S.show.a1 || S.show.tel) { el('b', null, 'Audio contact', r); el('div', null, S.show.a1, r); el('div', null, S.show.tel, r); }
+    if (S.items.length) { const p = el('div', 'sh-plot', null, sh); p.append(render(document.createElementNS(NS, 'svg'), THEMES.light, false)); }
+    if (S.ch.length) {
+      const n = S.ch.length, p48 = S.ch.filter((c) => c.p48).length, rf = S.ch.filter(isRF).length;
+      el('h2', null, `Inputs · ${n} channel${n === 1 ? '' : 's'}, ${p48} on 48V, ${rf} wireless`, sh);
+      const showBox = S.ch.some((c) => c.box);
+      const t = el('table', null, null, sh), hr = el('tr', null, null, el('thead', null, null, t));
+      for (const h of ['Ch', 'Input', 'Mic or DI', 'Stand', '48V', ...(showBox ? ['Box'] : []), 'Notes']) el('th', null, h, hr);
+      const tb = el('tbody', null, null, t);
+      S.ch.forEach((c, i) => { const tr = el('tr', null, null, tb); el('td', 'c', i + 1, tr); el('td', null, c.n, tr); el('td', null, c.src, tr); el('td', null, c.st, tr); el('td', 'p', c.p48 ? '48V' : '', tr); if (showBox) el('td', null, c.box, tr); el('td', null, c.note, tr); });
+    }
+    if (S.out.length) {
+      el('h2', null, 'Mixes', sh);
+      const t = el('table', null, null, sh), hr = el('tr', null, null, el('thead', null, null, t));
+      for (const h of ['#', 'Mix', 'Type', 'For', 'Notes']) el('th', null, h, hr);
+      const tb = el('tbody', null, null, t);
+      S.out.forEach((c, i) => { const tr = el('tr', null, null, tb); el('td', 'c', i + 1, tr); el('td', null, c.n, tr); el('td', null, c.t, tr); el('td', null, c.who, tr); el('td', null, c.note, tr); });
+    }
+    el('div', 'sh-foot', `Made with the free Input List & Stage Plot Builder · showcallerstudio.com/input-list · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, sh);
+  }
+  window.addEventListener('beforeprint', buildSheet);
+  $('#pdf').onclick = () => {
+    buildSheet();
+    const t = document.title; document.title = `${S.show.name || 'Input list'} - input list and stage plot`;
+    window.print(); setTimeout(() => { document.title = t; }, 1000);
+  };
+
+  const csvCell = (v) => (/[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+  $('#csv').onclick = () => {
+    const rows = [['Ch', 'Input', 'Mic or DI', 'Stand', '48V', 'Box', 'Notes'], ...S.ch.map((c, i) => [i + 1, c.n, c.src, c.st, c.p48 ? 'Yes' : '', c.box, c.note])];
+    download(`${slug()}-inputs.csv`, new Blob(['﻿' + rows.map((r) => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv' }));
+    msg('CSV downloaded.');
+  };
+  $('#png').onclick = () => {
+    const s = render(document.createElementNS(NS, 'svg'), THEMES.light, false);
+    s.setAttribute('xmlns', NS);
+    const [, , vw, vh] = s.getAttribute('viewBox').split(' ').map(Number), W = 2400, H = Math.round((W * vh) / vw);
+    s.setAttribute('width', W); s.setAttribute('height', H);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.drawImage(img, 0, 0, W, H);
+      c.toBlob((b) => { download(`${slug()}-stage-plot.png`, b); msg('Stage plot downloaded.'); }, 'image/png');
+    };
+    img.onerror = () => msg('Your browser could not make the picture. Use Download PDF instead.');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(s));
+  };
+  function asText() {
+    const pad = (s, n) => String(s).padEnd(n);
+    const lines = [S.show.name || 'Input list', [S.show.venue, dateTxt()].filter(Boolean).join(' · '), (S.show.a1 || S.show.tel) ? `Audio: ${[S.show.a1, S.show.tel].filter(Boolean).join(', ')}` : '', ''].filter((x, i) => x || i === 3);
+    if (S.ch.length) {
+      lines.push(`INPUTS (${S.ch.length} channels, ${S.ch.filter((c) => c.p48).length} on 48V, ${S.ch.filter(isRF).length} wireless)`);
+      S.ch.forEach((c, i) => lines.push(`${pad(i + 1, 3)} ${pad(c.n, 18)} ${pad(c.src, 20)} ${pad(c.st, 11)} ${c.p48 ? '48V' : '   '}${c.box ? ` box ${c.box}` : ''}${c.note ? `  ${c.note}` : ''}`.trimEnd()));
+      lines.push('');
+    }
+    if (S.out.length) { lines.push('MIXES'); S.out.forEach((c, i) => lines.push(`${pad(i + 1, 3)} ${pad(c.n, 18)} ${pad(c.t, 12)} ${c.who}${c.note ? `  ${c.note}` : ''}`.trimEnd())); lines.push(''); }
+    return lines.join('\n');
+  }
+  $('#copyText').onclick = async () => copy(`${asText()}Stage plot and the full list: ${await shareUrl()}`, 'Copied as text.');
+  $('#copyLink').onclick = async () => copy(await shareUrl(), 'Link copied.');
+  function load(o) { S = clean(o); sel = -1; drawAll(); save(); }
+  $('#example').onclick = () => { if (confirm('Replace this show with the example?')) { load(EXAMPLE); msg('Example loaded.'); } };
+  $('#blank').onclick = () => { if (confirm('Start a new, empty show? Copy the link first if you want to keep this one.')) { load(BLANK); msg('New show started.'); } };
+
+  function drawAll() { drawShow(); drawCh(-1); drawOut(-1); drawStage(); drawPlot(); drawInsp(); }
+
+  // ---- start: the link, then this browser's last show, then the example ----
+  (async () => {
+    let from = null;
+    const h = location.hash.match(/^#p=([A-Za-z0-9_-]+)/);
+    if (h) { try { from = await unpack(h[1]); } catch { msg('That link looks damaged, so the example is shown instead.'); } }
+    if (!from) { try { const s = localStorage.getItem('showcaller-input-list'); if (s) from = JSON.parse(s); } catch {} }
+    S = clean(from || EXAMPLE);
+    drawAll();
+    if (from) save();
+  })();
+  window.addEventListener('hashchange', async () => { const h = location.hash.match(/^#p=([A-Za-z0-9_-]+)/); if (h && h[1] !== packed) { try { load(await unpack(h[1])); } catch {} } });
+})();
+</script>
+</body>
+</html>
