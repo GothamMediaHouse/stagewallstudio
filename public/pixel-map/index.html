@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pixel Map Maker: every LED screen on one output | Showcaller</title>
+<meta name="description" content="Free pixel map maker for LED walls: lay out several screens on one media server output, take out panels that aren't fitted, add data path arrows, and download the pixel map PNG at the output's exact resolution.">
+<link rel="canonical" href="https://showcallerstudio.com/pixel-map/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pixel Map Maker, free">
+<meta property="og:description" content="Every LED screen on the set on one output, with panel numbers, positions and data paths. Download the PNG.">
+<meta property="og:url" content="https://showcallerstudio.com/pixel-map/">
+<meta property="og:image" content="https://showcallerstudio.com/media/led-sc.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Same look as the home page (copied from index.html), plus the maker's own rules at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut: clamp(20px, 4vw, 40px);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -.03em; }
+h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s, transform .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+
+/* top bar */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body, Inter, sans-serif); letter-spacing: .42em; text-transform: uppercase; color: #ffb224; padding-left: 1px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* opener */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: 20%; width: min(1100px, 120vw); height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .13), rgba(255, 178, 36, 0)); pointer-events: none; }
+.hero .wrap { position: relative; display: flex; flex-direction: column; gap: 18px; padding-block: clamp(44px, 6vw, 76px) clamp(28px, 4vw, 44px); }
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(56px, 7vw, 96px); display: flex; flex-direction: column; gap: clamp(26px, 3.5vw, 40px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+ul.ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--soft); font-size: 16px; }
+ul.ticks li { padding-left: 26px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 11px; height: 5px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 22px 48px; align-items: center; justify-content: space-between; }
+.trial .txt { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.trial .txt p { color: var(--soft); }
+.trial .go { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px; }
+[hidden] { display: none !important; }
+
+/* questions */
+.faq { display: flex; flex-direction: column; max-width: 860px; }
+details { border-top: 1px solid var(--line2); }
+details:last-child { border-bottom: 1px solid var(--line2); }
+summary { cursor: pointer; padding: 22px 40px 22px 0; font: 600 19px var(--display); letter-spacing: -.01em; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; right: 6px; top: 30px; width: 10px; height: 10px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); transition: transform .2s; }
+details[open] summary::after { transform: rotate(-135deg); top: 35px; }
+details p { color: var(--soft); padding: 0 40px 24px 0; }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+
+/* Pixel Map Maker */
+*, *::before, *::after { box-sizing: border-box; }
+.maker { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(20px, 3vw, 36px); align-items: start; }
+@media (max-width: 900px) { .maker { grid-template-columns: minmax(0, 1fr); } }
+.side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
+@media (max-width: 900px) { .side { position: static; } }
+.inputs { border: 1px solid var(--line2); background: var(--panel); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+.inputs h3 { grid-column: 1 / -1; font-size: 16px; }
+.inputs .full { grid-column: 1 / -1; }
+.inputs label { display: grid; gap: 6px; font-size: 14px; color: var(--soft); min-width: 0; }
+.inputs input, .inputs select { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 10px 11px; width: 100%; min-width: 0; border-radius: 0; }
+.inputs select { appearance: none; -webkit-appearance: none; padding-right: 34px; background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+.inputs input:focus, .inputs select:focus { outline: none; border-color: var(--accent); }
+.inputs .note { grid-column: 1 / -1; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.list { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; }
+.chip { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; width: 100%; font: 500 14.5px/1.3 var(--body); color: var(--soft); background: var(--bg); border: 1px solid var(--line2); padding: 9px 11px; cursor: pointer; }
+.chip i { width: 14px; height: 14px; display: block; }
+.chip b { color: var(--fg); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip span { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-ground); }
+.chip:hover { border-color: var(--soft); }
+.btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.btn.xs { min-height: 40px; padding: 0 14px; font-size: 14px; }
+.btn.danger:hover { border-color: #ff7a6b; color: #ff9b8f; }
+.out { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+.big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.big b { font: 600 clamp(28px, 3.4vw, 40px)/1.05 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.big span { color: var(--soft); font-size: 16px; }
+.seg { display: flex; border: 1px solid var(--line2); }
+.seg button { font: 600 14px var(--body); color: var(--soft); background: transparent; border: 0; padding: 10px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line2); }
+.seg button[aria-pressed="true"] { background: var(--accent-ground); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.preview { border: 1px solid var(--line2); background: #000; display: flex; justify-content: center; align-items: center; padding: 10px; touch-action: none; }
+.preview canvas { display: block; max-width: 100%; height: auto; cursor: grab; }
+.preview.panels canvas { cursor: crosshair; }
+.preview canvas.dragging { cursor: grabbing; }
+.hint { font-size: 14px; color: var(--muted); }
+.warn { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; font-size: 14.5px; color: var(--soft); margin: 0; }
+.warn.bad { border-left-color: #ff7a6b; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th { font: 600 11.5px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl td i { display: inline-block; width: 10px; height: 10px; margin-right: 8px; }
+.box { border: 1px solid var(--line2); background: var(--panel); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.box h3 { font-size: 18px; }
+.box .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+textarea.sum { font: 400 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--soft); background: var(--bg); border: 1px solid var(--line2); padding: 12px; width: 100%; min-height: 150px; resize: vertical; }
+#msg { font-size: 14.5px; color: var(--soft); }
+.cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px 40px; }
+.cols2 div { display: flex; flex-direction: column; gap: 8px; }
+.cols2 p { color: var(--soft); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav>
+      <a href="#maker">Pixel map</a>
+      <a href="#notes">How it works</a>
+      <a href="/led-wall-calculator/">LED calculator</a>
+      <a href="/tools/">Free tools</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top" style="border-top:0">
+  <div class="wrap">
+    <div class="eyebrow">Free tool · LED walls</div>
+    <h1>Pixel map maker</h1>
+    <p class="lede">Lay out every screen on the set on one output: the main wall, the side screens, the desk front. Drag them into place, take out panels that aren't fitted, and download the pixel map at the output's exact resolution.</p>
+  </div>
+</section>
+
+<section id="maker" style="border-top:0">
+  <div class="wrap" style="padding-top:0">
+    <div class="maker">
+      <div class="side">
+        <form class="inputs" id="fOut" novalidate onsubmit="return false">
+          <h3>Output</h3>
+          <label class="full">Output size<select id="out">
+            <option value="1920x1080">1920 × 1080 (HD)</option>
+            <option value="3840x2160">3840 × 2160 (4K UHD)</option>
+            <option value="3840x1080">3840 × 1080 (two HD side by side)</option>
+            <option value="7680x2160">7680 × 2160 (two 4K side by side)</option>
+            <option value="4096x2160">4096 × 2160 (DCI 4K)</option>
+            <option value="custom">Custom…</option>
+          </select></label>
+          <label id="owL">Width<input id="ow" type="number" inputmode="numeric" min="64" max="16384" step="1"></label>
+          <label id="ohL">Height<input id="oh" type="number" inputmode="numeric" min="64" max="16384" step="1"></label>
+        </form>
+
+        <form class="inputs" id="fScr" novalidate onsubmit="return false">
+          <h3>Screens</h3>
+          <div class="list" id="list"></div>
+          <div class="btns">
+            <button type="button" class="btn xs" id="add">Add a screen</button>
+            <button type="button" class="btn xs" id="arrange">Arrange them</button>
+          </div>
+          <label class="full">Name<input id="sn" maxlength="40" autocomplete="off"></label>
+          <label class="full">Panel<select id="sp"></select></label>
+          <label id="scxL" hidden>Pixels wide<input id="scx" type="number" inputmode="numeric" min="1" max="4096" step="1"></label>
+          <label id="scyL" hidden>Pixels high<input id="scy" type="number" inputmode="numeric" min="1" max="4096" step="1"></label>
+          <label>Columns<input id="sc" type="number" inputmode="numeric" min="1" max="200" step="1"></label>
+          <label>Rows<input id="sr" type="number" inputmode="numeric" min="1" max="200" step="1"></label>
+          <label>X (left)<input id="sx" type="number" inputmode="numeric" min="0" step="1"></label>
+          <label>Y (top)<input id="sy" type="number" inputmode="numeric" min="0" step="1"></label>
+          <label class="full">Data path arrows<select id="spath">
+            <option value="">None</option>
+            <option value="rtl">Rows, from top left</option>
+            <option value="rbl">Rows, from bottom left</option>
+            <option value="ctl">Columns, from top left</option>
+            <option value="cbl">Columns, from bottom left</option>
+          </select></label>
+          <p class="note" id="sNote"></p>
+          <div class="btns">
+            <button type="button" class="btn xs" id="dup">Duplicate</button>
+            <button type="button" class="btn xs" id="fill">Put back all panels</button>
+            <button type="button" class="btn xs danger" id="del">Remove screen</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="out">
+        <div class="bar">
+          <div class="big"><b id="oRes">3840 × 2160</b><span id="oSub"></span></div>
+          <div class="seg" role="group" aria-label="What a click on the map does">
+            <button type="button" id="mMove" aria-pressed="true">Move screens</button>
+            <button type="button" id="mPanels" aria-pressed="false">Take out panels</button>
+          </div>
+        </div>
+        <div class="preview" id="pvBox"><canvas id="pv" width="640" height="360" aria-label="Preview of the pixel map. Drag a screen to move it."></canvas></div>
+        <p class="hint" id="hint">Drag a screen to move it. It snaps to the edges of the output and of the other screens.</p>
+        <div id="warns" aria-live="polite"></div>
+        <div class="tbl"><table><thead><tr><th>Screen</th><th>Size</th><th>X, Y</th><th>Panels</th><th>Pitch</th></tr></thead><tbody id="rows"></tbody></table></div>
+
+        <div class="box">
+          <h3>Download and share</h3>
+          <p class="small">The PNG is the full output at its exact resolution, one pixel per LED. Play it full screen out of the media server: every panel shows its screen letter and column-row, and the corner numbers are the pixel position to type into the processor.</p>
+          <div class="row">
+            <button type="button" class="btn primary" id="dl">Download pixel map</button>
+            <button type="button" class="btn" id="copySum">Copy the screen list</button>
+            <button type="button" class="btn" id="copyLink">Copy link</button>
+            <span id="msg" role="status"></span>
+          </div>
+          <textarea class="sum" id="sum" readonly aria-label="The screen list"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="trial">
+      <div class="txt">
+        <div class="eyebrow">Showcaller Studio</div>
+        <h2 style="font-size:clamp(24px,2.6vw,32px)">Playing content to these screens?</h2>
+        <p>Showcaller Studio maps every screen on the set, plays looks and cues, and runs from your phone. Start a free trial.</p>
+      </div>
+      <div class="go">
+        <a class="btn primary" href="/#pricing">Start a free trial</a>
+        <a class="btn" href="/#contact">Book a demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="notes">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">How it works</div><h2>One output, every screen.</h2></div>
+    <div class="cols2">
+      <div><h3>The output</h3><p>Most shows feed several LED screens from one media server output. The processor takes a piece of that output for each screen. The output size is the canvas everything has to fit on.</p></div>
+      <div><h3>Screens</h3><p>Each screen is a grid of panels. Its size in pixels is the panel's pixels times the columns and rows. Its X and Y are the pixel position of its top-left corner on the output, which is what you type into the processor.</p></div>
+      <div><h3>Panels that aren't there</h3><p>Switch to Take out panels and click a panel to remove it, for a stepped edge, a doorway or a wall built around a set piece. Its pixels go black on the map, and the data path arrows skip it.</p></div>
+      <div><h3>Single walls</h3><p>For one wall's resolution, power, circuits, ports and weight, use the <a href="/led-wall-calculator/">LED Wall Calculator</a>. It makes a pixel map and a test card for a single wall too.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">A free tool from <a href="/">Showcaller Studio</a>.</span></div></footer>
+
+<script src="/led-panels.js"></script>
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const PANELS = window.LED_PANELS, CUSTOM = 'custom';
+  const COLORS = [['#1f4f8f', '#2a64ad'], ['#2b7a5f', '#36946f'], ['#86304f', '#a3405f'], ['#9a5b17', '#b56d1d'], ['#5a3d8f', '#6f4fae'], ['#2f6f7f', '#3a879a'], ['#7a6a1f', '#958229'], ['#7f2f2f', '#9b3b3b']];
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const MAX_SCREENS = 26;
+
+  // ---- state; the page address carries it so a link opens the same layout ----
+  const DEFAULT = { w: 3840, h: 2160, s: [
+    { n: 'Left IMAG', p: 'bp2v2', c: 4, r: 6, x: 0, y: 0, path: '', off: [] },
+    { n: 'Main wall', p: 'bp2v2', c: 10, r: 6, x: 704, y: 0, path: 'rtl', off: [] },
+    { n: 'Right IMAG', p: 'bp2v2', c: 4, r: 6, x: 2464, y: 0, path: '', off: [] },
+    { n: 'Desk front', p: 'cb5mk2h', c: 8, r: 1, x: 0, y: 1056, path: '', off: [] },
+  ] };
+  let S = JSON.parse(JSON.stringify(DEFAULT)), sel = 1, mode = 'move', outCustom = false;
+  const int = (v, d, lo, hi) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= lo && n <= hi ? n : d; };
+  function clean(o) {
+    const w = int(o?.w, 3840, 64, 16384), h = int(o?.h, 2160, 64, 16384);
+    const s = (Array.isArray(o?.s) ? o.s : []).slice(0, MAX_SCREENS).map((a) => {
+      const p = a.p === CUSTOM || PANELS.some((x) => x.id === a.p) ? a.p : 'g26';
+      const c = int(a.c, 4, 1, 200), r = int(a.r, 4, 1, 200);
+      return { n: String(a.n || '').slice(0, 40), p, c, r, x: int(a.x, 0, 0, 16384), y: int(a.y, 0, 0, 16384), path: ['rtl', 'rbl', 'ctl', 'cbl'].includes(a.path) ? a.path : '',
+        off: [...new Set((Array.isArray(a.off) ? a.off : []).map(Number).filter((i) => Number.isInteger(i) && i >= 0 && i < c * r))],
+        cx: int(a.cx, 128, 1, 4096), cy: int(a.cy, 128, 1, 4096) };
+    });
+    return { w, h, s };
+  }
+  try {
+    const d = new URLSearchParams(location.search).get('d');
+    if (d) S = clean(JSON.parse(decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))))));
+    else S = clean(S);
+  } catch { S = clean(DEFAULT); }
+  sel = Math.min(sel, S.s.length - 1);
+  const encode = () => btoa(unescape(encodeURIComponent(JSON.stringify({ w: S.w, h: S.h, s: S.s.map((a) => { const o = { ...a }; if (o.p !== CUSTOM) { delete o.cx; delete o.cy; } if (!o.off.length) delete o.off; if (!o.path) delete o.path; return o; }) })))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const shareUrl = () => `${location.origin}${location.pathname}?d=${encode()}`;
+
+  const panelOf = (a) => (a.p === CUSTOM ? { id: CUSTOM, make: 'Custom', name: `${a.cx} × ${a.cy} px panel`, px: [a.cx, a.cy], mm: null } : PANELS.find((x) => x.id === a.p));
+  const geo = (a) => { const P = panelOf(a); return { P, pw: P.px[0], ph: P.px[1], W: P.px[0] * a.c, H: P.px[1] * a.r }; };
+  const n0 = (n) => Math.round(n).toLocaleString('en-US');
+  const letter = (i) => LETTERS[i] || '?';
+  const label = (a, i) => a.n || `Screen ${letter(i)}`;
+
+  // ---- panel list ----
+  const sp = $('#sp'), groups = {};
+  for (const p of PANELS) {
+    if (!groups[p.make]) { groups[p.make] = document.createElement('optgroup'); groups[p.make].label = p.make; sp.append(groups[p.make]); }
+    const o = document.createElement('option'); o.value = p.id; o.textContent = `${p.generic ? 'Generic' : p.make} ${p.name}`; groups[p.make].append(o);
+  }
+  { const o = document.createElement('option'); o.value = CUSTOM; o.textContent = 'Custom (pixels only)…'; sp.append(o); }
+
+  // ---- drawing ----
+  function order(c, r, path) {
+    const out = [], byRow = path[0] === 'r', fromBottom = path[1] === 'b', outer = byRow ? r : c, inner = byRow ? c : r;
+    for (let a = 0; a < outer; a++) for (let b0 = 0; b0 < inner; b0++) {
+      const b = a % 2 ? inner - 1 - b0 : b0;
+      out.push(byRow ? [b, fromBottom ? r - 1 - a : a] : [a, fromBottom ? r - 1 - b : b]);
+    }
+    return out;
+  }
+  function arrow(ctx, x1, y1, x2, y2, s) {
+    const a = Math.atan2(y2 - y1, x2 - x1), mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    ctx.beginPath();
+    ctx.moveTo(mx + Math.cos(a) * s, my + Math.sin(a) * s);
+    ctx.lineTo(mx + Math.cos(a + 2.5) * s, my + Math.sin(a + 2.5) * s);
+    ctx.lineTo(mx + Math.cos(a - 2.5) * s, my + Math.sin(a - 2.5) * s);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  function drawScreen(ctx, a, i, preview) {
+    const { pw, ph, W, H } = geo(a), off = new Set(a.off), col = COLORS[i % COLORS.length];
+    const lw = Math.max(1, Math.round(Math.min(pw, ph) / 64));
+    const fs = Math.max(8, Math.round(Math.min(pw, ph) * 0.18)), fsS = Math.round(fs * 0.5);
+    for (let r = 0; r < a.r; r++) for (let c = 0; c < a.c; c++) {
+      const px = a.x + c * pw, py = a.y + r * ph;
+      if (off.has(r * a.c + c)) {
+        if (preview) { ctx.save(); ctx.setLineDash([lw * 4, lw * 4]); ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = lw; ctx.strokeRect(px + lw / 2, py + lw / 2, pw - lw, ph - lw); ctx.restore(); }
+        continue;
+      }
+      ctx.fillStyle = col[(r + c) % 2]; ctx.fillRect(px, py, pw, ph);
+      ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = lw; ctx.strokeRect(px + lw / 2, py + lw / 2, pw - lw, ph - lw);
+      ctx.fillStyle = '#ffffff'; ctx.font = `700 ${fs}px Inter, Arial, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(`${letter(i)}${c + 1}-${r + 1}`, px + pw / 2, py + ph / 2, pw - lw * 4);
+      if (fsS >= 8) {
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `500 ${fsS}px Inter, Arial, sans-serif`; ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillText(`${px},${py}`, px + lw * 3, py + lw * 3, pw - lw * 6);
+      }
+    }
+    if (a.path) {
+      const o = order(a.c, a.r, a.path).filter(([c, r]) => !off.has(r * a.c + c)), s = Math.max(4, Math.min(pw, ph) * 0.12);
+      const edge = (k, n) => (n > 1 && k === 0 ? 0.12 : n > 1 && k === n - 1 ? 0.88 : 0.5);
+      const pt = a.path[0] === 'r' ? ([c, r]) => [a.x + c * pw + pw * edge(c, a.c), a.y + r * ph + ph * 0.8] : ([c, r]) => [a.x + c * pw + pw * 0.86, a.y + r * ph + ph * edge(r, a.r)];
+      if (o.length) {
+        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        ctx.beginPath(); o.forEach((p, k) => { const [X, Y] = pt(p); k ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); });
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = lw * 5; ctx.stroke();
+        ctx.strokeStyle = '#ffd400'; ctx.lineWidth = lw * 2.5; ctx.stroke();
+        ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#000000'; ctx.lineWidth = lw;
+        for (let k = 1; k < o.length; k++) { const [x1, y1] = pt(o[k - 1]), [x2, y2] = pt(o[k]); arrow(ctx, x1, y1, x2, y2, s); }
+        const [sx, sy] = pt(o[0]); ctx.beginPath(); ctx.arc(sx, sy, s * 0.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+    }
+    // the screen's name and where it sits, in the middle
+    const f1 = Math.max(12, Math.round(Math.min(W, H) * 0.12)), f2 = Math.max(9, Math.round(f1 * 0.42));
+    const l1 = `${letter(i)}  ${label(a, i)}`, l2 = `${W} × ${H} at ${a.x}, ${a.y}`;
+    ctx.font = `700 ${f1}px Inter, Arial, sans-serif`; const w1 = ctx.measureText(l1).width;
+    ctx.font = `600 ${f2}px Inter, Arial, sans-serif`; const w2 = ctx.measureText(l2).width;
+    const bw = Math.min(W - lw * 4, Math.max(w1, w2) + f1), bh = f1 * 1.25 + f2 * 1.6, cx = a.x + W / 2, cy = a.y + H / 2;
+    if (bw > 20 && bh < H) {
+      ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(cx - bw / 2, cy - bh / 2, bw, bh);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff'; ctx.font = `700 ${f1}px Inter, Arial, sans-serif`; ctx.fillText(l1, cx, cy - bh / 2 + f1 * 0.7, bw - f1 * 0.4);
+      ctx.fillStyle = '#ffd34d'; ctx.font = `600 ${f2}px Inter, Arial, sans-serif`; ctx.fillText(l2, cx, cy + bh / 2 - f2 * 0.95, bw - f1 * 0.4);
+    }
+  }
+  function draw(ctx, preview, k) {
+    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, S.w, S.h);
+    if (preview) {
+      // a faint grid, so the empty output reads as a canvas
+      ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1 / k; ctx.beginPath();
+      for (let x = 120; x < S.w; x += 120) { ctx.moveTo(x, 0); ctx.lineTo(x, S.h); }
+      for (let y = 120; y < S.h; y += 120) { ctx.moveTo(0, y); ctx.lineTo(S.w, y); }
+      ctx.stroke();
+    }
+    S.s.forEach((a, i) => drawScreen(ctx, a, i, preview));
+    if (preview && S.s[sel]) {
+      const a = S.s[sel], g = geo(a);
+      ctx.strokeStyle = '#ffb224'; ctx.lineWidth = 3 / k; ctx.strokeRect(a.x, a.y, g.W, g.H);
+    }
+    if (preview) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1 / k; ctx.strokeRect(0, 0, S.w, S.h); }
+  }
+
+  // ---- preview ----
+  const pv = $('#pv');
+  let scale = 1;
+  function preview() {
+    const box = pv.parentElement.clientWidth - 22, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const maxH = Math.min(560, window.innerHeight * 0.6);
+    scale = Math.min(box / S.w, maxH / S.h);
+    const cw = Math.max(1, Math.round(S.w * scale)), ch = Math.max(1, Math.round(S.h * scale));
+    pv.style.width = cw + 'px'; pv.style.height = ch + 'px';
+    pv.width = Math.round(cw * dpr); pv.height = Math.round(ch * dpr);
+    const ctx = pv.getContext('2d');
+    ctx.setTransform(pv.width / S.w, 0, 0, pv.height / S.h, 0, 0);
+    draw(ctx, true, scale);
+  }
+
+  // ---- checks ----
+  function problems() {
+    const w = [], rects = S.s.map((a) => { const g = geo(a); return { x: a.x, y: a.y, W: g.W, H: g.H, a }; });
+    rects.forEach((r, i) => {
+      if (r.W > S.w || r.H > S.h) w.push(['bad', `${letter(i)} ${label(r.a, i)} is ${r.W} × ${r.H}, bigger than the ${S.w} × ${S.h} output. Choose a bigger output or split the screen across two outputs.`]);
+      else if (r.x + r.W > S.w || r.y + r.H > S.h) w.push(['bad', `${letter(i)} ${label(r.a, i)} runs off the ${r.x + r.W > S.w ? 'right' : 'bottom'} of the output. Move it or press Arrange them.`]);
+    });
+    for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
+      const A = rects[i], B = rects[j];
+      if (A.x < B.x + B.W && B.x < A.x + A.W && A.y < B.y + B.H && B.y < A.y + A.H) w.push(['bad', `${letter(i)} and ${letter(j)} overlap, so they would show the same pixels. Move one of them.`]);
+    }
+    return w;
+  }
+
+  // ---- show it all ----
+  function render() {
+    $('#oRes').textContent = `${S.w} × ${S.h}`;
+    const used = S.s.reduce((t, a) => { const g = geo(a); return t + (a.c * a.r - a.off.length) * g.pw * g.ph; }, 0);
+    $('#oSub').textContent = `output · ${S.s.length} screen${S.s.length === 1 ? '' : 's'} · ${Math.min(100, Math.round(used / (S.w * S.h) * 100))}% of the pixels in use`;
+    // the output picker
+    const key = `${S.w}x${S.h}`, has = [...$('#out').options].some((o) => o.value === key);
+    $('#out').value = has && !outCustom ? key : 'custom';
+    const custom = $('#out').value === 'custom';
+    $('#owL').hidden = $('#ohL').hidden = !custom;
+    if (document.activeElement !== $('#ow')) $('#ow').value = S.w;
+    if (document.activeElement !== $('#oh')) $('#oh').value = S.h;
+    // the screen list
+    $('#list').replaceChildren(...S.s.map((a, i) => {
+      const g = geo(a), b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', i === sel);
+      const sw = document.createElement('i'); sw.style.background = COLORS[i % COLORS.length][1];
+      const nm = document.createElement('b'); nm.textContent = `${letter(i)}  ${label(a, i)}`;
+      const sz = document.createElement('span'); sz.textContent = `${g.W} × ${g.H}`;
+      b.append(sw, nm, sz); b.onclick = () => { sel = i; render(); };
+      return b;
+    }));
+    // the selected screen
+    const a = S.s[sel], on = !!a;
+    for (const id of ['sn', 'sp', 'sc', 'sr', 'sx', 'sy', 'spath', 'scx', 'scy', 'dup', 'fill', 'del']) $('#' + id).disabled = !on;
+    if (on) {
+      const g = geo(a), set = (id, v) => { if (document.activeElement !== $('#' + id)) $('#' + id).value = v; };
+      set('sn', a.n); sp.value = a.p; set('sc', a.c); set('sr', a.r); set('sx', a.x); set('sy', a.y); $('#spath').value = a.path; set('scx', a.cx); set('scy', a.cy);
+      $('#scxL').hidden = $('#scyL').hidden = a.p !== CUSTOM;
+      $('#sNote').textContent = `${g.pw} × ${g.ph} px per panel · ${a.c * a.r - a.off.length} of ${a.c * a.r} panels fitted`;
+      $('#fill').hidden = !a.off.length;
+    }
+    $('#add').disabled = S.s.length >= MAX_SCREENS;
+    // the table
+    $('#rows').replaceChildren(...S.s.map((s, i) => {
+      const g = geo(s), tr = document.createElement('tr');
+      const pitch = g.P.mm ? `${(g.P.mm[0] / g.P.px[0]).toFixed(2)} mm` : '';
+      const cells = [`${letter(i)}  ${label(s, i)}`, `${g.W} × ${g.H}`, `${s.x}, ${s.y}`, `${s.c} × ${s.r}${s.off.length ? ` (−${s.off.length})` : ''}`, pitch];
+      cells.forEach((t, k) => { const td = document.createElement('td'); if (!k) { const sw = document.createElement('i'); sw.style.background = COLORS[i % COLORS.length][1]; td.append(sw); } td.append(t); tr.append(td); });
+      return tr;
+    }));
+    const w = problems();
+    $('#warns').replaceChildren(...w.map(([c, t]) => { const p = document.createElement('p'); p.className = 'warn ' + c; p.textContent = t; return p; }));
+    $('#sum').value = summary();
+    try { history.replaceState(null, '', `?d=${encode()}`); } catch {}
+    preview();
+  }
+  function summary() {
+    return [
+      `Pixel map: ${S.w} × ${S.h} output, ${S.s.length} screen${S.s.length === 1 ? '' : 's'}`,
+      ...S.s.map((a, i) => { const g = geo(a); return `${letter(i)}  ${label(a, i)}: ${g.W} × ${g.H} at X ${a.x}, Y ${a.y} · ${a.c} × ${a.r} ${g.P.id === CUSTOM ? g.P.name + 's' : `${g.P.make} ${g.P.name}`}${a.off.length ? `, ${a.off.length} panel${a.off.length === 1 ? '' : 's'} left out` : ''}`; }),
+      '',
+      'Made with the free Pixel Map Maker from Showcaller Studio:',
+      shareUrl(),
+    ].join('\n');
+  }
+
+  // ---- arranging: left to right, then the next row down ----
+  function arrange() {
+    let x = 0, y = 0, rowH = 0;
+    for (const a of S.s) {
+      const g = geo(a);
+      if (x > 0 && x + g.W > S.w) { x = 0; y += rowH; rowH = 0; }
+      a.x = x; a.y = y; x += g.W; rowH = Math.max(rowH, g.H);
+    }
+    render();
+  }
+  // a new screen goes in the first free spot on its row scan
+  function freeSpot(W, H) {
+    const rects = S.s.map((a) => { const g = geo(a); return [a.x, a.y, g.W, g.H]; });
+    const xs = [0, ...rects.map((r) => r[0] + r[2])], ys = [0, ...rects.map((r) => r[1] + r[3])];
+    const cand = [];
+    for (const y of ys) for (const x of xs) cand.push([x, y]);
+    cand.sort((p, q) => p[1] - q[1] || p[0] - q[0]);
+    for (const [x, y] of cand) {
+      if (x + W > S.w || y + H > S.h) continue;
+      if (rects.every(([rx, ry, rw, rh]) => !(x < rx + rw && rx < x + W && y < ry + rh && ry < y + H))) return [x, y];
+    }
+    return [0, 0];
+  }
+
+  // ---- inputs ----
+  $('#out').onchange = () => { const v = $('#out').value; outCustom = v === 'custom'; if (v !== 'custom') { const [w, h] = v.split('x').map(Number); S.w = w; S.h = h; } render(); };
+  const outIn = (id, k) => { $('#' + id).oninput = () => { const v = int($('#' + id).value, null, 64, 16384); if (v) { S[k] = v; render(); } }; };
+  outIn('ow', 'w'); outIn('oh', 'h');
+  const cur = () => S.s[sel];
+  $('#sn').oninput = () => { cur().n = $('#sn').value.slice(0, 40); render(); };
+  sp.onchange = () => { const a = cur(), g = geo(a); a.p = sp.value; if (a.p === CUSTOM) { a.cx = g.pw; a.cy = g.ph; } render(); };
+  const numIn = (id, k, lo, hi, after) => { $('#' + id).oninput = () => { const v = int($('#' + id).value, null, lo, hi); if (v != null) { cur()[k] = v; after?.(cur()); render(); } }; $('#' + id).onblur = () => render(); };
+  const trimOff = (a) => { a.off = a.off.filter((i) => i < a.c * a.r); };
+  // changing columns keeps removed panels where they were
+  $('#sc').oninput = () => { const a = cur(), v = int($('#sc').value, null, 1, 200); if (v == null) return; a.off = a.off.map((i) => [i % a.c, Math.floor(i / a.c)]).filter(([c]) => c < v).map(([c, r]) => r * v + c); a.c = v; render(); };
+  $('#sc').onblur = () => render();
+  numIn('sr', 'r', 1, 200, trimOff); numIn('sx', 'x', 0, 16384); numIn('sy', 'y', 0, 16384); numIn('scx', 'cx', 1, 4096); numIn('scy', 'cy', 1, 4096);
+  $('#spath').onchange = () => { cur().path = $('#spath').value; render(); };
+  $('#add').onclick = () => {
+    const a = { n: '', p: cur()?.p || 'g26', c: 4, r: 3, x: 0, y: 0, path: '', off: [], cx: 128, cy: 128 };
+    const g = geo(a); [a.x, a.y] = freeSpot(g.W, g.H);
+    S.s.push(a); sel = S.s.length - 1; render(); $('#sn').focus();
+  };
+  $('#dup').onclick = () => { if (S.s.length >= MAX_SCREENS) return; const a = JSON.parse(JSON.stringify(cur())); a.n = a.n ? `${a.n} 2`.slice(0, 40) : ''; const g = geo(a); [a.x, a.y] = freeSpot(g.W, g.H); S.s.push(a); sel = S.s.length - 1; render(); };
+  $('#fill').onclick = () => { cur().off = []; render(); };
+  $('#del').onclick = () => { S.s.splice(sel, 1); sel = Math.max(0, Math.min(sel, S.s.length - 1)); render(); };
+  $('#arrange').onclick = arrange;
+  const setMode = (m) => { mode = m; $('#mMove').setAttribute('aria-pressed', m === 'move'); $('#mPanels').setAttribute('aria-pressed', m === 'panels'); $('#pvBox').classList.toggle('panels', m === 'panels');
+    $('#hint').textContent = m === 'move' ? 'Drag a screen to move it. It snaps to the edges of the output and of the other screens.' : 'Click a panel to take it out, and click again to put it back.'; };
+  $('#mMove').onclick = () => setMode('move'); $('#mPanels').onclick = () => setMode('panels');
+
+  // ---- on the map: drag to move, click to take panels out ----
+  const at = (e) => { const r = pv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * S.w, (e.clientY - r.top) / r.height * S.h]; };
+  const hit = (x, y) => { for (let i = S.s.length - 1; i >= 0; i--) { const a = S.s[i], g = geo(a); if (x >= a.x && x < a.x + g.W && y >= a.y && y < a.y + g.H) return i; } return -1; };
+  let drag = null;
+  pv.addEventListener('pointerdown', (e) => {
+    const [x, y] = at(e), i = hit(x, y);
+    if (i < 0) return;
+    sel = i;
+    const a = S.s[i], g = geo(a);
+    if (mode === 'panels') {
+      const k = Math.floor((y - a.y) / g.ph) * a.c + Math.floor((x - a.x) / g.pw);
+      a.off = a.off.includes(k) ? a.off.filter((j) => j !== k) : [...a.off, k];
+      render(); return;
+    }
+    drag = { i, dx: x - a.x, dy: y - a.y, moved: false };
+    pv.setPointerCapture(e.pointerId); pv.classList.add('dragging');
+    render();
+  });
+  pv.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const [x, y] = at(e), a = S.s[drag.i], g = geo(a), snap = 10 / scale;
+    let nx = Math.round(x - drag.dx), ny = Math.round(y - drag.dy);
+    // snap edges to the output and to the other screens
+    const xs = [0, S.w - g.W], ys = [0, S.h - g.H];
+    S.s.forEach((b, j) => { if (j === drag.i) return; const h = geo(b); xs.push(b.x + h.W, b.x - g.W, b.x, b.x + h.W - g.W); ys.push(b.y + h.H, b.y - g.H, b.y, b.y + h.H - g.H); });
+    const near = (v, list) => list.reduce((best, t) => (Math.abs(t - v) < Math.abs(best - v) ? t : best), Infinity);
+    const sx = near(nx, xs), sy = near(ny, ys);
+    if (Math.abs(sx - nx) <= snap) nx = sx; if (Math.abs(sy - ny) <= snap) ny = sy;
+    nx = Math.max(0, nx); ny = Math.max(0, ny);
+    if (nx !== a.x || ny !== a.y) { a.x = nx; a.y = ny; drag.moved = true; preview(); }
+  });
+  const end = () => { if (!drag) return; drag = null; pv.classList.remove('dragging'); render(); };
+  pv.addEventListener('pointerup', end); pv.addEventListener('pointercancel', end);
+  // arrow keys nudge the selected screen
+  pv.tabIndex = 0;
+  pv.addEventListener('keydown', (e) => {
+    const a = S.s[sel]; if (!a) return;
+    const d = e.shiftKey ? 10 : 1, k = { ArrowLeft: [-d, 0], ArrowRight: [d, 0], ArrowUp: [0, -d], ArrowDown: [0, d] }[e.key];
+    if (!k) return; e.preventDefault();
+    a.x = Math.max(0, a.x + k[0]); a.y = Math.max(0, a.y + k[1]); render();
+  });
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(preview, 120); });
+
+  // ---- download: the whole output at its exact resolution ----
+  $('#dl').onclick = () => {
+    const msg = $('#msg'); msg.textContent = 'Drawing…';
+    setTimeout(() => {
+      const cv = document.createElement('canvas'); cv.width = S.w; cv.height = S.h;
+      const ctx = cv.getContext('2d');
+      if (!ctx) { msg.textContent = 'This browser couldn’t make an image that big.'; return; }
+      draw(ctx, false, 1);
+      cv.toBlob((b) => {
+        if (!b) { msg.textContent = 'This browser couldn’t make an image that big. Try a desktop browser.'; return; }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+        a.download = `pixel-map-${S.w}x${S.h}.png`;
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+        msg.textContent = `Saved ${a.download}`;
+      }, 'image/png');
+    }, 30);
+  };
+  async function copy(text, done) {
+    const msg = $('#msg');
+    try { await navigator.clipboard.writeText(text); msg.textContent = done; }
+    catch { const s = $('#sum'); s.focus(); s.select(); msg.textContent = 'Select the text and copy it.'; }
+  }
+  $('#copySum').onclick = () => copy($('#sum').value, 'Screen list copied.');
+  $('#copyLink').onclick = () => copy(shareUrl(), 'Link copied.');
+
+  render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(preview);
+})();
+</script>
+</body>
+</html>
