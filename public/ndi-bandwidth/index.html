@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NDI Bandwidth Calculator: is gigabit enough? | Showcaller</title>
+<meta name="description" content="Free NDI bandwidth calculator: list your NDI, NDI HX3 and HX2 sources and who watches them, and see the Mbps on every network link and whether 1 GbE is enough. Uses NDI's published figures.">
+<link rel="canonical" href="https://showcallerstudio.com/ndi-bandwidth/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NDI Bandwidth Calculator, free">
+<meta property="og:description" content="How many Mbps your NDI sources need, link by link, and whether gigabit is enough.">
+<meta property="og:url" content="https://showcallerstudio.com/ndi-bandwidth/">
+<meta property="og:image" content="https://showcallerstudio.com/media/poster4.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Same look as the home page (copied from index.html), plus the calculator's own rules at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut: clamp(20px, 4vw, 40px);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -.03em; }
+h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s, transform .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.btn[disabled] { opacity: .6; cursor: wait; }
+
+/* top bar */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body, Inter, sans-serif); letter-spacing: .42em; text-transform: uppercase; color: #ffb224; padding-left: 1px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* opener */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: 20%; width: min(1100px, 120vw); height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .13), rgba(255, 178, 36, 0)); pointer-events: none; }
+.hero .wrap { position: relative; display: flex; flex-direction: column; gap: 18px; padding-block: clamp(44px, 6vw, 76px) clamp(28px, 4vw, 44px); }
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(56px, 7vw, 96px); display: flex; flex-direction: column; gap: clamp(26px, 3.5vw, 40px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+ul.ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--soft); font-size: 16px; }
+ul.ticks li { padding-left: 26px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 11px; height: 5px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 22px 48px; align-items: center; justify-content: space-between; }
+.trial .txt { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.trial .txt p { color: var(--soft); }
+.trial .go { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px; }
+[hidden] { display: none !important; }
+
+/* questions */
+.faq { display: flex; flex-direction: column; max-width: 860px; }
+details { border-top: 1px solid var(--line2); }
+details:last-child { border-bottom: 1px solid var(--line2); }
+summary { cursor: pointer; padding: 22px 40px 22px 0; font: 600 19px var(--display); letter-spacing: -.01em; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; right: 6px; top: 30px; width: 10px; height: 10px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); transition: transform .2s; }
+details[open] summary::after { transform: rotate(-135deg); top: 35px; }
+details p { color: var(--soft); padding: 0 40px 24px 0; }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+
+/* NDI bandwidth calculator */
+*, *::before, *::after { box-sizing: border-box; }
+.calc { display: flex; flex-direction: column; gap: 22px; }
+.srcs { border: 1px solid var(--line2); background: var(--panel); }
+.srcs .hd, .src { display: grid; grid-template-columns: minmax(0, 1.6fr) 70px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .9fr) 78px 78px 40px; gap: 10px; align-items: end; padding: 12px 16px; }
+.srcs .hd { font: 600 11px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line2); align-items: center; }
+.src + .src { border-top: 1px solid var(--line); }
+.src input, .src select { font: 400 15.5px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 9px 10px; width: 100%; min-width: 0; border-radius: 0; }
+.src select { appearance: none; -webkit-appearance: none; padding-right: 30px; background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+.src input:focus, .src select:focus { outline: none; border-color: var(--accent); }
+.src label { display: grid; gap: 4px; min-width: 0; }
+.src label span { display: none; font-size: 13px; color: var(--soft); }
+.src .x { min-height: 42px; width: 40px; padding: 0; font-size: 20px; line-height: 1; }
+.src .rate { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin-top: -2px; }
+@media (max-width: 900px) {
+  .srcs .hd { display: none; }
+  .src { grid-template-columns: 1fr 1fr; }
+  .src label span { display: block; }
+  .src .nm { grid-column: 1 / -1; }
+  .src .x { justify-self: end; grid-column: 2; }
+}
+.srcfoot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line2); }
+.btn.xs { min-height: 42px; padding: 0 16px; font-size: 14px; }
+.links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (max-width: 760px) { .links { grid-template-columns: minmax(0, 1fr); } }
+.link { background: var(--bg); padding: 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.link small { font: 600 11.5px var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.link b { font: 600 clamp(26px, 3vw, 34px)/1.1 var(--display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.link b em { font-style: normal; font-size: .55em; color: var(--soft); margin-left: 4px; }
+.link p { color: var(--soft); font-size: 14.5px; }
+.meter { position: relative; height: 10px; background: var(--raised); }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; background: #3fb950; }
+.meter.warn i { background: var(--accent); }
+.meter.bad i { background: #ff6b5e; }
+.meter::after { content: ""; position: absolute; left: 75%; top: -3px; bottom: -3px; width: 1px; background: var(--soft); }
+.verdict { font: 600 14.5px var(--body); }
+.verdict.ok { color: #6fdc8c; } .verdict.warn { color: var(--accent); } .verdict.bad { color: #ff8b80; }
+.notes { display: flex; flex-direction: column; gap: 8px; }
+.note2 { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; font-size: 14.5px; color: var(--soft); margin: 0; }
+.box { border: 1px solid var(--line2); background: var(--panel); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.box h3 { font-size: 18px; }
+.box .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+textarea.sum { font: 400 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--soft); background: var(--bg); border: 1px solid var(--line2); padding: 12px; width: 100%; min-height: 190px; resize: vertical; }
+#msg { font-size: 14.5px; color: var(--soft); }
+.tbl { overflow-x: auto; border: 1px solid var(--line); }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font: 600 11.5px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px 40px; }
+.cols2 div { display: flex; flex-direction: column; gap: 8px; }
+.cols2 p { color: var(--soft); font-size: 16px; }
+.assume { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav>
+      <a href="#calc">Calculator</a>
+      <a href="#notes">How it works</a>
+      <a href="/multiview/">Multiview</a>
+      <a href="/tools/">Free tools</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top" style="border-top:0">
+  <div class="wrap">
+    <div class="eyebrow">Free tool · NDI</div>
+    <h1>NDI bandwidth calculator</h1>
+    <p class="lede">List the NDI sources on the show and who watches them. You get the traffic on every network link that matters, and whether gigabit is enough, using NDI's own published figures.</p>
+  </div>
+</section>
+
+<section id="calc" style="border-top:0">
+  <div class="wrap" style="padding-top:0">
+    <div class="calc">
+      <div class="srcs">
+        <div class="hd" aria-hidden="true"><span>Sources</span><span>How many</span><span>NDI format</span><span>Video</span><span>Frame rate</span><span title="Computers taking each source at full quality">Full</span><span title="Multiviewers taking each source as a small preview">Preview</span><span></span></div>
+        <div id="srcs"></div>
+        <div class="srcfoot">
+          <button type="button" class="btn xs" id="add">Add sources</button>
+          <span class="small">Full: computers taking each source at full quality (a switcher, recorder or vMix). Preview: multiviewers showing it small.</span>
+        </div>
+      </div>
+
+      <div class="links" id="links" aria-live="polite"></div>
+      <div class="notes" id="notes2"></div>
+
+      <div class="tbl"><table><thead><tr><th>Per source</th><th>Full quality</th><th>Preview</th><th>Leaves the source</th></tr></thead><tbody id="rows"></tbody></table></div>
+
+      <div class="box">
+        <h3>Share it</h3>
+        <p class="small">The page address keeps every row, so the link opens this same show. The summary is ready to paste into a tech spec or an email to IT.</p>
+        <textarea class="sum" id="sum" readonly aria-label="Summary"></textarea>
+        <div class="row">
+          <button type="button" class="btn" id="copySum">Copy summary</button>
+          <button type="button" class="btn" id="copyLink">Copy link</button>
+          <span id="msg" role="status"></span>
+        </div>
+      </div>
+      <p class="assume" id="assume"></p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="trial">
+      <div class="txt">
+        <div class="eyebrow">Showcaller Multiview</div>
+        <h2 style="font-size:clamp(24px,2.6vw,32px)">See every NDI source in one window.</h2>
+        <p>A free NDI multiviewer that takes small previews of each camera, so a dozen sources fit easily on one gigabit link.</p>
+      </div>
+      <div class="go">
+        <a class="btn primary" href="/multiview/">See Multiview</a>
+        <a class="btn" href="/tools/">All free tools</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="notes">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">How it works</div><h2>Where the traffic goes.</h2></div>
+    <div class="cols2">
+      <div><h3>Each viewer is its own stream</h3><p>NDI sends a separate copy of a source to every computer that takes it, unless multicast is turned on. Three computers watching one camera means three streams leave that camera.</p></div>
+      <div><h3>Full quality or preview</h3><p>Every NDI source also offers a small preview stream at 640 × 360. Multiviewers use it for small tiles, so they take far less than a switcher or recorder does.</p></div>
+      <div><h3>The links that matter</h3><p>On a switched network each computer has its own port. What counts is the port of the busiest computer, the port of each source, and the link between switches if the show spans more than one.</p></div>
+      <div><h3>The 75% line</h3><p>NDI traffic comes in bursts, so plan to fill no more than about three quarters of a link. The meters mark that line. Past it, frames start to drop before the link is truly full.</p></div>
+      <div><h3>Wi-Fi and remote viewers</h3><p>Full-quality NDI over Wi-Fi rarely holds up. For a viewer on another network, send NDI HX or use NDI Bridge, and check the upload speed at the studio.</p></div>
+      <div><h3>The figures</h3><p>The numbers are the maximum bit rates NDI publishes in its white paper. Real streams are often lower, especially for still or simple pictures, so these are safe planning numbers.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">A free tool from <a href="/">Showcaller Studio</a>.</span></div></footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  // ---- NDI's published maximum bit rates (Mbps), docs.ndi.video › White Paper › Bandwidth ----
+  // Keys are video + frame rate. 25p/30p use the 50i/60i figures (the same pixels per second);
+  // values marked e: are estimates where NDI lists no figure.
+  const T = {
+    hb: { name: 'NDI High Bandwidth', short: 'NDI', proxy: { lo: 18.75, hi: 65.83 },
+      '720p25': 'e:53', '720p30': 'e:58', '720p50': 96.94, '720p60': 105.83,
+      '1080i50': 102.50, '1080i60': 112.50, '1080p25': 102.50, '1080p30': 112.50, '1080p50': 125.59, '1080p60': 132.14,
+      '2160p25': 158.33, '2160p30': 171.42, '2160p50': 223.80, '2160p60': 249.99 },
+    hx3: { name: 'NDI HX3 (H.264)', short: 'HX3', proxy: { lo: 3, hi: 3 },
+      '720p25': 'e:13', '720p30': 'e:16', '720p50': 'e:26', '720p60': 'e:31',
+      '1080i50': 26, '1080i60': 31, '1080p25': 26, '1080p30': 31, '1080p50': 52, '1080p60': 62,
+      '2160p25': 'e:46', '2160p30': 'e:55', '2160p50': 92, '2160p60': 110 },
+    hx3h: { name: 'NDI HX3 (H.265)', short: 'HX3 HEVC', proxy: { lo: 3, hi: 3 },
+      '720p25': 'e:10', '720p30': 'e:13', '720p50': 'e:20', '720p60': 'e:25',
+      '1080i50': 20, '1080i60': 25, '1080p25': 20, '1080p30': 25, '1080p50': 41, '1080p60': 50,
+      '2160p25': 'e:35', '2160p30': 'e:42', '2160p50': 70, '2160p60': 84 },
+    hx2: { name: 'NDI HX2 (H.264)', short: 'HX2', proxy: { lo: 3.99, hi: 6.00 },
+      '720p25': 'e:5', '720p30': 'e:5.5', '720p50': 9.11, '720p60': 9.99,
+      '1080i50': 9.66, '1080i60': 10.59, '1080p25': 9.66, '1080p30': 10.59, '1080p50': 14.20, '1080p60': 15.99,
+      '2160p25': 19.11, '2160p30': 20.66, '2160p50': 26.88, '2160p60': 30.00 },
+  };
+  const VIDEO = [['720p', '1280 × 720'], ['1080p', '1920 × 1080'], ['1080i', '1080 interlaced'], ['2160p', '3840 × 2160 (4K)']];
+  const RATES = { '720p': [25, 30, 50, 60], '1080p': [25, 30, 50, 60], '1080i': [50, 60], '2160p': [25, 30, 50, 60] };
+  const rateName = (v, r) => (v === '1080i' ? `${r}i` : `${r}p`);
+  const fmtName = (a) => `${a.v === '1080i' ? '1080' : a.v.replace('p', '')} ${rateName(a.v, a.r)}`;
+  const look = (f, v, r) => { const x = T[f][`${v}${r}`]; return typeof x === 'string' ? { mbps: Number(x.slice(2)), est: true } : { mbps: x, est: false }; };
+  const proxyOf = (f, v, r) => (v === '1080i' || r <= 30 ? T[f].proxy.lo : T[f].proxy.hi);
+
+  // ---- state, from the address if it has one ----
+  const DEFAULT = [
+    { n: 'PTZ cameras', k: 3, f: 'hx3', v: '1080p', r: 60, full: 1, pv: 1 },
+    { n: 'Switcher program', k: 1, f: 'hb', v: '1080p', r: 30, full: 1, pv: 1 },
+    { n: 'Graphics', k: 1, f: 'hb', v: '1080p', r: 30, full: 1, pv: 0 },
+  ];
+  let S = DEFAULT.map((x) => ({ ...x }));
+  const int = (v, d, lo, hi) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= lo && n <= hi ? n : d; };
+  const clean = (a) => {
+    const f = T[a.f] ? a.f : 'hb', v = RATES[a.v] ? a.v : '1080p', r = RATES[v].includes(Number(a.r)) ? Number(a.r) : RATES[v].at(-1);
+    return { n: String(a.n ?? '').slice(0, 40), k: int(a.k, 1, 1, 99), f, v, r, full: int(a.full, 1, 0, 20), pv: int(a.pv, 0, 0, 20) };
+  };
+  try {
+    const q = new URLSearchParams(location.search).get('s');
+    if (q) { const rows = q.split('~').map((x) => { const [n, k, f, v, r, full, pv] = x.split('*'); return clean({ n: decodeURIComponent(n), k, f, v, r, full, pv }); }); if (rows.length) S = rows.slice(0, 30); }
+  } catch {}
+  const shareQ = () => S.map((a) => [encodeURIComponent(a.n).replace(/~/g, '%7E').replace(/\*/g, '%2A'), a.k, a.f, a.v, a.r, a.full, a.pv].join('*')).join('~');
+  const shareUrl = () => `${location.origin}${location.pathname}?s=${shareQ()}`;
+
+  // ---- the rows ----
+  const opt = (sel, list, val) => { sel.replaceChildren(...list.map(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; return o; })); sel.value = String(val); };
+  function rowEl(a, i) {
+    const d = document.createElement('div'); d.className = 'src';
+    d.innerHTML = `<label class="nm"><span>Sources</span><input data-k="n" maxlength="40" placeholder="Name, e.g. Cameras" aria-label="Name"></label>
+      <label><span>How many</span><input data-k="k" type="number" inputmode="numeric" min="1" max="99" aria-label="How many"></label>
+      <label><span>NDI format</span><select data-k="f" aria-label="NDI format"></select></label>
+      <label><span>Video</span><select data-k="v" aria-label="Video"></select></label>
+      <label><span>Frame rate</span><select data-k="r" aria-label="Frame rate"></select></label>
+      <label><span>Full</span><input data-k="full" type="number" inputmode="numeric" min="0" max="20" aria-label="Computers at full quality"></label>
+      <label><span>Preview</span><input data-k="pv" type="number" inputmode="numeric" min="0" max="20" aria-label="Multiviewers"></label>
+      <button type="button" class="btn x" aria-label="Remove this row" title="Remove">×</button>
+      <p class="rate"></p>`;
+    const q = (k) => d.querySelector(`[data-k="${k}"]`);
+    q('n').value = a.n; q('k').value = a.k; q('full').value = a.full; q('pv').value = a.pv;
+    opt(q('f'), Object.entries(T).map(([k, x]) => [k, x.name]), a.f);
+    opt(q('v'), VIDEO, a.v);
+    opt(q('r'), RATES[a.v].map((r) => [r, rateName(a.v, r)]), a.r);
+    q('n').oninput = () => { a.n = q('n').value.slice(0, 40); calc(); };
+    for (const [k, lo, hi] of [['k', 1, 99], ['full', 0, 20], ['pv', 0, 20]]) { q(k).oninput = () => { const v = int(q(k).value, null, lo, hi); if (v != null) { a[k] = v; calc(); } }; q(k).onblur = () => { q(k).value = a[k]; }; }
+    q('f').onchange = () => { a.f = q('f').value; calc(); };
+    q('v').onchange = () => { a.v = q('v').value; if (!RATES[a.v].includes(a.r)) a.r = RATES[a.v].at(-1); opt(q('r'), RATES[a.v].map((r) => [r, rateName(a.v, r)]), a.r); calc(); };
+    q('r').onchange = () => { a.r = Number(q('r').value); calc(); };
+    d.querySelector('.x').onclick = () => { S.splice(i, 1); if (!S.length) S.push(clean({})); draw(); };
+    a._el = d;
+    return d;
+  }
+  function draw() { $('#srcs').replaceChildren(...S.map(rowEl)); calc(); }
+  $('#add').onclick = () => { if (S.length >= 30) return; S.push(clean({ n: '', k: 1, f: 'hb', v: '1080p', r: 60, full: 1, pv: 1 })); draw(); S.at(-1)._el.querySelector('input').focus(); };
+
+  // ---- the numbers ----
+  const LINKS = [[1000, '1 GbE'], [2500, '2.5 GbE'], [10000, '10 GbE']];
+  const f1 = (n) => (n >= 100 ? Math.round(n).toLocaleString('en-US') : n.toFixed(1));
+  const nm = (a, i) => a.n || `Row ${i + 1}`;
+  function verdict(mbps) {
+    const fit = LINKS.find(([cap]) => mbps <= cap * 0.75);
+    if (!fit) return ['bad', `More than a 10 GbE link should carry. Split the load across computers or use NDI HX.`];
+    if (fit[0] === 1000) return [mbps > 600 ? 'warn' : 'ok', mbps > 600 ? `Fits gigabit, with little to spare` : `Fits gigabit easily`];
+    return ['warn', `Needs ${fit[1]}; gigabit is not enough`];
+  }
+  function calc() {
+    let total = 0, fullAll = 0, pvAll = 0, busiest = { mbps: 0, a: null }, anyEst = false, sources = 0;
+    const per = S.map((a, i) => {
+      const { mbps, est } = look(a.f, a.v, a.r), px = proxyOf(a.f, a.v, a.r);
+      const out = mbps * a.full + px * a.pv;
+      anyEst ||= est; sources += a.k;
+      total += out * a.k;
+      if (a.full) fullAll += mbps * a.k;
+      if (a.pv) pvAll += px * a.k;
+      if (out > busiest.mbps) busiest = { mbps: out, a, i };
+      a._el.querySelector('.rate').textContent = `${T[a.f].short} ${fmtName(a)}: ${f1(mbps)} Mbps${est ? ' (estimate)' : ''} full, ${f1(px)} Mbps preview · ${f1(out)} Mbps leaves each source`;
+      return { a, i, mbps, px, out, est };
+    });
+    const maxFull = Math.max(0, ...S.map((a) => a.full)), maxPv = Math.max(0, ...S.map((a) => a.pv));
+    const cards = [
+      ['A full-quality computer', fullAll, maxFull ? `A switcher, recorder or vMix taking every source marked Full at full quality.` : 'Nothing is set to Full.'],
+      ['A multiviewer', pvAll, maxPv ? `A multiviewer taking every source marked Preview as a small tile.` : 'Nothing is set to Preview.'],
+      ['The busiest source', busiest.mbps, busiest.a ? `${nm(busiest.a, busiest.i)}: each one sends ${busiest.a.full} full and ${busiest.a.pv} preview stream${busiest.a.full + busiest.a.pv === 1 ? '' : 's'}.` : ''],
+      ['All NDI on the network', total, `${sources} source${sources === 1 ? '' : 's'}. Matters for the link between two switches, or a single switch's total capacity.`],
+    ];
+    $('#links').replaceChildren(...cards.map(([k, mbps, txt]) => {
+      const d = document.createElement('div'); d.className = 'link';
+      const [cls, v] = verdict(mbps), pct = Math.min(100, (mbps / 1000) * 100);
+      d.innerHTML = `<small></small><b></b><div class="meter ${cls}" title="Share of a 1 GbE link; the line marks 75%"><i style="width:${pct}%"></i></div><span class="verdict ${cls}"></span><p></p>`;
+      d.querySelector('small').textContent = k;
+      d.querySelector('b').innerHTML = `${f1(mbps)}<em>Mbps</em>`;
+      d.querySelector('.verdict').textContent = mbps ? v : 'Nothing on this link';
+      if (!mbps) d.querySelector('.verdict').className = 'verdict';
+      d.querySelector('p').textContent = txt;
+      return d;
+    }));
+    // notes
+    const n = [];
+    if (S.some((a) => a.full > 1)) n.push('Some sources go to more than one computer at full quality. Each computer gets its own copy unless NDI multicast is on, and multicast needs IGMP snooping on the switch.');
+    if (S.some((a) => a.f === 'hb' && a.v === '2160p')) n.push('4K full-bandwidth NDI is about a quarter of a gigabit per stream. Give 4K sources and the computers taking them 2.5 GbE or 10 GbE ports.');
+    if (anyEst) n.push('Some rows use an estimate, because NDI publishes no figure for that format and frame rate.');
+    $('#notes2').replaceChildren(...n.map((t) => { const p = document.createElement('p'); p.className = 'note2'; p.textContent = t; return p; }));
+    // table
+    $('#rows').replaceChildren(...per.map(({ a, i, mbps, px, out, est }) => {
+      const tr = document.createElement('tr');
+      for (const t of [`${a.k} × ${nm(a, i)} (${T[a.f].short} ${fmtName(a)})`, `${f1(mbps)} Mbps${est ? ' ≈' : ''}`, `${f1(px)} Mbps`, `${f1(out)} Mbps`]) { const td = document.createElement('td'); td.textContent = t; tr.append(td); }
+      return tr;
+    }));
+    $('#sum').value = [
+      'NDI bandwidth plan',
+      ...per.map(({ a, i, mbps, px, out, est }) => `- ${a.k} × ${nm(a, i)}: ${T[a.f].name}, ${fmtName(a)}, ${f1(mbps)} Mbps${est ? ' (estimate)' : ''}; ${a.full} full + ${a.pv} preview = ${f1(out)} Mbps from each`),
+      '',
+      ...cards.map(([k, mbps]) => `${k}: ${f1(mbps)} Mbps · ${mbps ? verdict(mbps)[1] : 'nothing'}`),
+      '',
+      'Maximum bit rates from NDI\'s white paper; plan to fill no more than 75% of a link.',
+      'Worked out with the free NDI Bandwidth Calculator from Showcaller Studio:',
+      shareUrl(),
+    ].join('\n');
+    $('#assume').textContent = 'Figures: the maximum bit rates in NDI’s white paper (docs.ndi.video, Bandwidth). 25p and 30p use NDI’s 50i and 60i figures, which carry the same pixels per second. Previews are NDI’s 640 × 360 proxy stream. A link is called full at 75% of its speed.';
+    try { history.replaceState(null, '', `?s=${shareQ()}`); } catch {}
+  }
+
+  async function copy(text, done) {
+    const msg = $('#msg');
+    try { await navigator.clipboard.writeText(text); msg.textContent = done; }
+    catch { const s = $('#sum'); s.focus(); s.select(); msg.textContent = 'Select the text and copy it.'; }
+  }
+  $('#copySum').onclick = () => copy($('#sum').value, 'Summary copied.');
+  $('#copyLink').onclick = () => copy(shareUrl(), 'Link copied.');
+  draw();
+})();
+</script>
+</body>
+</html>
