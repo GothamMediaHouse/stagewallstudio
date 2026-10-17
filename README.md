@@ -65,3 +65,7 @@ To publish an update:
 Update zips hold only the app's own code (no Electron, no libraries), so they're small, but each must stay under Cloudflare's 25 MB asset limit. An update that adds a new library needs a full rebuild instead; the app says so and points to the download page. Keep a zip's old versions out of the repo: delete the previous zip when you add a new one.
 
 The update key is `update-key.pem` in "Showcaller Studio Admin (keep private)", the same key as Showcaller Studio's updates. Without it no app can be updated, so keep a backup.
+
+## Showcaller Hub
+
+Showcaller Hub (the app that installs and updates every Showcaller app and holds the one license key) reads `public/hub/catalog.json`: the apps in the order it shows them, each with `buildVersion` and `builds` (full downloads per platform, `mac-arm64`, `mac-x64`, `win-x64`, as `{ "url", "sha256", "size" }`). Full downloads are too big for the site (Cloudflare's 25 MB limit), so they go on this repo's GitHub Releases (one release per app version, e.g. tag `timer-1.6.3`) and the catalog links to them. Without a download for a platform the Hub's button opens the app's `page` instead. Updates still come from `/api/<app>/latest` above; the Hub itself checks `/api/hub/latest`.
