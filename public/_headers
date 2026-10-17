@@ -11,5 +11,5 @@
   X-Robots-Tag: noindex
   Cache-Control: no-store
 
-/hub/catalog.json
+/hub/apps.json
   Cache-Control: public, max-age=300
