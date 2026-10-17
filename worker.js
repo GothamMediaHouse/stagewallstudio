@@ -29,7 +29,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api/gmh-inquiry') return gmhInquiry(request, env); // handles its own CORS and methods
-    if (url.pathname.startsWith('/download/') && request.method === 'GET') return download(request, env);
+    if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {
       if (request.method !== route[0]) return json({ error: `Use ${route[0]}` }, 405);
