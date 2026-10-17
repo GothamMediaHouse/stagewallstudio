@@ -57,7 +57,7 @@ Every Showcaller app (Multiview, Timer, Test Kit, Replay, ISO, Switcher, NDI Web
 
 To publish an update:
 
-1. On the Mac: `node sc-update.js pack "<app folder>" "../../Showcaller Studio Admin (keep private)/update-key.pem"` from inside the app's folder. It makes `<name>-update-<version>.zip` in `Documents/Showcaller/Releases` from the files in the app's `build.files`, signs it, and prints its `sha256` and `size`.
+1. On the Mac, in the app's folder (e.g. `Documents/Showcaller/Showcaller Timer`): `node sc-update.js pack . "../../Showcaller Studio Admin (keep private)/update-key.pem"`. It makes `<name>-update-<version>.zip` in `Documents/Showcaller/Releases` from the files in the app's `build.files`, signs it, and prints its `sha256` and `size`.
 2. Here: put the zip in `public/updates/<app>/` and write `public/updates/<app>/latest.json`:
    `{ "version": "1.6.3", "notes": "One line on what's new", "zip": "/updates/<app>/<file>.zip", "sha256": "…", "size": 123456 }`
 3. Push to `main`. Apps see it within five minutes.
