@@ -13,6 +13,7 @@ const TOOLS = {
   timer: 'Showcaller Timer',
   testkit: 'Showcaller Test Kit',
   companion: 'Showcaller Studio for Bitfocus Companion',
+  hub: 'Showcaller Hub', // the apps page (/apps/), until the Hub's download is online
 };
 
 // POST /api/notify {tool, email, name?, ms, website}: puts the visitor on a tool's waiting list.

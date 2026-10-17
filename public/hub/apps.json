@@ -1,0 +1,13 @@
+{
+  "note": "Showcaller Hub's list of apps, in the order it shows them; served as /hub/catalog.json by hub.js, which fills buildVersion and builds from the newest GitHub release tagged <id>-<version>. Updates come from /api/<id>/latest.",
+  "apps": [
+    { "id": "studio", "name": "Showcaller Studio", "pkg": "upstage", "kind": "paid", "blurb": "Show control for the stage: video walls, cues, graphics and outputs.", "page": "https://showcallerstudio.com/", "buildVersion": null, "builds": {} },
+    { "id": "multiview", "name": "Showcaller Multiview", "pkg": "showcaller-multiview", "kind": "free", "blurb": "Watch NDI cameras from anywhere, with tally and ATEM control (paid).", "page": "https://showcallerstudio.com/multiview/", "buildVersion": null, "builds": {} },
+    { "id": "timer", "name": "Showcaller Timer", "pkg": "showcaller-timer", "kind": "pro", "blurb": "Countdown and stage display, with a confidence monitor and producer page in Pro.", "page": "https://showcallerstudio.com/tools/#timer", "buildVersion": null, "builds": {} },
+    { "id": "replay", "name": "Showcaller Replay", "pkg": "showcaller-replay", "kind": "paid", "blurb": "Records every NDI source and plays any of them back as an instant replay.", "page": "https://showcallerstudio.com/tools/", "buildVersion": null, "builds": {} },
+    { "id": "iso", "name": "Showcaller ISO", "pkg": "showcaller-iso", "kind": "paid", "blurb": "Records every NDI source to its own file at the same time, for the edit.", "page": "https://showcallerstudio.com/tools/", "buildVersion": null, "builds": {} },
+    { "id": "switcher", "name": "Showcaller Switcher", "pkg": "showcaller-switcher", "kind": "paid", "blurb": "A 2 M/E NDI production switcher with keys, audio, media and recording.", "page": "https://showcallerstudio.com/tools/", "buildVersion": null, "builds": {} },
+    { "id": "testkit", "name": "Showcaller Test Kit", "pkg": "showcaller-testkit", "kind": "free", "blurb": "NDI test patterns and a receiver to check a network before the show.", "page": "https://showcallerstudio.com/tools/#testkit", "buildVersion": null, "builds": {} },
+    { "id": "ndiwebcam", "name": "Showcaller NDI Webcam", "pkg": "showcaller-ndi-webcam", "kind": "free", "blurb": "Turns a webcam or USB capture device into an NDI source.", "page": "https://showcallerstudio.com/tools/", "buildVersion": null, "builds": {} }
+  ]
+}
