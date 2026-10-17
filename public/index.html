@@ -83,6 +83,11 @@ section { border-top: 1px solid var(--line); }
 section.alt { background: var(--bg2); }
 section > .wrap { padding-block: clamp(64px, 8vw, 108px); display: flex; flex-direction: column; gap: clamp(30px, 4vw, 48px); }
 .head { display: flex; flex-direction: column; gap: 14px; }
+.family { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; }
+.family a { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--soft); text-decoration: none; font-size: 14px; font-weight: 500; text-align: center; }
+.family a:hover { border-color: var(--line2); color: var(--fg); }
+.family img { width: 64px; height: 64px; }
+#family + #types { border-top: 1px solid var(--line); }
 
 /* project types */
 .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
@@ -218,6 +223,27 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <div><b>Stream Deck, OSC, MIDI</b><span>Buttons and show control</span></div>
       <div><b>ATEM, vMix, OBS</b><span>Looks can follow the switcher</span></div>
     </div>
+  </div>
+</section>
+
+<section class="alt" id="family">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">The Showcaller apps</div>
+      <h2>One family of apps for the whole show</h2>
+      <p class="lede">Multiview, Timer, Replay and the rest work alongside Showcaller Studio. Showcaller Hub installs and updates them all, and one license covers every paid app.</p>
+    </div>
+    <div class="family">
+      <a href="/apps/#studio"><img src="/media/apps/studio.png" alt="" width="64" height="64"><span>Studio</span></a>
+      <a href="/apps/#multiview"><img src="/media/apps/multiview.png" alt="" width="64" height="64"><span>Multiview</span></a>
+      <a href="/apps/#timer"><img src="/media/apps/timer.png" alt="" width="64" height="64"><span>Timer</span></a>
+      <a href="/apps/#replay"><img src="/media/apps/replay.png" alt="" width="64" height="64"><span>Replay</span></a>
+      <a href="/apps/#iso"><img src="/media/apps/iso.png" alt="" width="64" height="64"><span>ISO</span></a>
+      <a href="/apps/#switcher"><img src="/media/apps/switcher.png" alt="" width="64" height="64"><span>Switcher</span></a>
+      <a href="/apps/#testkit"><img src="/media/apps/testkit.png" alt="" width="64" height="64"><span>Test Kit</span></a>
+      <a href="/apps/#ndiwebcam"><img src="/media/apps/ndiwebcam.png" alt="" width="64" height="64"><span>NDI Webcam</span></a>
+    </div>
+    <div class="row"><a class="btn" href="/apps/">See all the apps</a></div>
   </div>
 </section>
 
