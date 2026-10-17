@@ -50,3 +50,18 @@ Prices are worked out in `store.js` (and shown by the calculator in `index.html`
 
 - `GET /api/timer/latest`: version from `TIMER_VERSION` (and `TIMER_NOTES`), `null` until set
 - `GET /api/testkit/latest`: version from `TESTKIT_VERSION` (and `TESTKIT_NOTES`), `null` until set
+
+## App updates (one click)
+
+Every Showcaller app (Multiview, Timer, Test Kit, Replay, ISO, Switcher, NDI Webcam) asks `GET /api/<app>/latest` on start and from Help → Check for Updates. When `public/updates/<app>/latest.json` is there, the answer also carries a signed update zip: the app shows "Update available", downloads the zip, checks its signature against the update key, installs it and restarts. Settings and licenses stay. `updates.js` handles this; for Multiview, Timer and Test Kit a newer zip wins over the older Cloudflare variables above.
+
+To publish an update:
+
+1. On the Mac: `node sc-update.js pack "<app folder>" "../../Showcaller Studio Admin (keep private)/update-key.pem"` from inside the app's folder. It makes `<name>-update-<version>.zip` in `Documents/Showcaller/Releases` from the files in the app's `build.files`, signs it, and prints its `sha256` and `size`.
+2. Here: put the zip in `public/updates/<app>/` and write `public/updates/<app>/latest.json`:
+   `{ "version": "1.6.3", "notes": "One line on what's new", "zip": "/updates/<app>/<file>.zip", "sha256": "…", "size": 123456 }`
+3. Push to `main`. Apps see it within five minutes.
+
+Update zips hold only the app's own code (no Electron, no libraries), so they're small, but each must stay under Cloudflare's 25 MB asset limit. An update that adds a new library needs a full rebuild instead; the app says so and points to the download page. Keep a zip's old versions out of the repo: delete the previous zip when you add a new one.
+
+The update key is `update-key.pem` in "Showcaller Studio Admin (keep private)", the same key as Showcaller Studio's updates. Without it no app can be updated, so keep a backup.
