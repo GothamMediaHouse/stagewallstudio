@@ -394,6 +394,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   header.top nav a { font-size: 14px; padding: 8px 0 10px; white-space: nowrap; }
 }
 @media (max-width: 640px) { footer .wrap > span { margin-left: 0 !important; flex-basis: 100%; } }
+nav a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -405,6 +406,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     </a>
     <nav>
       <a href="/apps/">The apps</a>
+      <a href="/backtime/" aria-current="page">Backtime</a>
       <a href="/tools/">Free tools</a>
       <a href="/">Showcaller Studio</a>
     </nav>
