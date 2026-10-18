@@ -64,7 +64,7 @@ To publish an update:
 
 Update zips hold only the app's own code (no Electron, no libraries), so they're small, but each must stay under Cloudflare's 25 MB asset limit. An update that adds a new library needs a full rebuild instead; the app says so and points to the download page. Keep a zip's old versions out of the repo: delete the previous zip when you add a new one.
 
-The update key is `update-key.pem` in "Showcaller Studio Admin (keep private)", the same key as Showcaller Studio's updates. Without it no app can be updated, so keep a backup.
+The update key is `update-key.pem` in "Showcaller Studio Admin (keep private)", the same key as Showcaller Screens' updates. Without it no app can be updated, so keep a backup.
 
 ## Showcaller Hub
 

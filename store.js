@@ -33,8 +33,8 @@ export function order(d) {
     const s = Date.parse(start + 'T00:00:00Z'), today = Date.parse(ymd(Date.now()) + 'T00:00:00Z');
     if (!(s >= today - DAY && s <= today + 365 * DAY)) return { error: 'Pick a first show day within the next year.' };
   }
-  const name = rent ? `Showcaller Studio rental, one ${term}, everything included`
-    : led && proj ? 'Showcaller Studio Everything, one year' : `Showcaller Studio${led ? ' + LED' : ''}${proj ? ' + Projection' : ''}, one year`;
+  const name = rent ? `Showcaller Screens rental, one ${term}, everything included`
+    : led && proj ? 'Showcaller Screens Everything, one year' : `Showcaller Screens${led ? ' + LED' : ''}${proj ? ' + Projection' : ''}, one year`;
   return { term, n, led, proj, each, start, name };
 }
 // The date the key ends: a year from today, or the rental's length from its first show day
@@ -134,7 +134,7 @@ export async function fulfil(env, sessionId) {
   if (o.error) throw new Error(`Session ${s.id} has no order details`);
   const buyer = s.customer_details || {};
   const named = (s.custom_fields || []).find((f) => f.key === 'licensee')?.text?.value;
-  const to = clean(named || buyer.name || buyer.email || 'Showcaller Studio customer', 60);
+  const to = clean(named || buyer.name || buyer.email || 'Showcaller Screens customer', 60);
   const exp = endDate(o);
   const addons = [...(o.led ? ['led'] : []), ...(o.proj ? ['projection'] : [])];
   const { payload, key } = await makeKey(env, { to, seats: o.n, exp, addons });
@@ -143,17 +143,17 @@ export async function fulfil(env, sessionId) {
 
   const what = `${o.name}, ${o.n} computer${o.n === 1 ? '' : 's'}`;
   const amount = `$${((s.amount_total || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  const steps = ['Open Showcaller Studio on the set computer.', 'Go to Settings → License.', 'Paste the whole key below (it starts with UPS2-) and press Save.'];
-  const text = `Thank you for buying Showcaller Studio.\n\n${what}\nLicensed to: ${to}\nKey ${payload.id}, ends ${exp}\n\nTo enter it:\n${steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\n\n${key}\n\n`
+  const steps = ['Open Showcaller Screens on the set computer.', 'Go to Settings → License.', 'Paste the whole key below (it starts with UPS2-) and press Save.'];
+  const text = `Thank you for buying Showcaller Screens.\n\n${what}\nLicensed to: ${to}\nKey ${payload.id}, ends ${exp}\n\nTo enter it:\n${steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\n\n${key}\n\n`
     + `If the app isn't installed yet, reply to this email and we'll send the installer.\nA linked computer in the same set uses the main computer's key.\n\nGotham Media House`;
   const html = `<div style="font:15px/1.6 system-ui,sans-serif;max-width:560px">`
-    + `<p>Thank you for buying Showcaller Studio.</p>`
+    + `<p>Thank you for buying Showcaller Screens.</p>`
     + `<p><b>${esc(what)}</b><br>Licensed to ${esc(to)}<br>Key ${esc(payload.id)}, ends ${esc(exp)}</p>`
     + `<p>To enter it:</p><ol>${steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>`
     + `<p style="font:13px/1.5 ui-monospace,Menlo,monospace;word-break:break-all;background:#f3f3f1;padding:12px;border-radius:6px">${esc(key)}</p>`
     + `<p>If the app isn’t installed yet, reply to this email and we’ll send the installer.</p><p>Gotham Media House</p></div>`;
   const team = String(env.CONTACT_TO || '').split(',').map((x) => x.trim()).filter(Boolean);
-  if (buyer.email) await sendMail(env, { to: [buyer.email], ...(team.length ? { reply_to: team[0] } : {}), subject: `Your Showcaller Studio license key (${payload.id})`, text, html });
+  if (buyer.email) await sendMail(env, { to: [buyer.email], ...(team.length ? { reply_to: team[0] } : {}), subject: `Your Showcaller Screens license key (${payload.id})`, text, html });
   if (team.length) await sendMail(env, { to: team, ...(buyer.email ? { reply_to: buyer.email } : {}), subject: `Sold online: ${what} to ${to} (${amount})`,
     text: `${what}\nLicensed to: ${to}\nBuyer: ${buyer.name || ''} <${buyer.email || ''}>\nPaid: ${amount}\nKey ${payload.id}, ends ${exp}\nStripe: https://dashboard.stripe.com/payments/${pi.id}\n\nIn the Admin app, Sales → Import from Stripe adds it with the sale filled in.\n\n${key}\n` });
   return { done: true, key };

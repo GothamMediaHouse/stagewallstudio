@@ -12,7 +12,7 @@ const TOOLS = {
   multiview: 'Showcaller Multiview',
   timer: 'Showcaller Timer',
   testkit: 'Showcaller Test Kit',
-  companion: 'Showcaller Studio for Bitfocus Companion',
+  companion: 'Showcaller Screens for Bitfocus Companion',
   hub: 'Showcaller Hub', // the apps page (/apps/), until the Hub's download is online
 };
 
