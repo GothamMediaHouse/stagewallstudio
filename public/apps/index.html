@@ -115,6 +115,15 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .notify .msg.bad { color: #ff7a6b; }
 @media (max-width: 440px) { .notify { grid-template-columns: minmax(0, 1fr); } }
 .done { border: 1px solid var(--accent); background: var(--accent-ground); padding: 16px 18px; font-size: 15px; display: flex; flex-direction: column; gap: 2px; }
+/* phones: keep the header to two slim rows (logo + button, then the links) */
+@media (max-width: 640px) {
+  header.top .wrap { gap: 0 12px; padding-block: 8px 0; }
+  header.top .btn.sm { margin-left: auto; order: 2; }
+  header.top nav { order: 3; flex: 1 0 100%; margin: 0; flex-wrap: nowrap; gap: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  header.top nav::-webkit-scrollbar { display: none; }
+  header.top nav a { font-size: 14px; padding: 8px 0 10px; white-space: nowrap; }
+}
+@media (max-width: 640px) { footer .wrap > span { margin-left: 0 !important; flex-basis: 100%; } }
 </style>
 </head>
 <body>
