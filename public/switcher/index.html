@@ -175,6 +175,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .license div { background: var(--bg); padding: 24px; display: flex; flex-direction: column; gap: 8px; }
 .license b { font: 600 17px var(--display); }
 .license span { color: var(--soft); font-size: 15.5px; }
+.soon { display: inline-block; margin-left: 6px; font: 600 11px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 1px 7px; vertical-align: 1px; }
 .legal { font-size: 13px; color: var(--muted); max-width: 900px; }
 /* phones: keep the header to two slim rows (logo + button, then the links) */
 @media (max-width: 640px) {
@@ -294,9 +295,9 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <div class="ftxt">
         <h3>Hardware panels.</h3>
         <p>Plug in a panel and its buttons light up with names and tally. The switcher knows a few kinds out of the box, with layouts you can change.</p>
-        <ul class="ticks"><li>Elgato Stream Deck</li><li>X-keys</li><li>MIDI controllers</li><li>The Showcaller Panel: a do-it-yourself panel with 36 lit keys and a T-bar, built from a Raspberry Pi Pico and off-the-shelf parts</li></ul>
+        <ul class="ticks"><li>Elgato Stream Deck</li><li>X-keys</li><li>MIDI controllers</li><li>The Showcaller Panel, our own panel with 36 lit keys and a T-bar <span class="soon">Coming soon</span></li></ul>
       </div>
-      <figure class="shot"><img src="/media/switcher-panels.jpg" width="1180" height="760" alt="The Control Panels window with a Showcaller Panel connected: program, preview and transition rows and a T-bar" loading="lazy"></figure>
+      <figure class="shot"><img src="/media/switcher-panels.jpg" width="1180" height="760" alt="The Control Panels window showing the Showcaller Panel layout: program, preview and transition rows and a T-bar" loading="lazy"></figure>
     </div>
     <div class="grid">
       <div class="feat"><h3>Operator links</h3><p>Give the graphics, audio, media or camera operator their own link. It opens just their page in a browser on a laptop, iPad or phone on the same network.</p></div>
@@ -341,7 +342,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <details><summary>What do I need to run it?</summary><p>A Mac with macOS 12 or later, Apple silicon or Intel, and a second display if you want the multiview full screen (with one display it opens in a window). NDI cameras are optional; it comes with practice cameras. A Windows version is on the way.</p></details>
       <details><summary>Does it take SDI or HDMI?</summary><p>Yes, through a capture card or a USB capture device the Mac can see. Outputs are NDI; to get SDI or HDMI out, send the NDI program to a converter or to <a href="/screens/">Showcaller Screens</a>.</p></details>
       <details><summary>Can I stream with it?</summary><p>Send the NDI program feed, with sound, to your streaming software or encoder, such as OBS or vMix. The switcher records the show itself as well.</p></details>
-      <details><summary>Which hardware panels work?</summary><p>Elgato Stream Deck, X-keys, MIDI controllers and the do-it-yourself Showcaller Panel, plus anything that can send commands through Bitfocus Companion. The panel support is new, so tell us what you have and we'll help set it up.</p></details>
+      <details><summary>Which hardware panels work?</summary><p>Elgato Stream Deck, X-keys and MIDI controllers, plus anything that can send commands through Bitfocus Companion. Our own Showcaller Panel, with lit keys and a T-bar, is coming soon. The panel support is new, so tell us what you have and we'll help set it up.</p></details>
       <details><summary>Is my Showcaller Screens license enough?</summary><p>No. A Screens key covers Screens and the Pro features in Timer and Multiview. The Switcher has its own key, like Replay, ISO and Playback.</p></details>
       <details><summary>How much will it cost?</summary><p>Pricing will be set when it's out of testing. Testers get the 14-day trial and can ask us about longer test keys.</p></details>
     </div>
