@@ -66,6 +66,11 @@ nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
 .hero::before { content: ""; position: absolute; left: 50%; top: 38%; width: min(1100px, 120vw); height: 620px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .16), rgba(255, 178, 36, 0)); pointer-events: none; }
 .hero .wrap { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px; padding-block: clamp(56px, 8vw, 104px) clamp(48px, 6vw, 80px); }
 .hero h1 { max-width: 13em; }
+.appmark { display: flex; align-items: center; gap: 16px; text-align: left; }
+.appmark img { width: 88px; height: 88px; filter: drop-shadow(0 10px 24px rgba(255, 178, 36, .25)); }
+.appmark b { display: block; font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -.01em; color: var(--fg); line-height: 1.2; }
+.appmark .eyebrow { display: block; margin-top: 4px; }
+@media (max-width: 480px) { .appmark img { width: 64px; height: 64px; } .appmark b { font-size: 21px; } }
 .hero .lede { max-width: 36em; }
 .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .frame { width: 100%; margin: 22px 0 0; border: 1px solid var(--line2); background: var(--panel); box-shadow: 0 40px 120px -30px rgba(0, 0, 0, .9), 0 0 0 1px rgba(255, 255, 255, .02); }
@@ -206,7 +211,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 
 <section class="hero" id="top" style="border-top:0">
   <div class="wrap">
-    <div class="eyebrow">Showcaller Screens · Screen playback for sets and stages</div>
+    <div class="appmark"><img src="/media/apps/screens-512.png" alt="" width="88" height="88"><div><b>Showcaller Screens</b><span class="eyebrow">Screen playback for sets and stages</span></div></div>
     <h1>Every screen on your set, run from one page.</h1>
     <p class="lede">Showcaller Screens puts video, stills, live cameras, web pages and graphics on set monitors, LED walls and projectors. One computer drives the screens. The crew runs them from a laptop, tablet or phone.</p>
     <div class="row">
