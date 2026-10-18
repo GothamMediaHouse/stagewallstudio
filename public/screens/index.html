@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Showcaller Screens · Every screen on your set, run from one page</title>
+<meta name="description" content="Showcaller Screens puts video, stills, live cameras, web pages and graphics on set monitors, LED walls and projectors, run from a laptop, tablet or phone. By Gotham Media House.">
+<link rel="canonical" href="https://showcallerstudio.com/screens/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Showcaller Screens">
+<meta property="og:description" content="Every screen on your set, run from one page.">
+<meta property="og:url" content="https://showcallerstudio.com/screens/">
+<meta property="og:image" content="https://showcallerstudio.com/media/poster4.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a broadcast product page. Centered opener over one large framed run-through, then wide
+   picture-led rows. Square corners and hairlines from the app itself; one amber accent. Single dark look. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut: clamp(20px, 4vw, 40px);
+}
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(40px, 6.2vw, 76px); line-height: 1.02; letter-spacing: -.03em; }
+h2 { font-size: clamp(30px, 3.8vw, 46px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s, transform .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+
+/* top bar */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body, Inter, sans-serif); letter-spacing: .42em; text-transform: uppercase; color: #ffb224; padding-left: 1px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover, nav a.on { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* opener */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: 50%; top: 38%; width: min(1100px, 120vw); height: 620px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .16), rgba(255, 178, 36, 0)); pointer-events: none; }
+.hero .wrap { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px; padding-block: clamp(56px, 8vw, 104px) clamp(48px, 6vw, 80px); }
+.hero h1 { max-width: 13em; }
+.appmark { display: flex; align-items: center; gap: 16px; text-align: left; }
+.appmark img { width: 88px; height: 88px; filter: drop-shadow(0 10px 24px rgba(255, 178, 36, .25)); }
+.appmark b { display: block; font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -.01em; color: var(--fg); line-height: 1.2; }
+.appmark .eyebrow { display: block; margin-top: 4px; }
+@media (max-width: 480px) { .appmark img { width: 64px; height: 64px; } .appmark b { font-size: 21px; } }
+.hero .lede { max-width: 36em; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.frame { width: 100%; margin: 22px 0 0; border: 1px solid var(--line2); background: var(--panel); box-shadow: 0 40px 120px -30px rgba(0, 0, 0, .9), 0 0 0 1px rgba(255, 255, 255, .02); }
+.frame .chrome { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+.frame .chrome i { width: 10px; height: 10px; border-radius: 50%; background: var(--line2); }
+.frame .chrome span { margin-left: 10px; font-size: 12.5px; color: var(--muted); letter-spacing: .02em; }
+.frame video, .frame img { display: block; width: 100%; height: auto; }
+.hero figcaption { margin-top: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1px; width: 100%; background: var(--line); border: 1px solid var(--line); margin-top: 10px; }
+.facts div { background: var(--bg); padding: 18px 16px; display: flex; flex-direction: column; gap: 3px; text-align: left; }
+.facts b { font: 600 15.5px var(--display); }
+.facts span { font-size: 14px; color: var(--muted); }
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(64px, 8vw, 108px); display: flex; flex-direction: column; gap: clamp(30px, 4vw, 48px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+.family { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; }
+.family a { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--soft); text-decoration: none; font-size: 14px; font-weight: 500; text-align: center; }
+.family a:hover { border-color: var(--line2); color: var(--fg); }
+.family img { width: 64px; height: 64px; }
+#family + #types { border-top: 1px solid var(--line); }
+
+/* project types */
+.tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tab { min-height: 68px; display: flex; align-items: center; gap: 13px; padding: 12px 18px; background: transparent; border: 1px solid var(--line2); color: var(--soft); font: 600 16.5px var(--display); cursor: pointer; text-align: left; transition: border-color .15s, color .15s, background .15s; }
+.tab:hover { color: var(--fg); border-color: var(--muted); }
+.tab svg { flex: none; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.tab small { display: block; font: 600 10.5px var(--body); letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-top: 2px; }
+.tab[aria-selected="true"] { border-color: var(--accent); background: var(--accent-ground); color: var(--fg); }
+.tab[aria-selected="true"] svg { stroke: var(--accent); }
+.pane { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 52px); align-items: center; }
+@media (max-width: 860px) { .pane { grid-template-columns: minmax(0, 1fr); } }
+.pane .txt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pane .txt h3 { font-size: 27px; letter-spacing: -.02em; }
+.pane .txt p { color: var(--soft); }
+figure { margin: 0; min-width: 0; }
+.shot { border: 1px solid var(--line2); background: var(--panel); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .85); }
+.shot img { display: block; width: 100%; height: auto; }
+ul.ticks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--soft); font-size: 16px; }
+ul.ticks li { padding-left: 26px; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 11px; height: 5px; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* picture-led feature rows */
+.rows { display: flex; flex-direction: column; gap: clamp(56px, 8vw, 104px); }
+.feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(26px, 5vw, 72px); align-items: center; }
+.feature.flip { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.feature.flip > .ftxt { order: 2; }
+@media (max-width: 860px) { .feature, .feature.flip { grid-template-columns: minmax(0, 1fr); } .feature.flip > .ftxt { order: 0; } }
+.ftxt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ftxt h3 { font-size: clamp(25px, 2.6vw, 32px); line-height: 1.12; letter-spacing: -.02em; }
+.ftxt p { color: var(--soft); }
+.phonewrap { display: flex; justify-content: center; }
+.phonewrap .shot { width: min(300px, 80%); border-radius: 30px; overflow: hidden; border-width: 6px; border-color: #23242b; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.feat { background: var(--bg); padding: 28px 26px; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.feat svg { width: 24px; height: 24px; fill: none; stroke: var(--accent); stroke-width: 1.6; margin-bottom: 6px; }
+.feat h3 { font-size: 18px; }
+.feat p { color: var(--soft); font-size: 15.5px; line-height: 1.55; }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; counter-reset: s; }
+.step { border-top: 1px solid var(--line2); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.step b { font: 600 13px var(--body); letter-spacing: .16em; color: var(--accent); }
+.step h3 { font-size: 21px; }
+.step p { color: var(--soft); font-size: 16px; }
+
+/* free trial */
+.trial { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 26px 48px; align-items: center; justify-content: space-between; }
+.trial ul.ticks { flex: 1 1 340px; min-width: 0; font-size: 16px; gap: 10px; }
+.trial-go { flex: 0 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+[hidden] { display: none !important; }
+
+/* questions */
+.faq { display: flex; flex-direction: column; max-width: 860px; }
+details { border-top: 1px solid var(--line2); }
+details:last-child { border-bottom: 1px solid var(--line2); }
+summary { cursor: pointer; padding: 22px 40px 22px 0; font: 600 19px var(--display); letter-spacing: -.01em; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; right: 6px; top: 30px; width: 10px; height: 10px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); transition: transform .2s; }
+details[open] summary::after { transform: rotate(-135deg); top: 35px; }
+details p { color: var(--soft); padding: 0 40px 24px 0; }
+
+.cta { position: relative; overflow: hidden; }
+.cta::before { content: ""; position: absolute; left: 50%; bottom: -320px; width: 900px; height: 600px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(255, 178, 36, .2), rgba(255, 178, 36, 0)); pointer-events: none; }
+.cta > .wrap { position: relative; align-items: center; text-align: center; gap: 22px; }
+/* demo request form (sent by /api/contact through Resend) */
+.form { width: min(640px, 100%); display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left; }
+.form label { display: grid; gap: 6px; font-size: 14px; color: var(--soft); min-width: 0; }
+.form label.full { grid-column: 1 / -1; }
+.form *, .form *::before { box-sizing: border-box; }
+.form input, .form textarea, .form select { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 12px 14px; width: 100%; min-width: 0; }
+.form textarea { min-height: 120px; resize: vertical; }
+.form input:focus, .form textarea:focus, .form select:focus { outline: none; border-color: var(--accent); }
+.form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form .row { grid-column: 1 / -1; justify-self: stretch; justify-content: flex-start; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.form .btn[disabled] { opacity: .6; cursor: wait; }
+#formMsg { font-size: 15px; color: var(--soft); }
+#formMsg.bad { color: #ff7a6b; }
+.sent { width: min(640px, 100%); border: 1px solid var(--accent); background: var(--accent-ground); padding: 22px; }
+@media (max-width: 560px) { .form { grid-template-columns: 1fr; } }
+.contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-items: center; }
+.contact code { font: 500 17px var(--body); border: 1px solid var(--line2); padding: 12px 18px; user-select: all; background: var(--bg); }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+/* phones: keep the header to two slim rows (logo + button, then the links) */
+@media (max-width: 640px) {
+  header.top .wrap { gap: 0 12px; padding-block: 8px 0; }
+  header.top .btn.sm { margin-left: auto; order: 2; }
+  header.top nav { order: 3; flex: 1 0 100%; margin: 0; flex-wrap: nowrap; gap: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  header.top nav::-webkit-scrollbar { display: none; }
+  header.top nav a { font-size: 14px; padding: 8px 0 10px; white-space: nowrap; }
+}
+@media (max-width: 640px) { footer .wrap > span { margin-left: 0 !important; flex-basis: 100%; } }
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav id="nav">
+      <a href="#types">What it runs</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Free trial</a>
+      <a href="#questions">Questions</a>
+      <a href="/apps/">Apps</a>
+      <a href="/backtime/">Backtime</a>
+      <a href="/tools/">Free tools</a>
+    </nav>
+    <a class="btn primary sm" href="#contact">Book a demo</a>
+  </div>
+</header>
+
+<section class="hero" id="top" style="border-top:0">
+  <div class="wrap">
+    <div class="appmark"><img src="/media/apps/screens-512.png" alt="" width="88" height="88"><div><b>Showcaller Screens</b><span class="eyebrow">Screen playback for sets and stages</span></div></div>
+    <h1>Every screen on your set, run from one page.</h1>
+    <p class="lede">Showcaller Screens puts video, stills, live cameras, web pages and graphics on set monitors, LED walls and projectors. One computer drives the screens. The crew runs them from a laptop, tablet or phone.</p>
+    <div class="row">
+      <a class="btn primary" href="#contact">Book a demo</a>
+      <a class="btn" href="#pricing">Try it free</a>
+    </div>
+    <figure style="width:100%">
+      <div class="frame">
+        <div class="chrome"><i></i><i></i><i></i><span>Showcaller Screens · Morning Live</span></div>
+        <video id="tour" src="/media/tour4.mp4" poster="/media/poster4.jpg" width="1280" height="800" autoplay muted loop playsinline controls preload="metadata" aria-label="A run-through of the Showcaller Screens control page"></video>
+      </div>
+      <figcaption class="small">The control page, recorded in real time from the current app: recall two looks, send a still to one monitor, then step through the cue list with GO.</figcaption>
+    </figure>
+    <figure style="width:100%">
+      <div class="frame">
+        <div class="chrome"><i></i><i></i><i></i><span>On the set · four monitors</span></div>
+        <video id="setvid" src="/media/set4.mp4" poster="/media/set-poster4.jpg" width="1280" height="600" muted loop playsinline preload="auto" aria-label="A simulation of the set: four monitors changing as the control page above is operated"></video>
+      </div>
+      <figcaption class="small">What the set shows at the same moment. The four pictures were recorded from Showcaller Studio’s own monitor outputs during the run-through above and placed on a drawn set. “Morning Live” is a made-up show.</figcaption>
+    </figure>
+    <div class="facts">
+      <div><b>Windows and Mac</b><span>One set computer drives every screen</span></div>
+      <div><b>Your own network</b><span>No cloud service in between</span></div>
+      <div><b>Stream Deck, OSC, MIDI</b><span>Buttons and show control</span></div>
+      <div><b>ATEM, vMix, OBS</b><span>Looks can follow the switcher</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="family">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">The Showcaller apps</div>
+      <h2>One family of apps for the whole show</h2>
+      <p class="lede">Multiview, Timer, Replay and the rest work alongside Showcaller Screens. Showcaller Hub installs and updates them all, and a Screens license also unlocks the Pro features in Timer and Multiview. Timer can follow and run a rundown in Backtime, our show rundown app: <a href="/backtime/">try a sample</a>.</p>
+    </div>
+    <div class="family">
+      <a href="/apps/#studio"><img src="/media/apps/studio.png" alt="" width="64" height="64"><span>Screens</span></a>
+      <a href="/apps/#multiview"><img src="/media/apps/multiview.png" alt="" width="64" height="64"><span>Multiview</span></a>
+      <a href="/apps/#timer"><img src="/media/apps/timer.png" alt="" width="64" height="64"><span>Timer</span></a>
+      <a href="/apps/#replay"><img src="/media/apps/replay.png" alt="" width="64" height="64"><span>Replay</span></a>
+      <a href="/apps/#iso"><img src="/media/apps/iso.png" alt="" width="64" height="64"><span>ISO</span></a>
+      <a href="/apps/#playback"><img src="/media/apps/playback.png" alt="" width="64" height="64"><span>Playback</span></a>
+      <a href="/apps/#switcher"><img src="/media/apps/switcher.png" alt="" width="64" height="64"><span>Switcher</span></a>
+      <a href="/apps/#testkit"><img src="/media/apps/testkit.png" alt="" width="64" height="64"><span>Test Kit</span></a>
+      <a href="/apps/#ndiwebcam"><img src="/media/apps/ndiwebcam.png" alt="" width="64" height="64"><span>NDI Webcam</span></a>
+    </div>
+    <div class="row"><a class="btn" href="/apps/">See all the apps</a><a class="btn" href="/backtime/">Try the Backtime sample</a></div>
+  </div>
+</section>
+
+<section class="alt" id="types">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">What it runs</div>
+      <h2>Five kinds of show, one app</h2>
+      <p class="lede">Pick what you're running when Showcaller Screens opens. Each kind has its own look and its own tools, and the ones you don't need stay out of the way. Switch any time with Alt+1 to 5.</p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button type="button" class="tab" role="tab" aria-selected="true" data-t="0"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12"/><path d="M8 20h8M12 16v4"/></svg><span>Monitors</span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-t="1"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="5"/><rect x="9.5" y="4" width="5" height="5"/><rect x="16" y="4" width="5" height="5"/><rect x="3" y="10.5" width="5" height="5"/><rect x="9.5" y="10.5" width="5" height="5"/><rect x="16" y="10.5" width="5" height="5"/><path d="M3 20h18"/></svg><span>LED screens<small>Add-on</small></span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-t="2"><svg viewBox="0 0 24 24"><path d="M3 20 7 5l14 3-3 11z"/><path d="M7 5l11 14M21 8 3 20"/></svg><span>Projection mapping<small>Add-on</small></span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-t="3"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="12"/><path d="M12 15v6M8 21h8"/><path d="M10 6.5v5l4-2.5z"/></svg><span>Signage</span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-t="4"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7"/><rect x="13" y="4" width="8" height="7"/><rect x="3" y="13" width="8" height="7"/><rect x="13" y="13" width="8" height="7"/></svg><span>Multiviewer</span></button>
+    </div>
+    <div class="pane" role="tabpanel" id="pane"></div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">Features</div>
+      <h2>Built on a working set, for the people who run one</h2>
+    </div>
+    <div class="rows">
+      <div class="feature">
+        <div class="ftxt">
+          <h3>Save the whole set as a look. Run the show with GO.</h3>
+          <p>A look remembers what every monitor is showing and recalls it in one tap. Put looks in running order and step through them with GO or the space bar.</p>
+          <ul class="ticks"><li>A fade time for each cue</li><li>Cues that follow on by themselves, after a wait or when a video ends</li><li>Music and stings that start and stop with a cue</li><li>Notes beside GO so you know what's next</li></ul>
+        </div>
+        <figure class="shot"><img src="/media/cues-sw.jpg" width="1360" height="1532" alt="The cue list editor: five cues with fade times, follow-on settings and sound"></figure>
+      </div>
+      <div class="feature flip">
+        <div class="ftxt">
+          <h3>One picture across many screens</h3>
+          <p>Span a video or still across monitors, LED regions or projection surfaces. Each screen shows its own part, and the same video stays in step on every one.</p>
+          <ul class="ticks"><li>The set drawn at its true proportions</li><li>Gaps between TVs accounted for</li><li>Works across linked computers</li></ul>
+        </div>
+        <figure class="shot"><img src="/media/led-sc.jpg" width="1440" height="900" alt="An LED screens project: one backdrop spanned across three regions of a wall"></figure>
+      </div>
+      <div class="feature">
+        <div class="ftxt">
+          <h3>Run it from anywhere in the building</h3>
+          <p>The control page opens on any laptop, tablet or phone on your network. Nothing to install on the crew's devices.</p>
+          <ul class="ticks"><li>An operator PIN for running the show, an admin PIN for settings</li><li>A view-only link for producers and clients</li><li>A simple phone remote with big buttons for looks, GO and Blackout</li><li>Remote access over Tailscale, never an open port</li></ul>
+        </div>
+        <div class="phonewrap"><figure class="shot"><img src="/media/phone-sc.jpg" width="780" height="1688" alt="The control page on a phone"></figure></div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="feat"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><path d="m10 9 5 3-5 3z"/></svg><h3>Anything on any screen</h3><p>Video, stills, playlists, cameras and capture cards, app windows, web pages, clocks, countdowns and text.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/><circle cx="19" cy="12" r="2"/></svg><h3>Works with your control room</h3><p>Stream Deck through Companion, OSC and MIDI. Follow settings for ATEM, vMix, OBS and tally recall a look when the program source changes.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.2 7.6 8 9 4.800-1.400 8-4.500 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><h3>Made for live</h3><p>A pre-show check, undo, a Blackout key that works from any window, automatic recovery when a source drops, alerts on your phone, daily backups and updates you can roll back.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16 9a4 4 0 0 1 0 6M18.500 6.500a8 8 0 0 1 0 11"/></svg><h3>Sound where you want it</h3><p>Choose the sound output per monitor, set levels and lip-sync delay, and watch meters on the page or on a monitor.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h6"/></svg><h3>Show files</h3><p>Each production keeps its own sources, looks, cues and schedule. Switch shows without rebuilding the set.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M3 14h18M9 4v16"/></svg><h3>Graphics from a spreadsheet</h3><p>Point a lower third at a Google Sheet or paste a table. Names and titles fill in, and Next row moves the whole show on.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><rect x="5" y="4" width="6" height="4"/><rect x="11" y="10" width="7" height="4"/><rect x="7" y="16" width="5" height="4"/></svg><h3>A timeline</h3><p>Lay pictures on a track for each monitor and press Play, for a timed open or a walk-in loop that runs itself.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h3>Locked down</h3><p>Signed updates only, PINs with lockouts, a code on screen before a new computer can join, and one button to sign out a lost phone.</p></div>
+      <div class="feat"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="6"/><rect x="13" y="14" width="8" height="6"/><path d="M11 7h4v7M9 17H7v-7"/></svg><h3>Bigger sets</h3><p>Link a second computer and its screens join the same set, numbered and controlled from the same page.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">Getting started</div><h2>Up and running in an afternoon</h2></div>
+    <div class="steps">
+      <div class="step"><b>STEP 1</b><h3>Install on the set computer</h3><p>Plug in the screens. Showcaller Screens finds them and never touches the computer's own display.</p></div>
+      <div class="step"><b>STEP 2</b><h3>Add media and build looks</h3><p>Drag files in, send them to monitors, and save each arrangement as a look.</p></div>
+      <div class="step"><b>STEP 3</b><h3>Run the show</h3><p>From the control page, a Stream Deck, your switcher, or a schedule.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">Free trial · Beta</div>
+      <h2>Try everything free for 14 days</h2>
+      <p class="lede">Showcaller Screens is in beta. Every new install runs for 14 days with everything unlocked, including LED and Projection, so you can build a real show on your own screens before you decide.</p>
+    </div>
+    <div class="trial">
+      <ul class="ticks">
+        <li>Monitors, LED, Projection, Signage and Multiviewer</li>
+        <li>Every source type, look, cue and control option</li>
+        <li>No card and no key needed to start</li>
+        <li>Your looks and settings carry over when you license it</li>
+      </ul>
+      <div class="trial-go">
+        <a class="btn primary" href="#contact" id="trialBtn">Get the free trial</a>
+        <span class="small">Tell us about your set and we'll send the installer for Mac or Windows.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="questions">
+  <div class="wrap">
+    <div class="head"><div class="eyebrow">Questions</div><h2>Good to know</h2></div>
+    <div class="faq">
+      <details open><summary>What do I need to run it?</summary><p>A Windows PC or a Mac with a video output for each screen. The computer's own display is kept for the operator and never used as a monitor.</p></details>
+      <details><summary>Does it need the internet?</summary><p>No. It runs on your computer and your network. Web sources and phone alerts need a connection; everything else works offline.</p></details>
+      <details><summary>Can I use it for just one show?</summary><p>Yes. Licenses can be yearly or end on a date you choose, so a single production is covered. While we're in beta, get in touch and we'll work out what fits your show.</p></details>
+      <details><summary>What happens if my license runs out during a show?</summary><p>The show carries on. Showcaller Screens never takes a picture off a monitor over licensing; it reminds you on the control page until you renew.</p></details>
+      <details><summary>Can I try it first?</summary><p>Yes. Every new install is a free 14-day trial with everything unlocked, and it comes with a demo for each kind of show, with sample media. We're happy to walk you through it on a call.</p></details>
+      <details><summary>Can I add LED or Projection later?</summary><p>Yes. An add-on is a new key for the same computer. Nothing is reinstalled and your shows stay as they are.</p></details>
+      <details><summary>Who makes it?</summary><p>Gotham Media House, a video production company with 20 years in broadcast. Showcaller Screens was built to run our own studio sets, then offered to other studios.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contact">
+  <div class="wrap">
+    <h2>See it on your own screens.</h2>
+    <p class="lede">Tell us what's on your set and we'll show you how Showcaller Screens would run it.</p>
+    <form class="form" id="demoForm" novalidate>
+      <label>Your name<input name="name" autocomplete="name" required maxlength="120"></label>
+      <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
+      <label>Company or production<input name="company" autocomplete="organization" maxlength="160"></label>
+      <label>Phone (optional)<input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+      <label class="full">What's on your set?<textarea name="message" required maxlength="5000" placeholder="For example: four TVs behind the desk and an LED wall, run from one laptop"></textarea></label>
+      <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <input type="hidden" name="plan" id="formPlan">
+      <div class="row"><button type="submit" class="btn primary" id="formBtn">Book a demo</button><span id="formMsg" role="status" aria-live="polite"></span></div>
+    </form>
+    <div class="sent" id="formSent" hidden><b>Thanks, we've got it.</b><br><span class="small">We'll reply to the email you gave, usually within one working day.</span></div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span>Also from Gotham Media House: <a href="https://backtime.studio" target="_blank" rel="noopener">Backtime</a> (show rundowns, <a href="/backtime/">see a sample</a>)</span><span style="margin-left:auto">Showcaller Screens is a product of Gotham Media House.</span></div></footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  // ---- project types ----
+  const TYPES = [
+    { img: '/media/overview-sc.jpg', w: 1440, h: 900, alt: 'A Monitors project: four set monitors, the set view, the media library and saved looks', h3: 'Monitors', p: 'TVs and monitors on a set, one picture each or one picture spanned across several. The everyday mode for studios, podcasts and corporate stages.', li: ['Send any source to any monitor', 'Looks, cues, and Up next then Take', 'Set maps that match your real set', 'TV walls with the frames accounted for'] },
+    { img: '/media/led-sc.jpg', w: 1440, h: 900, alt: 'An LED screens project: the wall drawn at its true proportions with one picture across three regions', h3: 'LED screens', p: 'For walls fed from an LED processor. Bring in the pixel map you were given and Showcaller Screens cuts the output into exact regions.', li: ['Regions from an imported pixel map', 'Turned and mirrored panels', 'Wall trim and saved wall layouts', '28 test patterns, still and moving', 'Network commands to the processor'], add: 'LED add-on' },
+    { img: '/media/surfaces-sw.jpg', w: 1800, h: 1036, alt: 'Projection surfaces: three surfaces arranged as the front, side and top of a box', h3: 'Projection mapping', p: 'For projectors on set pieces and objects. Shape each picture to the thing it lands on.', li: ['Corner pin, mesh warp and masks', 'Several surfaces from one projector', 'Real-size layout, so circles stay round', 'An unfolded template for one video across a box'], add: 'Projection add-on' },
+    { img: '/media/signage-sw.jpg', w: 1240, h: 1124, alt: 'The Signage checklist: playlists, looks, the schedule, and starting with the computer', h3: 'Signage', p: 'For a lobby, a shop window or a booth. Set it up once and leave the computer alone.', li: ['Playlists of video and stills', 'A schedule by time and day', 'Starts with the computer', 'Comes back by itself after a power cut'] },
+    { img: '/media/multiview-sc.jpg', w: 1440, h: 900, alt: 'The Multiviewer console: four sources tiled with names, a clock and audio meters', h3: 'Multiviewer', p: 'For the control room. Tile cameras and other sources on one screen with names, a clock and audio meters, and send it to a monitor, SDI or HDMI out, or NDI.', li: ['Up to 16 tiles', 'Fill with inputs in one click', 'Names, clock and meters on screen', 'Its own console with a big program view'] },
+  ];
+  function setType(i) {
+    const t = TYPES[i];
+    for (const b of document.querySelectorAll('.tab')) b.setAttribute('aria-selected', String(Number(b.dataset.t) === i));
+    const fig = document.createElement('figure'); fig.className = 'shot';
+    const im = document.createElement('img'); im.src = t.img; im.width = t.w; im.height = t.h; im.alt = t.alt;
+    fig.append(im);
+    if (i === 3) { fig.style.maxWidth = '560px'; fig.style.justifySelf = 'center'; }
+    const txt = document.createElement('div'); txt.className = 'txt';
+    const h = document.createElement('h3'); h.textContent = t.h3;
+    const p = document.createElement('p'); p.textContent = t.p;
+    const ul = document.createElement('ul'); ul.className = 'ticks';
+    for (const x of t.li) { const li = document.createElement('li'); li.textContent = x; ul.append(li); }
+    txt.append(h, p, ul);
+    if (t.add) { const a = document.createElement('p'); a.className = 'small'; a.textContent = `Needs the ${t.add}.`; txt.append(a); }
+    $('#pane').replaceChildren(fig, txt);
+  }
+  $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('.tab'); if (b) setType(Number(b.dataset.t)); });
+  setType(0);
+
+  // ---- free trial: note it on the form so the request says what it's for ----
+  $('#trialBtn').onclick = () => { $('#formPlan').value = 'Free trial'; };
+
+  // ---- demo request: posted to /api/contact (a Cloudflare Pages Function that sends it with Resend) ----
+  const form = $('#demoForm'), started = Date.now();
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = $('#formMsg'), btn = $('#formBtn');
+    const d = Object.fromEntries(new FormData(form));
+    msg.className = '';
+    if (!d.name.trim() || !d.message.trim()) { msg.className = 'bad'; msg.textContent = 'Add your name and a line about your set.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) { msg.className = 'bad'; msg.textContent = 'That email doesn\u2019t look right.'; return; }
+    d.plan = d.plan || ''; d.ms = Date.now() - started;
+    btn.disabled = true; msg.textContent = 'Sending\u2026';
+    try {
+      const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'It didn\u2019t send.');
+      form.hidden = true; $('#formSent').hidden = false;
+    } catch (err) {
+      msg.className = 'bad'; msg.textContent = (err.message || 'It didn\u2019t send.') + ' Please try again in a minute.';
+    } finally { btn.disabled = false; }
+  };
+
+  // ---- the run-through plays by itself; if the browser won't, the poster and controls remain ----
+  const v = $('#tour'), o = $('#setvid');
+  if (v) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+  // the set follows the control page: same clock, same play and pause
+  if (v && o) {
+    const sync = () => { if (Math.abs(o.currentTime - v.currentTime) > 0.25) { try { o.currentTime = v.currentTime; } catch {} } };
+    v.addEventListener('play', () => { sync(); const p = o.play(); if (p && p.catch) p.catch(() => {}); });
+    v.addEventListener('pause', () => o.pause());
+    v.addEventListener('seeked', sync);
+    v.addEventListener('timeupdate', sync);
+    if (!v.paused) { const p = o.play(); if (p && p.catch) p.catch(() => {}); }
+  }
+
+  // ---- highlight the section being read ----
+  const links = [...document.querySelectorAll('#nav a')];
+  const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) for (const a of links) a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); }, { rootMargin: '-40% 0px -55% 0px' });
+  for (const a of links) { const h = a.getAttribute('href'); const s = h.startsWith('#') && document.querySelector(h); if (s) io.observe(s); }
+})();
+</script>
+
+</body>
+</html>
