@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Backtime sample · Showcaller Studio</title>
+<meta name="description" content="A sample Backtime rundown you can run in your browser: show clock, back times, prompter, graphics and talent view.">
+<link rel="canonical" href="https://showcallerstudio.com/backtime/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="A sample Backtime rundown">
+<meta property="og:description" content="Try a sample rundown: run the show clock, step through stories, and see the prompter, graphics and talent view follow along.">
+<meta property="og:url" content="https://showcallerstudio.com/backtime/">
+<meta property="og:image" content="https://showcallerstudio.com/media/poster4.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Same look as the other pages (copied from the Apps page), plus this page's own rules at the end. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --bg2: #101114; --panel: #14151a; --raised: #1d1e24;
+  --line: #24252c; --line2: #393a44;
+  --fg: #f1f1f4; --soft: #c5c6cf; --muted: #9495a0;
+  --accent: #ffb224; --on-accent: #0b0c0e; --accent-ground: #1b170e;
+  --live: #e5484d; --live-ground: #2a1214; --ok: #3dd68c; --ok-ground: #0f2219;
+  --display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --gut: clamp(16px, 4vw, 40px);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--gut); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(40px, 6.2vw, 76px); line-height: 1.02; letter-spacing: -.03em; }
+h2 { font-size: clamp(30px, 3.8vw, 46px); line-height: 1.08; letter-spacing: -.025em; }
+h3 { font-size: 20px; letter-spacing: -.01em; }
+p { margin: 0; }
+.lede { color: var(--soft); font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; max-width: 40em; }
+.eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.small { font-size: 14px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 26px; font: 600 16px var(--body); text-decoration: none; cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--fg); transition: border-color .15s, background .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: #ffc24f; border-color: #ffc24f; }
+.btn.sm { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 12, 14, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 30px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 11px; font: 600 21px var(--display); letter-spacing: -.01em; color: var(--fg); text-decoration: none; }
+.brand .lock { display: grid; gap: 4px; line-height: 1; }
+.brand .studio { font: 600 9.5px/1 var(--body); letter-spacing: .42em; text-transform: uppercase; color: var(--accent); padding-left: 1px; }
+nav { display: flex; flex-wrap: wrap; gap: 0 26px; margin-left: auto; }
+nav a { color: var(--soft); text-decoration: none; font-size: 15px; font-weight: 500; padding: 12px 0; border-bottom: 2px solid transparent; }
+nav a:hover { color: var(--fg); border-bottom-color: var(--accent); }
+
+
+section { border-top: 1px solid var(--line); }
+section.alt { background: var(--bg2); }
+section > .wrap { padding-block: clamp(56px, 7vw, 96px); display: flex; flex-direction: column; gap: clamp(28px, 4vw, 44px); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+[hidden] { display: none !important; }
+footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+
+/* ---------- the sample ---------- */
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.demo { border: 1px solid var(--line2); background: var(--panel); box-shadow: 0 30px 80px rgba(0, 0, 0, .5); min-width: 0; }
+.chrome { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.chrome i { width: 10px; height: 10px; border-radius: 50%; background: var(--line2); }
+.chrome span { margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--bg2); }
+.clockbox { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.clockbox b { font: 600 11px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.clockbox .mono { font-size: 22px; line-height: 1.1; }
+.ou { padding: 4px 9px; border: 1px solid var(--line2); font-size: 14px; }
+.ou.under { border-color: #1f5130; color: var(--ok); background: var(--ok-ground); }
+.ou.over { border-color: #6b2326; color: #ff8a8e; background: var(--live-ground); }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.ctl button { font: 600 14px var(--body); min-height: 40px; padding: 0 14px; background: transparent; color: var(--fg); border: 1px solid var(--line2); cursor: pointer; }
+.ctl button:hover { border-color: var(--fg); }
+.ctl button.go { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.ctl button.next { background: var(--live); border-color: var(--live); color: #fff; }
+.ctl button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.ctl button:disabled { opacity: .45; cursor: default; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); min-height: 520px; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.rundown { border-right: 1px solid var(--line); overflow-x: auto; }
+@media (max-width: 900px) { .rundown { border-right: 0; border-bottom: 1px solid var(--line); } }
+@media (max-width: 560px) { .rundown th:nth-child(3), .rundown td:nth-child(3), .rundown th:nth-child(5), .rundown td:nth-child(5) { display: none; } }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font: 600 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 10px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n, th.n { width: 36px; color: var(--muted); }
+td.t, th.t { text-align: right; white-space: nowrap; }
+tr.story { cursor: pointer; }
+tr.story:hover td { background: var(--raised); }
+tr.story.sel td { background: #1b1c22; box-shadow: inset 0 1px 0 var(--line2), inset 0 -1px 0 var(--line2); }
+tr.story.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+tr.story.aired td { color: var(--muted); }
+tr.story.aired .slug { text-decoration: line-through; text-decoration-color: var(--line2); }
+tr.story.onair td { background: var(--live-ground); }
+tr.story.onair td:first-child { box-shadow: inset 3px 0 0 var(--live); }
+.slug { font-weight: 600; }
+.who { display: block; font-size: 12.5px; color: var(--muted); }
+.type { font: 600 10.5px/1 var(--body); letter-spacing: .08em; padding: 4px 6px; border: 1px solid var(--line2); color: var(--soft); white-space: nowrap; }
+.tag-air { font: 700 10px/1 var(--body); letter-spacing: .12em; padding: 3px 5px; background: var(--live); color: #fff; margin-left: 6px; vertical-align: 2px; }
+.late { color: #ff8a8e; }
+.totals td { color: var(--muted); font-size: 13px; border-bottom: 0; }
+
+.side { display: flex; flex-direction: column; min-width: 0; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { flex: 1 0 auto; font: 600 13.5px var(--body); padding: 12px 12px; background: transparent; color: var(--muted); border: 0; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.pane { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+.script h4 { margin: 0; font: 600 18px var(--display); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.script .body { white-space: pre-wrap; color: var(--soft); font-size: 15px; line-height: 1.6; }
+.script .cue { display: block; color: var(--accent); font: 600 12px/1.5 var(--mono); margin: 8px 0 2px; }
+.script .gfx { display: block; color: #9bbcff; font: 600 12px/1.5 var(--mono); margin: 8px 0 2px; }
+
+.prompter { background: #000; flex: 1; min-height: 360px; position: relative; overflow: hidden; border: 1px solid var(--line); }
+.prompter .roll { position: absolute; left: 0; right: 0; padding: 0 8%; font: 600 clamp(22px, 2.6vw, 30px)/1.45 var(--body); color: #fff; will-change: transform; }
+.prompter .roll .sl { color: var(--accent); font-size: .6em; letter-spacing: .1em; text-transform: uppercase; display: block; margin-top: 1.4em; }
+.prompter .roll .dim { color: #6d6e78; }
+.prompter::after { content: ""; position: absolute; left: 0; right: 0; top: 34%; height: 2px; background: rgba(255, 178, 36, .55); }
+.prompter.mirror .roll { transform-origin: center; }
+.ptools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.ptools button { font: 600 13px var(--body); min-height: 34px; padding: 0 10px; background: transparent; color: var(--fg); border: 1px solid var(--line2); cursor: pointer; }
+.ptools button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+
+.frame { position: relative; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #1d2a3a, #0d1219 60%), #111; border: 1px solid var(--line); overflow: hidden; }
+.frame .cam { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .14); font: 600 clamp(14px, 2vw, 20px) var(--display); letter-spacing: .2em; text-transform: uppercase; }
+.l3 { position: absolute; left: 6%; bottom: 12%; display: flex; flex-direction: column; transform: translateX(-30px); opacity: 0; transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .3s; }
+.l3.in { transform: none; opacity: 1; }
+.l3 .a { background: var(--accent); color: #0b0c0e; font: 700 clamp(13px, 1.7vw, 19px)/1 var(--display); padding: .5em .7em; }
+.l3 .b { background: rgba(11, 12, 14, .92); color: #fff; font: 500 clamp(11px, 1.2vw, 14px)/1 var(--body); padding: .55em .7em; align-self: flex-start; }
+.gfxlist { display: flex; flex-direction: column; gap: 6px; }
+.gfxitem { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); font-size: 13.5px; }
+.gfxitem b { display: block; font-weight: 600; }
+.gfxitem span { color: var(--muted); font-size: 12.5px; }
+.gfxitem button { font: 600 12.5px var(--body); min-height: 34px; padding: 0 12px; border: 1px solid var(--line2); background: transparent; color: var(--fg); cursor: pointer; }
+.gfxitem.live { border-color: var(--live); }
+.gfxitem.live button { background: var(--live); border-color: var(--live); color: #fff; }
+
+.talent { background: #000; flex: 1; min-height: 360px; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: 18px; border: 1px solid var(--line); text-align: center; }
+.talent .lab { font: 600 12px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.talent .now { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.talent .now .sl { font: 700 clamp(22px, 3vw, 34px)/1.1 var(--display); }
+.talent .now .left { font: 600 clamp(52px, 8vw, 96px)/1 var(--mono); font-variant-numeric: tabular-nums; }
+.talent .now .left.warn { color: var(--accent); } .talent .now .left.over { color: #ff5a5f; }
+.talent .next { border-top: 1px solid var(--line2); padding-top: 10px; font-size: 16px; color: var(--soft); }
+.talent .next b { color: var(--fg); }
+
+.hint { font-size: 13.5px; color: var(--muted); padding: 10px 14px; border-top: 1px solid var(--line); }
+.hint b { color: var(--soft); }
+
+/* features */
+.band { border: 1px solid var(--accent); background: var(--accent-ground); padding: clamp(24px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: 22px 48px; align-items: center; justify-content: space-between; }
+.band .txt { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.band .txt p { color: var(--soft); }
+.band .go { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Showcaller Studio home">
+      <svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(-2.75 0)"><rect x="5" y="9" width="28" height="30" rx="7" fill="#ffb224"/><path d="M15 18l10 6-10 6z" fill="#0c0d0f"/><path d="M38 16a10 10 0 0 1 0 16M43 11a17 17 0 0 1 0 26" fill="none" stroke="#ffb224" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <span class="lock">Showcaller<span class="studio">Studio</span></span>
+    </a>
+    <nav>
+      <a href="/apps/">The apps</a>
+      <a href="/tools/">Free tools</a>
+      <a href="/">Showcaller Studio</a>
+    </nav>
+    <a class="btn primary sm" href="/#pricing">Free trial</a>
+  </div>
+</header>
+
+<section class="alt" id="sample" style="border-top:0">
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">Sample · Backtime</div>
+      <h1 style="font-size:clamp(30px,5vw,46px);margin:6px 0 12px">What a Backtime rundown looks like</h1>
+      <p class="lede">Press <b>Start show</b>, then <b>Next story</b> as each one ends. Watch the back times and the over/under change, and open the prompter, graphics and talent view on the right. This sample runs in your browser and is made up: it isn't connected to Backtime. For the real thing, see <a href="https://backtime.studio" target="_blank" rel="noopener">backtime.studio</a>.</p>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="chrome"><i></i><i></i><i></i><span>Backtime · The Six O'Clock Show · Sample</span></div>
+      <div class="bar">
+        <div class="clockbox"><b>Time of day</b><span class="mono" id="tod">17:59:30</span></div>
+        <div class="clockbox"><b>Show</b><span class="mono" id="showclock">18:00 – 18:30</span></div>
+        <div class="clockbox"><b>Planned</b><span class="mono" id="planned">29:25</span></div>
+        <span class="ou under mono" id="ou">0:35 under</span>
+        <div class="ctl">
+          <button type="button" class="go" id="start">Start show</button>
+          <button type="button" class="next" id="next" disabled>Next story</button>
+          <button type="button" id="fast" aria-pressed="false" title="Run the clock ten times faster">10× speed</button>
+          <button type="button" id="reset">Reset</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="rundown">
+          <table>
+            <thead><tr><th class="n">#</th><th>Story</th><th>Type</th><th class="t">Est</th><th class="t">Actual</th><th class="t">Back time</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="side">
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" aria-selected="true" data-tab="script">Script</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="prompter">Prompter</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="gfx">Graphics</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="talent">Talent view</button>
+          </div>
+          <div class="pane script" data-pane="script" id="script"></div>
+          <div class="pane" data-pane="prompter" hidden>
+            <div class="prompter" id="prompter"><div class="roll" id="roll"></div></div>
+            <div class="ptools"><button type="button" id="pmirror" aria-pressed="false">Mirror</button><button type="button" id="pplay" aria-pressed="false">Scroll</button><span>Follows the story on air. Scroll speed is set by the prompter operator.</span></div>
+          </div>
+          <div class="pane" data-pane="gfx" hidden>
+            <div class="frame"><div class="cam">Camera 1</div><div class="l3" id="l3"><span class="a" id="l3a"></span><span class="b" id="l3b"></span></div></div>
+            <div class="gfxlist" id="gfxlist"></div>
+          </div>
+          <div class="pane" data-pane="talent" hidden>
+            <div class="talent"><div class="lab" id="tlab">Standing by</div><div class="now"><div class="sl" id="tslug">The Six O'Clock Show</div><div class="left mono" id="tleft">0:30</div></div><div class="next" id="tnext"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hint" id="hint"><b>Back time</b> is when a story has to start for the show to end on time. A late start turns it red.</div>
+    </div>
+  </div>
+</section>
+
+<section id="timer">
+  <div class="wrap">
+    <div class="band" style="margin-top:0">
+      <div class="txt"><h3>Run it from Showcaller Timer</h3><p>Showcaller Timer can follow a Backtime rundown and put the countdown, or a confidence monitor, on the presenter's screen. With a Studio license it can run the show too: Start and Next in the timer do the same as in Backtime.</p></div>
+      <div class="go"><a class="btn" href="/tools/#timer">About the Timer</a><a class="btn" href="https://backtime.studio" target="_blank" rel="noopener">Backtime site</a></div>
+    </div>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">A Backtime sample on <a href="/">Showcaller Studio</a>. Both are made by Gotham Media House.</span></div></footer>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // The sample show: 18:00 to 18:30, planned at 29:25 (35 seconds spare). Times in seconds.
+  const START = 18 * 3600, END = START + 30 * 60;
+  const STORIES = [
+    { slug: 'Open and headlines', type: 'LIVE', who: 'Dana Reyes, Sam Okafor', est: 75,
+      script: '[CAM 1 · two-shot]\nDANA: Good evening, and welcome to the Six O\'Clock Show.\nSAM: Tonight: the bridge that finally opens, a bakery that never closes, and the weekend weather.\n[GFX · headlines strap]\nDANA: Here\'s what\'s happening.' },
+    { slug: 'River bridge opens', type: 'PKG', who: 'Reporter: Lena Park', est: 210, l3: ['Lena Park', 'Reporter'],
+      script: '[CAM 2 · Dana]\nDANA: After four years of work, the Fifth Street bridge opened to traffic this afternoon. Lena Park was there.\n[ROLL PKG · 3:10]\n[GFX · Lena Park, Reporter]\nOUT CUE: "...a shorter commute starting tomorrow."' },
+    { slug: 'Bridge: live with the mayor', type: 'INT', who: 'Sam Okafor, Mayor Ruth Alvarez', est: 240, l3: ['Ruth Alvarez', 'Mayor'],
+      script: '[CAM 3 · Sam and guest]\nSAM: The mayor joins us now. Mayor Alvarez, it took four years. Was it worth it?\n[GFX · Ruth Alvarez, Mayor]\nSAM: What happens to the ferry service now?\nSAM: Thank you for coming in.' },
+    { slug: 'Weather', type: 'LIVE', who: 'Theo Grant', est: 180, l3: ['Theo Grant', 'Weather'],
+      script: '[CAM 4 · weather wall]\nTHEO: A bright start to the weekend, but bring a coat for Sunday.\n[GFX · Theo Grant, Weather]\n[WALL · 5-day map]\nTHEO: Back to you, Dana.' },
+    { slug: 'Break 1', type: 'BREAK', who: '', est: 150, script: '[BREAK · 2:30]\nBumper out: "Still to come: the bakery that never closes."' },
+    { slug: 'All-night bakery', type: 'PKG', who: 'Reporter: Max Hill', est: 225, l3: ['Max Hill', 'Reporter'],
+      script: '[CAM 1 · Sam]\nSAM: On Delancey Street the lights are on at 3 a.m., and so is the oven.\n[ROLL PKG · 3:30]\n[GFX · Max Hill, Reporter]\nOUT CUE: "...and the first loaf is gone by four."' },
+    { slug: 'Sports', type: 'VO/SOT', who: 'Dana Reyes', est: 195,
+      script: '[CAM 2 · Dana]\nDANA: In sports, the Harbor Hawks clinched a playoff spot with a late goal.\n[VO · highlights 0:40]\n[SOT · coach 0:15]\nDANA: Game one is Thursday night.' },
+    { slug: 'Community calendar', type: 'VO', who: 'Sam Okafor', est: 140,
+      script: '[CAM 1 · Sam]\nSAM: A few things to do this weekend.\n[VO · calendar graphics]\nSAM: The farmers market moves indoors from Saturday.' },
+    { slug: 'Break 2', type: 'BREAK', who: '', est: 120, script: '[BREAK · 2:00]' },
+    { slug: 'Close', type: 'LIVE', who: 'Dana Reyes, Sam Okafor', est: 210,
+      script: '[CAM 1 · two-shot]\nDANA: That\'s the Six O\'Clock Show.\nSAM: Thanks for watching. Good night.\n[GFX · credits]\n[FADE TO BLACK]' },
+  ];
+  const planned = STORIES.reduce((a, s) => a + s.est, 0);
+
+  const mmss = (t) => { const s = Math.round(Math.abs(t)); return `${t < 0 ? '-' : ''}${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const hms = (t) => { t = Math.floor(t); return [Math.floor(t / 3600) % 24, Math.floor(t / 60) % 60, t % 60].map((x) => String(x).padStart(2, '0')).join(':'); };
+
+  // State: time of day (seconds, simulated), which story is on air, when each started and ended
+  let tod, onAir, startedAt, actual, sel, speed = 1, last = performance.now(), gfxLive = -1, pscroll = 0, pplay = false;
+  function reset() {
+    tod = START - 30; onAir = -1; startedAt = []; actual = []; sel = 0; gfxLive = -1; pscroll = 0;
+    $('start').disabled = false; $('next').disabled = true; $('next').textContent = 'Next story';
+    $('l3').classList.remove('in');
+    build(); showSel(); render();
+  }
+  // Back time: the time a story must start for the show to end at 18:30, given the stories after it
+  const backTime = (i) => END - STORIES.slice(i).reduce((a, s) => a + s.est, 0);
+  // Over/under: the planned run time against the time left, using what's already happened
+  function overUnder() {
+    if (onAir < 0) return planned - (END - START);
+    const remaining = STORIES.slice(onAir + 1).reduce((a, s) => a + s.est, 0);
+    const curLeft = Math.max(0, STORIES[onAir].est - (tod - startedAt[onAir]));
+    return (tod + curLeft + remaining) - END;
+  }
+
+  function build() {
+    $('rows').innerHTML = STORIES.map((s, i) => `<tr class="story" data-i="${i}">
+      <td class="n mono">${i + 1}</td>
+      <td><span class="slug">${esc(s.slug)}</span><span class="tagslot"></span>${s.who ? `<span class="who">${esc(s.who)}</span>` : ''}</td>
+      <td><span class="type">${s.type}</span></td>
+      <td class="t mono">${mmss(s.est)}</td>
+      <td class="t mono act"></td>
+      <td class="t mono bt"></td></tr>`).join('') +
+      `<tr class="totals"><td></td><td>Total</td><td></td><td class="t mono">${mmss(planned)}</td><td class="t mono" id="actTot"></td><td></td></tr>`;
+    $('planned').textContent = mmss(planned);
+    const g = STORIES.map((s, i) => [s, i]).filter(([s]) => s.l3);
+    $('gfxlist').innerHTML = g.map(([s, i]) => `<div class="gfxitem" data-g="${i}"><div><b>${esc(s.l3[0])}</b><span>${esc(s.l3[1])} · story ${i + 1}, ${esc(s.slug)}</span></div><button type="button">Take</button></div>`).join('');
+  }
+
+  function render() {
+    $('tod').textContent = hms(tod);
+    const ou = overUnder();
+    $('ou').textContent = ou === 0 ? 'On time' : `${mmss(Math.abs(ou))} ${ou > 0 ? 'over' : 'under'}`;
+    $('ou').className = `ou mono ${ou > 0 ? 'over' : 'under'}`;
+    let tot = 0;
+    document.querySelectorAll('#rows tr.story').forEach((tr) => {
+      const i = Number(tr.dataset.i), s = STORIES[i];
+      tr.classList.toggle('aired', i < onAir);
+      tr.classList.toggle('onair', i === onAir);
+      tr.classList.toggle('sel', i === sel);
+      tr.querySelector('.tagslot').innerHTML = i === onAir ? '<span class="tag-air">ON AIR</span>' : '';
+      const a = i < onAir ? actual[i] : i === onAir ? tod - startedAt[i] : null;
+      if (a != null) tot += a;
+      const act = tr.querySelector('.act');
+      act.textContent = a == null ? '' : mmss(a);
+      act.classList.toggle('late', a != null && a > s.est);
+      const bt = tr.querySelector('.bt');
+      bt.textContent = hms(backTime(i));
+      // a story that started (or, not started yet, will start) after its back time makes the show run long
+      const startAt = i <= onAir ? startedAt[i] : null;
+      bt.classList.toggle('late', startAt != null && startAt > backTime(i) + 0.5);
+    });
+    $('actTot').textContent = onAir >= 0 ? mmss(tot) : '';
+    talent();
+  }
+
+  function showSel() {
+    const s = STORIES[sel];
+    const body = esc(s.script).replace(/^\[(GFX[^\]]*)\]$/gm, '<span class="gfx">[$1]</span>').replace(/^\[([^\]]+)\]$/gm, '<span class="cue">[$1]</span>');
+    $('script').innerHTML = `<h4>${sel + 1}. ${esc(s.slug)}</h4><div class="meta"><span>${s.type}</span>${s.who ? `<span>${esc(s.who)}</span>` : ''}<span>Est ${mmss(s.est)}</span><span>Back time ${hms(backTime(sel))}</span></div><div class="body">${body}</div>`;
+    // the prompter shows every story's read lines; cues in brackets stay out
+    $('roll').innerHTML = STORIES.map((x, i) => `<span class="sl" data-p="${i}">${i + 1} · ${esc(x.slug)}</span>${x.script.split('\n').filter((l) => !/^\[/.test(l)).map((l) => `<div class="${i < onAir ? 'dim' : ''}">${esc(l.replace(/^([A-Z]+):\s*/, ''))}</div>`).join('') || '<div class="dim">(no read)</div>'}`).join('') + '<div style="height:60vh"></div>';
+    const target = $('roll').querySelector(`[data-p="${onAir >= 0 ? onAir : sel}"]`);
+    pscroll = target ? target.offsetTop - $('prompter').clientHeight * 0.34 + 10 : 0;
+    placeRoll();
+  }
+  function placeRoll() { $('roll').style.transform = `translateY(${-Math.max(0, pscroll)}px)${$('prompter').classList.contains('mirror') ? ' scaleX(-1)' : ''}`; }
+
+  function talent() {
+    if (onAir < 0) {
+      $('tlab').textContent = 'Standing by'; $('tslug').textContent = 'The Six O\'Clock Show';
+      $('tleft').textContent = mmss(START - tod); $('tleft').className = 'left mono';
+      $('tnext').innerHTML = `Next: <b>${esc(STORIES[0].slug)}</b>`;
+      return;
+    }
+    if (onAir >= STORIES.length) { $('tlab').textContent = 'Off air'; $('tslug').textContent = 'Show ended'; $('tleft').textContent = ''; $('tnext').textContent = ''; return; }
+    const s = STORIES[onAir], left = s.est - (tod - startedAt[onAir]);
+    $('tlab').textContent = `On air · story ${onAir + 1} of ${STORIES.length}`;
+    $('tslug').textContent = s.slug;
+    $('tleft').textContent = mmss(left);
+    $('tleft').className = `left mono ${left < 0 ? 'over' : left < 30 ? 'warn' : ''}`;
+    const n = STORIES[onAir + 1];
+    $('tnext').innerHTML = n ? `Next: <b>${esc(n.slug)}</b> · ${esc(n.who || n.type)}` : 'Last story';
+  }
+
+  function take(i) {
+    if (onAir >= 0 && onAir < STORIES.length) actual[onAir] = tod - startedAt[onAir];
+    onAir = i;
+    if (i < STORIES.length) { startedAt[i] = tod; sel = i; }
+    $('start').disabled = true;
+    $('next').disabled = i >= STORIES.length;
+    $('next').textContent = i >= STORIES.length - 1 ? 'End show' : 'Next story';
+    $('hint').innerHTML = i >= STORIES.length ? `<b>Show ended</b> at ${hms(tod)}. ${tod > END ? `It ran ${mmss(tod - END)} long.` : tod < END ? `It came out ${mmss(END - tod)} early.` : 'Right on time.'} Press Reset to run it again.` : '<b>Back time</b> is when a story has to start for the show to end on time. A late start turns it red.';
+    showSel(); render();
+  }
+
+  $('start').onclick = () => { if (tod < START) tod = START; take(0); };
+  $('next').onclick = () => take(onAir + 1);
+  $('reset').onclick = reset;
+  $('fast').onclick = () => { speed = speed === 1 ? 10 : 1; $('fast').setAttribute('aria-pressed', String(speed > 1)); };
+  $('rows').onclick = (e) => { const tr = e.target.closest('tr.story'); if (!tr) return; sel = Number(tr.dataset.i); showSel(); render(); };
+  document.querySelectorAll('.tabs button').forEach((b) => b.onclick = () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('[data-pane]').forEach((p) => { p.hidden = p.dataset.pane !== b.dataset.tab; });
+    if (b.dataset.tab === 'prompter') showSel();
+  });
+  $('pmirror').onclick = () => { const on = $('prompter').classList.toggle('mirror'); $('pmirror').setAttribute('aria-pressed', String(on)); placeRoll(); };
+  $('pplay').onclick = () => { pplay = !pplay; $('pplay').setAttribute('aria-pressed', String(pplay)); };
+  $('gfxlist').onclick = (e) => {
+    const it = e.target.closest('.gfxitem'); if (!it || e.target.tagName !== 'BUTTON') return;
+    const i = Number(it.dataset.g), l3 = $('l3');
+    if (gfxLive === i) { gfxLive = -1; l3.classList.remove('in'); }
+    else { gfxLive = i; $('l3a').textContent = STORIES[i].l3[0]; $('l3b').textContent = STORIES[i].l3[1]; l3.classList.remove('in'); void l3.offsetWidth; l3.classList.add('in'); }
+    document.querySelectorAll('.gfxitem').forEach((x) => { const live = Number(x.dataset.g) === gfxLive; x.classList.toggle('live', live); x.querySelector('button').textContent = live ? 'Clear' : 'Take'; });
+  };
+
+  // The clock: time of day runs on its own; before the show it counts down to 18:00
+  function tick(now) {
+    const dt = Math.min(1, (now - last) / 1000); last = now;
+    tod += dt * speed;
+    if (pplay) { pscroll += dt * 34; placeRoll(); }
+    render();
+    requestAnimationFrame(tick);
+  }
+  reset();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
