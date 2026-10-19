@@ -8,7 +8,7 @@
 const TOOLS = 'https://showcallerstudio.com/tools/';
 export const APPS = {
   multiview: null, timer: null, testkit: null, // answered by multiview.js / tools.js first
-  replay: TOOLS, iso: TOOLS, switcher: TOOLS, playback: TOOLS, ndiwebcam: TOOLS, hub: TOOLS,
+  replay: TOOLS, iso: TOOLS, switcher: TOOLS, playback: TOOLS, intercom: 'https://showcallerstudio.com/apps/#intercom', ndiwebcam: TOOLS, hub: TOOLS,
 };
 const VERSION = /^\d+\.\d+\.\d+$/;
 const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
