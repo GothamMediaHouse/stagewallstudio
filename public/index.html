@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Showcaller Studio · Apps for the people who run the show</title>
-<meta name="description" content="Showcaller Studio is a family of apps for live shows, sets and stages from Gotham Media House: Showcaller Screens for every screen on the set, plus Multiview, Timer, Replay, ISO, Playback, Switcher and free tools, installed and licensed in one place by Showcaller Hub.">
+<meta name="description" content="Showcaller Studio is a family of apps for live shows, sets and stages from Gotham Media House: Showcaller Screens for every screen on the set, plus Multiview, Timer, Replay, ISO, Playback, Switcher, Intercom and free tools, installed and licensed in one place by Showcaller Hub.">
 <link rel="canonical" href="https://showcallerstudio.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Showcaller Studio">
-<meta property="og:description" content="Apps for the people who run the show: screens, multiview, timers, replay, recording, playback and switching.">
+<meta property="og:description" content="Apps for the people who run the show: screens, multiview, timers, replay, recording, playback, switching and crew comms.">
 <meta property="og:url" content="https://showcallerstudio.com/">
 <meta property="og:image" content="https://showcallerstudio.com/media/poster4.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -143,8 +143,8 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .feature .txt p { color: var(--soft); }
 .feature .go { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 .feature .shot { width: 100%; height: auto; display: block; border: 1px solid var(--line2); box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
-.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
-@media (max-width: 1000px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@media (max-width: 1000px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tile:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 @media (max-width: 520px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
 .tile { background: var(--bg); padding: 22px; display: flex; flex-direction: column; gap: 10px; color: var(--fg); text-decoration: none; min-width: 0; }
 .tile:hover { background: var(--panel); }
@@ -193,7 +193,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a class="btn primary" href="#apps">See the apps</a>
       <a class="btn" href="/apps/">Get Showcaller Hub</a>
     </div>
-    <div class="family" aria-hidden="true"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></div>
+    <div class="family" aria-hidden="true"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/intercom.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></div>
   </div>
 </section>
 
@@ -218,6 +218,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a class="tile" href="/apps/#replay"><div class="top"><img src="/media/apps/replay.png" alt="" width="48" height="48"><h3>Showcaller Replay</h3></div><p>Records every NDI source and plays any of them back as an instant replay.</p><span class="badge paid">Paid</span></a>
       <a class="tile" href="/apps/#iso"><div class="top"><img src="/media/apps/iso.png" alt="" width="48" height="48"><h3>Showcaller ISO</h3></div><p>Records every NDI source to its own file, ready for the edit.</p><span class="badge paid">Paid</span></a>
       <a class="tile" href="/apps/#playback"><div class="top"><img src="/media/apps/playback.png" alt="" width="48" height="48"><h3>Showcaller Playback</h3></div><p>Cue lists of video, stills and sound, out to NDI and SDI.</p><span class="badge test">In testing</span></a>
+      <a class="tile" href="/intercom/"><div class="top"><img src="/media/apps/intercom.png" alt="" width="48" height="48"><h3>Showcaller Intercom</h3></div><p>Crew talkback from one Mac: party lines, IFB, cue lights and tally, with crew on their phones.</p><span class="badge test">In testing</span></a>
       <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/switcher.png" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
       <a class="tile" href="/tools/#testkit"><div class="top"><img src="/media/apps/testkit.png" alt="" width="48" height="48"><h3>Showcaller Test Kit</h3></div><p>NDI bars, tone, ident and a network check for load-in.</p><span class="badge ">Free</span></a>
       <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/ndiwebcam.png" alt="" width="48" height="48"><h3>Showcaller NDI Webcam</h3></div><p>Turns a webcam or USB capture device into an NDI source.</p><span class="badge ">Free</span></a>
