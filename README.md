@@ -69,3 +69,15 @@ The update key is `update-key.pem` in "Showcaller Studio Admin (keep private)", 
 ## Showcaller Hub
 
 Showcaller Hub (the app that installs and updates every Showcaller app and holds the one license key) reads `/hub/catalog.json`, which `hub.js` makes from `public/hub/apps.json` (the apps in the order the Hub shows them) plus this repo's GitHub Releases: the newest release tagged `<app>-<version>` (e.g. `timer-1.6.4`) gives that app's `buildVersion` and `builds`, from assets named `Showcaller-<Name>-<version>-mac-arm64.zip`, `…-mac-x64.zip` and `…-win-x64.exe` (sha256 from GitHub's asset digest). Full downloads are too big for the site (Cloudflare's 25 MB limit), which is why they live on Releases; `Publish to the Hub.command` (Releases folder on the Mac) uploads them, and the catalog picks them up within 10 minutes, no commit needed. `/download/<app>/<platform>` redirects to the newest one (for Download buttons). Without a download for a platform the Hub's button opens the app's `page` instead. Updates still come from `/api/<app>/latest` above; the Hub itself checks `/api/hub/latest`. An optional `GITHUB_TOKEN` secret raises GitHub's limit on how often the list is read.
+
+## Showcaller Intercom from anywhere
+
+Crew can join the director's intercom from any network (mobile data included) through this site. The director's
+computer connects out to `/intercom/host` (one Durable Object per room, `intercom.js`, class `IntercomRoom`); crew open
+`https://showcallerstudio.com/i/<room>/<key>`, which serves the crew page in `public/intercom/crew/` (a copy of the
+Intercom app's `renderer/crew.*`, re-copy when those change). The room only passes messages through; the director's
+computer still checks every key. Sound goes direct where it can and through Cloudflare TURN where it can't.
+
+TURN setup (optional but recommended, without it only STUN is used): Cloudflare dashboard → Realtime → TURN Server →
+create a key, then set the Worker secrets `TURN_KEY_ID` and `TURN_KEY_API_TOKEN`
+(`npx wrangler secret put TURN_KEY_ID`, same for the token).

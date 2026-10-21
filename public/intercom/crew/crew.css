@@ -1,0 +1,69 @@
+@font-face { font-family: "SC Inter"; src: url(Inter.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "SC Sora"; src: url(Sora.woff2) format("woff2"); font-weight: 100 800; font-display: swap; }
+:root { --bg: #0f1013; --panel: #17181c; --line: #26282e; --text: #e8e9ec; --muted: #9a9da6; --amber: #FFB52E; --red: #e5484d; --green: #3ecf8e; --blue: #5b8def; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 15px/1.35 "SC Inter", system-ui, sans-serif; -webkit-user-select: none; user-select: none; overscroll-behavior: none; }
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+#app { min-height: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; padding: max(16px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); }
+body.pgm #app { box-shadow: inset 0 0 0 4px var(--red); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.who { display: flex; flex-direction: column; min-width: 0; }
+.who b { font: 600 21px/1.15 "SC Sora", sans-serif; }
+.who span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.conn i { width: 8px; height: 8px; border-radius: 50%; background: #666; }
+.conn.ok { color: var(--green); } .conn.ok i { background: var(--green); }
+.conn.bad { color: #ff8a8d; } .conn.bad i { background: var(--red); }
+.tally { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.tally b { font: 700 26px/1 "SC Sora", sans-serif; letter-spacing: .08em; }
+.tally.pgm { background: var(--red); color: #fff; }
+.tally.pvw { background: #1f6b46; color: #e9fff3; }
+.cue { padding: 16px; text-align: center; font: 700 30px/1 "SC Sora", sans-serif; letter-spacing: .12em; }
+.cue.standby { background: #2a2210; border: 2px solid var(--amber); color: var(--amber); }
+.cue.go { background: var(--green); color: #062417; animation: flash .5s ease-in-out 4 alternate; }
+@keyframes flash { from { filter: brightness(1); } to { filter: brightness(1.35); } }
+.tome { padding: 10px 14px; background: #10233f; border: 1px solid var(--blue); color: #cfe0ff; font-weight: 600; }
+.msg { background: #2a2210; border: 1px solid var(--amber); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.msg-h { display: flex; justify-content: space-between; font-size: 11px; color: var(--amber); letter-spacing: .08em; }
+.msg p { margin: 0; font-size: 19px; font-weight: 500; -webkit-user-select: text; user-select: text; }
+.msg .seen { align-self: flex-start; height: 40px; padding: 0 16px; background: var(--amber); color: #101114; border: 0; font-weight: 700; }
+.msg.done { background: var(--panel); border-color: var(--line); }
+.msg.done .msg-h { color: var(--muted); }
+.msg.done .seen { display: none; }
+.lines { display: flex; flex-direction: column; gap: 8px; }
+.ln { display: grid; grid-template-columns: 6px minmax(0, 1fr) auto auto; background: var(--panel); border: 1px solid var(--line); min-height: 58px; }
+.ln .bar { background: var(--c); }
+.ln .tx { padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; }
+.ln .tx b { font-size: 15px; }
+.ln .tx span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln .tx span.act { color: var(--green); }
+.ln .tx span.sb { color: var(--amber); font-weight: 600; }
+.ln button { width: 76px; border: 0; border-left: 1px solid var(--line); background: #1f2025; color: #8d9099; font-weight: 700; font-size: 12px; letter-spacing: .04em; }
+.ln button.lis.on { background: #2b3a2f; color: var(--green); }
+.ln button.tk.on { background: var(--red); color: #fff; }
+.vol { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.vol span { width: 64px; }
+.vol input { flex: 1; accent-color: var(--amber); height: 32px; }
+.grow { flex: 1; min-height: 4px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.two:empty { display: none; }
+.two button { min-height: 56px; background: #24262c; border: 1px solid #3a3c44; font-weight: 600; font-size: 14px; padding: 6px 8px; }
+.two button.on { background: var(--red); border-color: var(--red); color: #fff; }
+.ptt { position: relative; overflow: hidden; height: 172px; background: #1c1d22; border: 2px solid var(--blue); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.ptt svg { width: 40px; height: 40px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; }
+.ptt b { font: 700 21px/1.1 "SC Sora", sans-serif; }
+.ptt span { font-size: 13px; color: var(--muted); }
+.ptt.on { background: var(--red); border-color: var(--red); }
+.ptt.on svg { stroke: #fff; } .ptt.on span { color: #ffe1e2; }
+.ptt-lv { position: absolute; left: 0; bottom: 0; height: 6px; width: 0; background: #fff; opacity: .8; transition: width .08s linear; }
+.foot { margin: 0; font-size: 11px; color: #8d9099; text-align: center; }
+.join { position: fixed; inset: 0; background: rgba(8, 9, 10, .94); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 5; }
+.join[hidden] { display: none; }
+.join-card { max-width: 360px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.join-card img { border-radius: 16px; }
+.join-card h1 { margin: 6px 0 0; font: 600 24px/1.2 "SC Sora", sans-serif; }
+.join-card p { margin: 0; color: var(--muted); }
+.join-card button { margin-top: 12px; width: 100%; height: 56px; background: var(--amber); color: #101114; border: 0; font-weight: 700; font-size: 17px; }
+.join-card button:disabled { opacity: .45; }
+.join-card .small { font-size: 12px; }
