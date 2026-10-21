@@ -50,13 +50,13 @@
   $('joinBtn').onclick = async () => {
     $('joinBtn').disabled = true;
     try {
-      mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      mic = await navigator.mediaDevices.getUserMedia({ audio: isPort() ? portAudio() : { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     } catch (e) {
       $('joinShow').textContent = 'The microphone isn’t allowed. Allow it for this page in your browser’s settings, then reload.';
       $('joinBtn').disabled = false; return;
     }
     joined = true; $('join').hidden = true;
-    startSide();
+    if (isPort()) await fillPortDevices(); else startSide();
     $('out').play().catch(() => {});
     keepAwake();
     startRtc();
@@ -64,7 +64,7 @@
   async function startRtc() {
     if (pc) { try { pc.close(); } catch {} }
     const p = pc = new RTCPeerConnection({ iceServers: ice });
-    if (mic) { const t = mic.getAudioTracks()[0]; t.enabled = talking.size > 0; p.addTrack(t, mic); } else p.addTransceiver('audio', { direction: 'recvonly' });
+    if (mic) { const t = mic.getAudioTracks()[0]; t.enabled = isPort() || talking.size > 0; p.addTrack(t, mic); } else p.addTransceiver('audio', { direction: 'recvonly' });
     p.ontrack = (e) => { const o = $('out'); o.srcObject = e.streams[0] || new MediaStream([e.track]); o.play().catch(() => {}); };
     p.onconnectionstatechange = () => {
       if (p !== pc) return;
@@ -112,6 +112,15 @@
   let built = '';
   function render() {
     if (!S) return;
+    document.body.classList.toggle('isport', isPort());
+    $('portv').hidden = !isPort();
+    if (isPort()) {
+      const t = S.port.talking, m = S.port.mode;
+      $('pvState').textContent = m === 'off' ? 'Sound out only' : t ? 'Talking into the intercom' : m === 'vox' ? 'Waiting for sound' : 'Sound in and out';
+      $('pvState').classList.toggle('on', t);
+      $('joinNote').textContent = 'The browser will ask to use a sound input. Pick the other intercom’s input once you’re in.';
+      $('joinBtn').textContent = 'Connect the port';
+    }
     document.title = `${S.name} · Showcaller Intercom`;
     $('name').textContent = S.name;
     $('show').textContent = S.show ? `${S.show} · Showcaller Intercom` : 'Showcaller Intercom';
@@ -161,7 +170,7 @@
     $('two').innerHTML = [...(other.length ? [`<button type="button" data-t="line:${esc(other[0].id)}">Talk on ${esc(other[0].name)}</button>`] : []), `<button type="button" data-t="to:dir">${S.talent ? 'Talk to the director' : 'Call the director'}</button>`,
       ...(S.ifbs || []).map((t) => `<button type="button" data-t="to:${esc(t.id)}">Talk to ${esc(t.name)}</button>`)].join('');
     $('two').querySelectorAll('[data-t]').forEach((b) => smart(b, b.dataset.t));
-    $('foot').textContent = S.talent ? 'You hear the program and the director. Keep this page open.' : 'Keep this page open. The screen stays on while you’re on the intercom.';
+    $('foot').textContent = isPort() ? 'Keep this page open while the port is in use.' : S.talent ? 'You hear the program and the director. Keep this page open.' : 'Keep this page open. The screen stays on while you’re on the intercom.';
   }
   let pttBound = false;
   function bindPtt() { if (pttBound) return; pttBound = true; let target = null; const el = $('ptt'); let down = null;
@@ -170,7 +179,33 @@
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('contextmenu', (e) => e.preventDefault());
   }
   bindPtt();
-  function meter() { $('pttLv').style.width = `${talking.size ? Math.round((lv.me || 0) * 100) : 0}%`; }
+  // ---- an IP port: the sound input and output picked on this page (remembered here), no voice processing ----
+  const isPort = () => !!S?.port;
+  const pref = (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
+  const portAudio = () => ({ ...(pref('ic.portIn') ? { deviceId: { ideal: pref('ic.portIn') } } : {}), echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 });
+  async function fillPortDevices() {
+    const all = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+    const cur = mic?.getAudioTracks()[0]?.getSettings?.().deviceId || pref('ic.portIn');
+    const opt = (list, sel) => list.map((d, i) => `<option value="${esc(d.deviceId)}"${d.deviceId === sel ? ' selected' : ''}>${esc(d.label || `Device ${i + 1}`)}</option>`).join('');
+    $('pvIn').innerHTML = opt(all.filter((d) => d.kind === 'audioinput'), cur);
+    const outs = all.filter((d) => d.kind === 'audiooutput');
+    $('pvOutRow').hidden = !outs.length || !$('out').setSinkId;
+    $('pvOut').innerHTML = opt(outs, pref('ic.portOut') || 'default');
+    if (pref('ic.portOut') && $('out').setSinkId) $('out').setSinkId(pref('ic.portOut')).catch(() => {});
+  }
+  $('pvIn').onchange = async () => {
+    try { localStorage.setItem('ic.portIn', $('pvIn').value); } catch {}
+    try {
+      const m = await navigator.mediaDevices.getUserMedia({ audio: { ...portAudio(), deviceId: { exact: $('pvIn').value } } });
+      const t = m.getAudioTracks()[0], snd = pc?.getSenders().find((x) => x.track?.kind === 'audio' || !x.track);
+      if (snd) await snd.replaceTrack(t);
+      if (mic) mic.getTracks().forEach((x) => x.stop());
+      mic = m;
+    } catch (e) { console.warn(e); }
+  };
+  $('pvOut').onchange = () => { try { localStorage.setItem('ic.portOut', $('pvOut').value); } catch {} $('out').setSinkId?.($('pvOut').value).catch(() => {}); };
+  function meter() {
+    if (isPort()) { $('pvLv').style.width = `${Math.round((lv.me || 0) * 100)}%`; return; } $('pttLv').style.width = `${talking.size ? Math.round((lv.me || 0) * 100) : 0}%`; }
   $('vol').oninput = () => sendCmd({ op: 'master', vol: $('vol').value / 100 });
   $('progVol').oninput = () => sendCmd({ op: 'program', vol: $('progVol').value / 100 });
 
