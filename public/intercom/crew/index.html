@@ -27,6 +27,14 @@
     <button type="button" class="seen" id="msgSeen">Got it</button>
   </section>
 
+  <section class="portv" id="portv" hidden>
+    <div class="pv-h"><span>IP PORT</span><b id="pvState">Sound in and out</b></div>
+    <p class="pv-note" id="pvNote">This page is a direct port on the director’s intercom: the sound goes both ways all the time, with no talk keys. Plug in the other intercom or mixer and pick it below.</p>
+    <label class="pv-f"><span>Sound in (to the intercom)</span><select id="pvIn"></select></label>
+    <div class="pv-m"><i id="pvLv"></i></div>
+    <label class="pv-f" id="pvOutRow"><span>Sound out (from the intercom)</span><select id="pvOut"></select></label>
+  </section>
+
   <section class="lines" id="lines"></section>
 
   <label class="vol"><span>Volume</span><input id="vol" type="range" min="0" max="100" value="100"></label>

@@ -67,3 +67,15 @@ body.pgm #app { box-shadow: inset 0 0 0 4px var(--red); }
 .join-card button { margin-top: 12px; width: 100%; height: 56px; background: var(--amber); color: #101114; border: 0; font-weight: 700; font-size: 17px; }
 .join-card button:disabled { opacity: .45; }
 .join-card .small { font-size: 12px; }
+
+/* an IP port's page: device pickers and a meter, no talk keys */
+.portv{background:#17181d;border:1px solid #26272e;border-radius:14px;padding:16px;display:grid;gap:12px}
+.pv-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.12em;color:#8d9099}
+.pv-h b{letter-spacing:0;font-size:14px;color:#e8e8ea}
+.pv-h b.on{color:#3ddc84}
+.pv-note{margin:0;color:#8d9099;font-size:14px;line-height:1.45}
+.pv-f{display:grid;gap:6px;font-size:13px;color:#8d9099}
+.pv-f select{background:#0f1013;color:#e8e8ea;border:1px solid #33343f;border-radius:10px;padding:10px;font:inherit;font-size:15px}
+.pv-m{height:8px;background:#0f1013;border-radius:4px;overflow:hidden}
+.pv-m i{display:block;height:100%;width:0;background:#3ddc84;transition:width .1s}
+body.isport .lines,body.isport .vol,body.isport #two,body.isport #ptt,body.isport .cue,body.isport .msg,body.isport .tally,body.isport .tome{display:none!important}
