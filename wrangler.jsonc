@@ -6,5 +6,8 @@
   // Keep the variables set in the Cloudflare dashboard (CONTACT_TO, CONTACT_FROM) when this deploys
   "keep_vars": true,
   // Branch builds (pull requests) run `wrangler preview`, which needs this block; it can stay empty
-  "previews": {}
+  "previews": {},
+  // Showcaller Intercom: one room per director's computer, so crew can join from anywhere (intercom.js)
+  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }] },
+  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }]
 }

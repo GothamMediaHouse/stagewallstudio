@@ -13,3 +13,13 @@
 
 /hub/apps.json
   Cache-Control: public, max-age=300
+
+/intercom/crew/
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
+  Cache-Control: no-cache
+
+/intercom/crew/*
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
+  Cache-Control: no-cache

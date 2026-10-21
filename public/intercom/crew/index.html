@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1013">
+<title>Showcaller Intercom</title>
+<link rel="icon" href="/intercom/crew/icon.png">
+<link rel="apple-touch-icon" href="/intercom/crew/icon.png">
+<link rel="stylesheet" href="/intercom/crew/crew.css">
+</head>
+<body>
+<main id="app">
+  <header class="top">
+    <div class="who"><b id="name">Intercom</b><span id="show">Showcaller Intercom</span></div>
+    <span class="conn" id="conn"><i></i><span>Connecting…</span></span>
+  </header>
+
+  <div class="tally" id="tally" hidden></div>
+  <div class="cue" id="cue" hidden></div>
+  <div class="tome" id="toMe" hidden></div>
+
+  <section class="msg" id="msg" hidden>
+    <div class="msg-h"><span>DIRECTOR · TO YOU</span><span id="msgTime"></span></div>
+    <p id="msgText"></p>
+    <button type="button" class="seen" id="msgSeen">Got it</button>
+  </section>
+
+  <section class="lines" id="lines"></section>
+
+  <label class="vol"><span>Volume</span><input id="vol" type="range" min="0" max="100" value="100"></label>
+  <label class="vol" id="sideRow" hidden><span>Sidetone</span><input id="side" type="range" min="0" max="100" step="5" value="0" aria-label="Sidetone: hear yourself while you talk"></label>
+  <label class="vol" id="progVolRow" hidden><span>Program</span><input id="progVol" type="range" min="0" max="100" value="70"></label>
+
+  <div class="grow"></div>
+
+  <div class="two" id="two"></div>
+  <button type="button" class="ptt" id="ptt" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+    <b id="pttLabel">Hold to talk</b>
+    <span id="pttSub">Tap to keep talking, hold to talk while held</span>
+    <i class="ptt-lv" id="pttLv"></i>
+  </button>
+  <p class="foot" id="foot">Keep this page open. The screen stays on while you’re on the intercom.</p>
+</main>
+
+<div class="join" id="join">
+  <div class="join-card">
+    <img src="/intercom/crew/icon.png" alt="" width="72" height="72">
+    <h1 id="joinName">Showcaller Intercom</h1>
+    <p id="joinShow">Connecting to the director…</p>
+    <button type="button" id="joinBtn" disabled>Join the intercom</button>
+    <p class="small" id="joinNote">Your phone will ask to use the microphone. Headphones work best.</p>
+  </div>
+</div>
+<audio id="out" autoplay playsinline></audio>
+<script src="/intercom/crew/crew.js"></script>
+</body>
+</html>
