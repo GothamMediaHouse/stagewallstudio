@@ -9,7 +9,7 @@ import { gmhInquiry } from './gmh-inquiry.js';
 import { multiviewDownload, multiviewLatest } from './multiview.js';
 import { toolNotify, timerLatest, testkitLatest } from './tools.js';
 import { APPS, latestWithUpdate } from './updates.js';
-import { hubCatalog, download } from './hub.js';
+import { hubCatalog, download, hubDownload } from './hub.js';
 import { intercom, intercomPage } from './intercom.js';
 
 export { IntercomRoom } from './intercom.js';
@@ -26,6 +26,7 @@ const ROUTES = {
   '/api/timer/latest': ['GET', latestWithUpdate('timer', timerLatest)],
   '/api/testkit/latest': ['GET', latestWithUpdate('testkit', testkitLatest)],
   '/hub/catalog.json': ['GET', hubCatalog],
+  '/api/hub-download': ['POST', hubDownload],
 };
 for (const app of Object.keys(APPS)) ROUTES[`/api/${app}/latest`] ||= ['GET', latestWithUpdate(app)];
 
