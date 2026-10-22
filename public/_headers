@@ -23,3 +23,6 @@
   Referrer-Policy: no-referrer
   X-Robots-Tag: noindex
   Cache-Control: no-cache
+
+/hub/releases.json
+  Cache-Control: public, max-age=300
