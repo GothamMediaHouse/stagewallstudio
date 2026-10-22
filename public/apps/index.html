@@ -114,6 +114,14 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .notify .msg { grid-column: 1 / -1; font-size: 14.5px; color: var(--muted); min-height: 1.4em; text-align: left; }
 .notify .msg.bad { color: #ff7a6b; }
 @media (max-width: 440px) { .notify { grid-template-columns: minmax(0, 1fr); } }
+.dl { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(560px, 100%); }
+.dl input { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line2); padding: 12px 14px; width: min(420px, 100%); border-radius: 0; }
+.dl input:focus { outline: none; border-color: var(--accent); }
+.dl .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.dlbtns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.dl .btn[disabled] { opacity: .6; cursor: wait; }
+.dl .msg { font-size: 14.5px; color: var(--muted); min-height: 1.4em; }
+.dl .msg.bad { color: #ff7a6b; }
 .done { border: 1px solid var(--accent); background: var(--accent-ground); padding: 16px 18px; font-size: 15px; display: flex; flex-direction: column; gap: 2px; }
 /* phones: keep the header to two slim rows (logo + button, then the links) */
 @media (max-width: 640px) {
@@ -150,12 +158,18 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="eyebrow">Showcaller Hub</div>
     <h1>Every Showcaller app, one download.</h1>
     <p class="lede">Showcaller Hub installs the apps you need, keeps them all up to date with one click, and holds your license keys so every paid app you own is unlocked on that computer.</p>
-    <div class="dl" id="dl" hidden>
-      <a class="btn primary" href="/download/hub/mac-arm64" data-p="mac-arm64" hidden>Download for Mac (Apple silicon)</a>
-      <a class="btn" href="/download/hub/mac-x64" data-p="mac-x64" hidden>Mac with Intel</a>
-      <a class="btn" href="/download/hub/win-x64" data-p="win-x64" hidden>Windows</a>
-      <span class="small">Free. Apple silicon is any Mac with an M1 chip or newer (Apple menu › About This Mac).</span>
-    </div>
+    <form class="dl" id="dl" hidden novalidate>
+      <input name="email" type="email" autocomplete="email" maxlength="200" placeholder="Your email" aria-label="Your email, to download Showcaller Hub" required>
+      <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="dlbtns">
+        <button type="submit" class="btn primary" data-p="mac-arm64" hidden>Download for Mac (Apple silicon)</button>
+        <button type="submit" class="btn" data-p="mac-x64" hidden>Mac with Intel</button>
+        <button type="submit" class="btn" data-p="win-x64" hidden>Windows</button>
+      </div>
+      <span class="msg" role="status" aria-live="polite"></span>
+      <span class="small">Free. We’ll email you the link and how to get started, and only ever about Showcaller. No spam.</span>
+      <span class="small">Apple silicon is any Mac with an M1 chip or newer (Apple menu › About This Mac).</span>
+    </form>
     <form class="notify" id="soon" data-tool="hub" novalidate>
       <input name="email" type="email" autocomplete="email" maxlength="200" placeholder="Your email" aria-label="Email for Showcaller Hub" required>
       <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
@@ -264,7 +278,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   // The download buttons show once each one's release is online (/download/hub/<platform> redirects to it);
   // until then, a "tell me when it's out" form.
   const btns = [...document.querySelectorAll('#dl [data-p]')];
-  Promise.all(btns.map((b) => fetch(b.href, { method: 'HEAD', redirect: 'manual' }).then((r) => r.type === 'opaqueredirect' || (r.status >= 300 && r.status < 400)).catch(() => false)))
+  Promise.all(btns.map((b) => fetch(`/download/hub/${b.dataset.p}`, { method: 'HEAD', redirect: 'manual' }).then((r) => r.type === 'opaqueredirect' || (r.status >= 300 && r.status < 400)).catch(() => false)))
     .then((ok) => {
       btns.forEach((b, i) => { b.hidden = !ok[i]; });
       if (!ok.some(Boolean)) return;
@@ -272,6 +286,30 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       const first = btns.find((b) => !b.hidden); btns.forEach((b) => b.classList.toggle('primary', b === first));
       document.getElementById('dl').hidden = false; document.getElementById('soon').hidden = true;
     });
+
+  // The download asks for an email first (remembered on this browser for next time)
+  const dl = document.getElementById('dl');
+  try { dl.email.value = localStorage.getItem('sc-email') || ''; } catch {}
+  dl.onsubmit = async (e) => {
+    e.preventDefault();
+    const b = e.submitter && e.submitter.dataset.p ? e.submitter : btns.find((x) => !x.hidden);
+    const msg = dl.querySelector('.msg'), email = dl.email.value.trim();
+    msg.className = 'msg';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.className = 'msg bad'; msg.textContent = 'Enter your email to download.'; dl.email.focus(); return; }
+    btns.forEach((x) => { x.disabled = true; }); msg.textContent = 'Starting the download…';
+    try {
+      const r = await fetch('/api/hub-download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, p: b.dataset.p, website: dl.website.value, ms: Date.now() - started }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.url) throw new Error(j.error || 'It didn’t start.');
+      try { localStorage.setItem('sc-email', email); } catch {}
+      location.href = j.url;
+      msg.textContent = '';
+      const a = document.createElement('a'); a.href = j.url; a.textContent = 'click here';
+      msg.append('Downloading. Open it from your Downloads when it’s done. Didn’t start? ', a, '.');
+    } catch (err) {
+      msg.className = 'msg bad'; msg.textContent = (err.message || 'It didn’t start.') + ' Please try again.';
+    } finally { btns.forEach((x) => { x.disabled = false; }); }
+  };
 
   const form = document.getElementById('soon');
   form.onsubmit = async (e) => {
