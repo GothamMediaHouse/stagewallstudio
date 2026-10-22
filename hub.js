@@ -28,20 +28,6 @@ async function fromGitHub(env) {
     const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, {
       headers: { 'User-Agent': 'showcallerstudio.com', Accept: 'application/vnd.github+json', ...(env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}) },
     });
-    if (!r.ok) return out; // not cached, so the next request tries again
-    for (const rel of await r.json()) {
-      const m = String(rel.tag_name || '').match(/^([a-z][a-z-]*)-(\d+\.\d+\.\d+)$/); // also intercom-frame-3.7.0
-      if (!m || rel.draft || rel.prerelease) continue;
-      const [, app, version] = m;
-      if (out[app] && !newer(version, out[app].version)) continue;
-      const builds = {};
-      for (const a of rel.assets || []) {
-        const p = String(a.name || '').match(PLATFORM);
-        if (!p || a.state !== 'uploaded') continue;
-        const sha = String(a.digest || '').replace(/^sha256:/, '');
-        builds[p[1] || p[2]] = { url: a.browser_download_url, sha256: /^[0-9a-f]{64}$/.test(sha) ? sha : undefined, size: a.size };
-      }
-      if (Object.keys(builds).length) out[app] = { version, builds };
     return r.ok ? newest(await r.json()) : null;
   } catch { return null; }
 }
@@ -49,7 +35,7 @@ async function fromGitHub(env) {
 export function newest(list) {
   const out = {};
   for (const rel of list || []) {
-    const m = String(rel.tag_name || '').match(/^([a-z]+)-(\d+\.\d+\.\d+)$/);
+    const m = String(rel.tag_name || '').match(/^([a-z][a-z-]*)-(\d+\.\d+\.\d+)$/); // also intercom-frame-3.7.0
     if (!m || rel.draft || rel.prerelease) continue;
     const [, app, version] = m;
     if (out[app] && !newer(version, out[app].version)) continue;
