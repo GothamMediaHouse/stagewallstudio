@@ -250,7 +250,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="facts">
       <div><b>Party lines and IFB</b><span>Calls, Reply, cue lights, cues, tally</span></div>
       <div><b>A panel per position</b><span>Install, type the code, pick your seat</span></div>
-      <div><b>Crew on any phone</b><span>A link or QR code, here or anywhere</span></div>
+      <div><b>Crew on any phone</b><span>A link, a QR code or a phone call</span></div>
       <div><b>Free for 4 crew</b><span>A key takes the whole crew</span></div>
     </div>
   </div>
@@ -328,7 +328,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
         <div class="ftxt">
           <h3>Run the whole system from the control room.</h3>
           <p>Showcaller Intercom Comms joins the Frame as the Comms position and opens every Frame page from the control room, with your own key panel docked beside them. No one has to walk to the rack.</p>
-          <ul class="ticks"><li>Live: alerts for anything wrong, with the fix one click away</li><li>Listen in, mute someone's mic, cut their talk or call them</li><li>Copy a link, show a QR code or disconnect anyone</li><li>Calls from every panel and crew member, in one list</li></ul>
+          <ul class="ticks"><li>Live: alerts for anything wrong, with the fix one click away</li><li>Listen in, mute someone's mic, cut their talk or call them</li><li>Invite crew, copy a link, show a QR code or disconnect anyone</li><li>Lines, crew, ports and tally each on their own page</li><li>Calls from every panel and crew member, in one list</li></ul>
         </div>
         <figure class="shot"><img src="/media/intercom-comms.jpg" width="1440" height="864" alt="The Comms app's Live page: alerts for two IFBs that aren't connected with Copy their link buttons, a table of every crew member and position with their lines, level, delay and Listen in, Mute mic and Call buttons, and the comms engineer's own key panel docked on the right" loading="lazy"></figure>
       </div>
@@ -351,16 +351,16 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <div class="feature">
         <div class="ftxt">
           <h3>Install it, then pick your seat.</h3>
-          <p>Showcaller Intercom Panel is a small app for each control-room computer. It finds the Frames on the network. Type the Frame's six-digit code, pick the position, and that computer is the Director's panel, or Audio's, or Graphics'.</p>
-          <ul class="ticks"><li>The code is on the Frame's Panels page; make a new one any time</li><li>See which positions are free before you pick one</li><li>The Comms app does the same for the Comms position</li><li>Recent positions open again with one click</li><li>Or paste a position's link, or open it on an iPad with the Intercom app</li></ul>
+          <p>Showcaller Intercom Panel is a small app for each control-room computer. It lists the Frames on the network; choose one, type its six-digit code and pick the position, and that computer is the Director's panel, or Audio's, or Graphics'.</p>
+          <ul class="ticks"><li>The code is on the Frame's Panels page; make a new one any time</li><li>Over Tailscale or another network, type the Frame's address instead</li><li>See which positions are free before you pick one</li><li>The Comms app does the same for the Comms position</li><li>Recent positions open again with one click, and the app tells you if a position was removed</li><li>Or paste a position's link, or open it on an iPad with the Intercom app</li></ul>
         </div>
-        <figure class="shot"><img src="/media/intercom-panel-pick.jpg" width="640" height="490" alt="The Panel app's pick a position page: Director and Audio A1 shown as free, Audio A1 marked Comms, runs the system, with recent positions to open again" loading="lazy"></figure>
+        <figure class="shot"><img src="/media/intercom-panel-pick.jpg" width="620" height="385" alt="The Panel app's Pick a Frame page: the Frames found on the network with a Choose button, a box to type a Frame's address for Tailscale or another network, and a link to paste a position's link instead" loading="lazy"></figure>
       </div>
       <div class="feature flip">
         <div class="ftxt">
           <h3>Every line and every person, one key away.</h3>
           <p>A panel shows the party lines with CALL, LISTEN, TALK and volume, a TALK and CALL key for each person and each other panel, the talent IFBs, cue lights and text cues. Lit edges show who's on air and who's in preview.</p>
-          <ul class="ticks"><li>Tap a key to latch it, hold it to talk while it's down</li><li>Hold CALL to flash a line or a person, the way a hardware panel does</li><li>Whoever called you or talked to you last is on REPLY</li><li>ALL CALL to talk to everyone at once</li><li>F1 to F8 for each line, Space for the first, M for mic off</li></ul>
+          <ul class="ticks"><li>Tap a key to latch it, hold it to talk while it's down</li><li>Hold CALL to flash a line or a person, the way a hardware panel does</li><li>Whoever called you or talked to you last is on REPLY</li><li>ALL CALL to talk to everyone at once</li><li>F1 to F8 for each line, Space for the first, M for mic off</li><li>Panels talk and listen; only Comms changes settings or invites crew</li></ul>
         </div>
         <figure class="shot"><img src="/media/intercom-panel-position.jpg" width="1440" height="900" alt="A panel with party lines, TALK keys for crew and other panels, talent IFBs, cue lights and messages" loading="lazy"></figure>
       </div>
@@ -419,6 +419,14 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 <section id="connect">
   <div class="wrap">
     <div class="head"><div class="eyebrow">Connect</div><h2>Works with the comms you already have.</h2></div>
+    <div class="feature">
+      <div class="ftxt">
+        <h3>Phone lines, for anyone with a phone.</h3>
+        <p>Add a phone line and anyone can dial a phone number into a party line. Or add a phone IFB, and a presenter on the phone hears the program feed and whoever talks to them. It answers by itself, and it can call out too.</p>
+        <ul class="ticks"><li>Uses a SIP account from a phone provider that supports WebSocket, such as Telnyx, Twilio, 3CX or FreePBX</li><li>Choose the lines it talks on and sends out, and voice-activated talk</li><li>One call per phone line; add more lines for more callers</li><li>The caller shows on Live, and the password never leaves the computer running the intercom</li></ul>
+      </div>
+      <figure class="shot"><img src="/media/intercom-phone-line.jpg" width="1300" height="654" alt="4-wire, Dante and phone: buttons to add a 4-wire port, a Dante connection, a Dante IFB, an IP port, a phone line or a phone IFB, and a phone line's card with its phone server, SIP address, password, a number to call out with Call and Hang up, and the lines it sends out and talks on" loading="lazy"></figure>
+    </div>
     <div class="grid">
       <div class="feat"><h3>4-wire ports</h3><p>Plug in a Clear-Com, RTS or Riedel matrix, or a 2-wire party line through a converter. A port is one more member of your lines, with mix-minus so there's no echo.</p></div>
       <div class="feat"><h3>Dante ready</h3><p>Pick any channel from 1 to 64 on Dante Virtual Soundcard or a multichannel audio interface, with routing laid out like Dante Controller. Talent IFB can go out on a Dante channel too.</p></div>
@@ -436,7 +444,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="license">
       <div><b>Free for 4 crew</b><span>Up to 4 crew at once, with every feature, on Intercom or Frame: lines, IFB, tally, cues, ports and the apps.</span></div>
       <div><b>An Intercom key</b><span>A key takes the whole crew. Intercom is licensed on its own; a Showcaller Screens key doesn't unlock it.</span></div>
-      <div><b>Panels and ports don't count</b><span>Panel positions, 4-wire, Dante and IP ports, and linked intercoms aren't counted toward the crew limit.</span></div>
+      <div><b>Panels and ports don't count</b><span>Panel positions, 4-wire, Dante, IP and phone lines, and linked intercoms aren't counted toward the crew limit.</span></div>
       <div><b>Installed by Showcaller Hub</b><span><a href="/apps/">Showcaller Hub</a> installs it, keeps it up to date and holds the key with your others.</span></div>
     </div>
   </div>
@@ -467,11 +475,12 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <details><summary>Do crew need to install anything?</summary><p>No. They open their link or scan the QR code and they're on. The free iPhone and iPad app is for crew who want comms to keep working with the screen locked; a phone browser stops the microphone when the screen locks.</p></details>
       <details><summary>Does it work over the internet?</summary><p>Yes, for crew. Turn on From anywhere and their links work from any connection through showcallerstudio.com. Panels and the Comms app connect on the show network, or over Tailscale from somewhere else.</p></details>
       <details><summary>What happens if the Frame stops?</summary><p>Set up a second computer as a backup Frame. It keeps a copy of the show and takes over within seconds; crew pages move to it on their own. The iPad app reconnects by its own link, so use from-anywhere links for iPads that should follow.</p></details>
+      <details><summary>Can someone join by phone call?</summary><p>Yes. Add a phone line with a SIP account from your phone provider and anyone can dial in to a party line, or a presenter can dial in as an IFB. You need a provider that supports SIP over WebSocket, such as Telnyx, Twilio, 3CX or a FreePBX system.</p></details>
       <details><summary>Can it connect to our Clear-Com, RTS or Riedel system?</summary><p>Yes, through 4-wire ports on an audio interface or over Dante. Each port joins the lines you choose, so people on your hardware beltpacks talk straight to the crew on phones and panels. Tell us what you have and we'll help set it up.</p></details>
       <details><summary>Where does tally come from?</summary><p>From <a href="/switcher/">Showcaller Switcher</a> on the same network. Give each camera operator their switcher input and their phone shows on air and preview.</p></details>
       <details><summary>How much will it cost?</summary><p>It's free for up to 4 crew at once. Pricing for a key that takes the whole crew will be set when it's out of testing.</p></details>
     </div>
-    <p class="legal">Clear-Com, RTS, Riedel, Dante and Tailscale are trademarks of their owners. Showcaller Intercom isn't made by or affiliated with them. iPhone, iPad and App Store are trademarks of Apple Inc.</p>
+    <p class="legal">Clear-Com, RTS, Riedel, Dante, Tailscale, Telnyx, Twilio, 3CX and FreePBX are trademarks of their owners. Showcaller Intercom isn't made by or affiliated with them. iPhone, iPad and App Store are trademarks of Apple Inc.</p>
   </div>
 </section>
 
