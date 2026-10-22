@@ -3,6 +3,9 @@
 // Publishing is just a release: "Publish to the Hub.command" on the Mac uploads the zips the Install scripts
 // make, as a release tagged <app>-<version> (e.g. timer-1.6.4), so nothing here needs a commit.
 // Asset names: Showcaller-<Name>-<version>-mac-arm64.zip, …-mac-x64.zip, …-win-x64.exe
+import { json } from './contact.js';
+import { clean, send } from './multiview.js';
+
 const REPO = 'GothamMediaHouse/stagewallstudio';
 const VERSION = /^\d+\.\d+\.\d+$/;
 const PLATFORM = /-(mac-arm64|mac-x64)\.zip$|-(win-x64)\.exe$/;
@@ -79,4 +82,28 @@ export async function download(request, env) {
   const b = m && (await releases(env))[m[1]]?.builds?.[m[2]];
   if (!b) return new Response('That download isn’t available yet.', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   return Response.redirect(b.url, 302);
+}
+
+// POST /api/hub-download {email, p, ms, website}: the Apps page asks for an email before the Hub download. Gotham
+// Media House gets an email saying who downloaded it, then the page starts the download (/download/hub/<p>). A
+// failed notice never stops the download.
+const PLATFORMS = { 'mac-arm64': 'Mac (Apple silicon)', 'mac-x64': 'Mac (Intel)', 'win-x64': 'Windows' };
+export async function hubDownload(request, env) {
+  let d;
+  try { d = await request.json(); } catch { return json({ error: 'That request couldn’t be read.' }, 400); }
+  const p = clean(d.p, 20), email = clean(d.email, 200);
+  if (!PLATFORMS[p]) return json({ error: 'Pick a download.' }, 400);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Enter your email to download.' }, 400);
+  const url = `/download/hub/${p}`;
+  if (clean(d.website, 200) || Number(d.ms) < 1500) return json({ ok: true, url }); // a bot: nothing to tell anyone
+  if (env.RESEND_API_KEY && env.CONTACT_TO) {
+    const v = (await releases(env)).hub?.version;
+    await send(env, {
+      to: env.CONTACT_TO.split(',').map((x) => x.trim()).filter(Boolean),
+      reply_to: email,
+      subject: `Showcaller Hub download: ${email}`,
+      text: `Email: ${email}\nDownloaded: Showcaller Hub${v ? ` ${v}` : ''} for ${PLATFORMS[p]}\n`,
+    });
+  }
+  return json({ ok: true, url });
 }
