@@ -1,6 +1,16 @@
 {
- "written": "2026-10-22T19:49:54.325Z",
+ "written": "2026-10-22T20:38:48.170Z",
  "apps": {
+  "hub": {
+   "version": "1.5.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.5.0/Showcaller-Hub-1.5.0-mac-arm64.zip",
+     "sha256": "e643714b90a45434196d046f12769f218953f419885ae38a422f84a16c3bfbcc",
+     "size": 128519928
+    }
+   }
+  },
   "intercom": {
    "version": "3.0.0",
    "builds": {
@@ -98,16 +108,6 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/iso-2.3.5/Showcaller-ISO-2.3.5-mac-arm64.zip",
      "sha256": "1387a7d4edd493bf332486157ad54d988fd9a1f6b20d2d6ac8ab7f7d8ed28301",
      "size": 152791597
-    }
-   }
-  },
-  "hub": {
-   "version": "1.4.1",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.4.1/Showcaller-Hub-1.4.1-mac-arm64.zip",
-     "sha256": "2ea4f44d225affbbeeb084d1be8adbf258bc4587d0fc4c0b4b8f71112d3543d1",
-     "size": 128506442
     }
    }
   }
