@@ -35,7 +35,7 @@ async function fromGitHub(env) {
 export function newest(list) {
   const out = {};
   for (const rel of list || []) {
-    const m = String(rel.tag_name || '').match(/^([a-z]+)-(\d+\.\d+\.\d+)$/);
+    const m = String(rel.tag_name || '').match(/^([a-z][a-z-]*)-(\d+\.\d+\.\d+)$/); // also intercom-frame-3.7.0
     if (!m || rel.draft || rel.prerelease) continue;
     const [, app, version] = m;
     if (out[app] && !newer(version, out[app].version)) continue;
@@ -75,7 +75,7 @@ export async function hubCatalog(request, env) {
 
 // /download/hub/mac-arm64 → the newest Hub for Apple silicon Macs (for the website's Download buttons)
 export async function download(request, env) {
-  const m = new URL(request.url).pathname.match(/^\/download\/([a-z]+)\/(mac-arm64|mac-x64|win-x64)\/?$/);
+  const m = new URL(request.url).pathname.match(/^\/download\/([a-z][a-z-]*)\/(mac-arm64|mac-x64|win-x64)\/?$/);
   const b = m && (await releases(env))[m[1]]?.builds?.[m[2]];
   if (!b) return new Response('That download isn’t available yet.', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   return Response.redirect(b.url, 302);
