@@ -85,8 +85,9 @@ export async function download(request, env) {
 }
 
 // POST /api/hub-download {email, p, ms, website}: the Apps page asks for an email before the Hub download. Gotham
-// Media House gets an email saying who downloaded it, then the page starts the download (/download/hub/<p>). A
-// failed notice never stops the download.
+// Media House gets an email saying who downloaded it, the visitor gets a welcome email with the link and how to
+// start (at most one a day per address, so the form can't be used to flood someone), then the page starts the
+// download (/download/hub/<p>). A failed email never stops the download.
 const PLATFORMS = { 'mac-arm64': 'Mac (Apple silicon)', 'mac-x64': 'Mac (Intel)', 'win-x64': 'Windows' };
 export async function hubDownload(request, env) {
   let d;
@@ -97,13 +98,34 @@ export async function hubDownload(request, env) {
   const url = `/download/hub/${p}`;
   if (clean(d.website, 200) || Number(d.ms) < 1500) return json({ ok: true, url }); // a bot: nothing to tell anyone
   if (env.RESEND_API_KEY && env.CONTACT_TO) {
-    const v = (await releases(env)).hub?.version;
-    await send(env, {
-      to: env.CONTACT_TO.split(',').map((x) => x.trim()).filter(Boolean),
-      reply_to: email,
-      subject: `Showcaller Hub download: ${email}`,
-      text: `Email: ${email}\nDownloaded: Showcaller Hub${v ? ` ${v}` : ''} for ${PLATFORMS[p]}\n`,
-    });
+    const v = (await releases(env)).hub?.version, us = env.CONTACT_TO.split(',').map((x) => x.trim()).filter(Boolean);
+    await Promise.all([
+      send(env, { to: us, reply_to: email, subject: `Showcaller Hub download: ${email}`, text: `Email: ${email}\nDownloaded: Showcaller Hub${v ? ` ${v}` : ''} for ${PLATFORMS[p]}\n` }),
+      welcome(env, email, p, us[0]),
+    ]);
   }
   return json({ ok: true, url });
+}
+
+// The visitor's welcome email: the download link again and the first steps
+async function welcome(env, email, p, replyTo) {
+  const cache = caches.default, key = new Request(`https://showcallerstudio.com/__hub-welcome/${encodeURIComponent(email.toLowerCase())}`);
+  if (await cache.match(key)) return;
+  await cache.put(key, new Response('1', { headers: { 'Cache-Control': 'max-age=86400' } }));
+  const link = `https://showcallerstudio.com/download/hub/${p}`, win = p === 'win-x64';
+  const steps = win
+    ? ['Open the file you downloaded and follow the installer.', 'Showcaller Hub opens: click Install next to each app you want.', 'Paid apps start with a 14-day free trial. When you have a license key, paste it in the Hub under License.']
+    : ['Open the zip you downloaded and drag Showcaller Hub into your Applications folder.', 'Open Showcaller Hub and click Install next to each app you want.', 'Paid apps start with a 14-day free trial. When you have a license key, paste it in the Hub under License.'];
+  const esc = (x) => x.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  await send(env, {
+    to: [email],
+    ...(replyTo ? { reply_to: replyTo } : {}),
+    subject: 'Welcome to Showcaller Hub',
+    text: `Thanks for downloading Showcaller Hub for ${PLATFORMS[p]}.\n\nIf the download didn't start, here it is again:\n${link}\n\nGetting started:\n${steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\n\nQuestions? Just reply to this email.\n\nShowcaller Studio, by Gotham Media House\nhttps://showcallerstudio.com\n\nYou're getting this because you entered your email to download Showcaller Hub. We'll only email you about Showcaller.\n`,
+    html: `<div style="font:15px/1.6 system-ui,sans-serif;color:#111"><p>Thanks for downloading <b>Showcaller Hub</b> for ${esc(PLATFORMS[p])}.</p>`
+      + `<p>If the download didn't start: <a href="${esc(link)}" style="color:#b77400;font-weight:600">download Showcaller Hub</a></p>`
+      + `<p><b>Getting started</b></p><ol>${steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>`
+      + `<p>Questions? Just reply to this email.</p><p>Showcaller Studio, by Gotham Media House<br><a href="https://showcallerstudio.com">showcallerstudio.com</a></p>`
+      + `<p style="color:#777;font-size:12px">You're getting this because you entered your email to download Showcaller Hub. We'll only email you about Showcaller.</p></div>`,
+  });
 }
