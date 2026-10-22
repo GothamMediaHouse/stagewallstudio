@@ -9,34 +9,54 @@ const PLATFORM = /-(mac-arm64|mac-x64)\.zip$|-(win-x64)\.exe$/;
 const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
 
 // { <app>: { version, builds: { <platform>: { url, sha256, size } } } }, newest release per app.
-// Cached for 10 minutes (GitHub allows only so many requests without a token; GITHUB_TOKEN raises that).
+// Cached for 10 minutes. GitHub allows only 60 requests an hour without a token, shared with everything else on
+// Cloudflare's addresses, so it often says no. public/hub/releases.json, the same list written by "Publish to the
+// Hub.command" each time it publishes, always counts too. GITHUB_TOKEN, if set, makes GitHub say yes.
 async function releases(env) {
   const cache = caches.default, key = new Request('https://showcallerstudio.com/__hub-releases');
   const hit = await cache.match(key);
   if (hit) return hit.json();
-  const out = {};
+  const out = await published(env), api = await fromGitHub(env);
+  for (const [app, r] of Object.entries(api || {})) if (!out[app] || !newer(out[app].version, r.version)) out[app] = r;
+  // A list GitHub refused isn't cached, so the next request asks again
+  if (api) await cache.put(key, new Response(JSON.stringify(out), { headers: { 'Cache-Control': 'max-age=600' } }));
+  return out;
+}
+// The releases on GitHub, or null when GitHub doesn't answer
+async function fromGitHub(env) {
   try {
     const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, {
       headers: { 'User-Agent': 'showcallerstudio.com', Accept: 'application/vnd.github+json', ...(env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}) },
     });
-    if (!r.ok) return out; // not cached, so the next request tries again
-    for (const rel of await r.json()) {
-      const m = String(rel.tag_name || '').match(/^([a-z]+)-(\d+\.\d+\.\d+)$/);
-      if (!m || rel.draft || rel.prerelease) continue;
-      const [, app, version] = m;
-      if (out[app] && !newer(version, out[app].version)) continue;
-      const builds = {};
-      for (const a of rel.assets || []) {
-        const p = String(a.name || '').match(PLATFORM);
-        if (!p || a.state !== 'uploaded') continue;
-        const sha = String(a.digest || '').replace(/^sha256:/, '');
-        builds[p[1] || p[2]] = { url: a.browser_download_url, sha256: /^[0-9a-f]{64}$/.test(sha) ? sha : undefined, size: a.size };
-      }
-      if (Object.keys(builds).length) out[app] = { version, builds };
+    return r.ok ? newest(await r.json()) : null;
+  } catch { return null; }
+}
+// GitHub's list of releases → the newest release of each app, with its builds
+export function newest(list) {
+  const out = {};
+  for (const rel of list || []) {
+    const m = String(rel.tag_name || '').match(/^([a-z]+)-(\d+\.\d+\.\d+)$/);
+    if (!m || rel.draft || rel.prerelease) continue;
+    const [, app, version] = m;
+    if (out[app] && !newer(version, out[app].version)) continue;
+    const builds = {};
+    for (const a of rel.assets || []) {
+      const p = String(a.name || '').match(PLATFORM);
+      if (!p || a.state !== 'uploaded') continue;
+      const sha = String(a.digest || '').replace(/^sha256:/, '');
+      builds[p[1] || p[2]] = { url: a.browser_download_url, sha256: /^[0-9a-f]{64}$/.test(sha) ? sha : undefined, size: a.size };
     }
-    await cache.put(key, new Response(JSON.stringify(out), { headers: { 'Cache-Control': 'max-age=600' } }));
-  } catch {}
+    if (Object.keys(builds).length) out[app] = { version, builds };
+  }
   return out;
+}
+// The list Publish to the Hub wrote (public/hub/releases.json: { apps: <the same shape> })
+async function published(env) {
+  try {
+    const r = await env.ASSETS.fetch(new Request('https://showcallerstudio.com/hub/releases.json'));
+    const j = r.ok ? await r.json() : null;
+    return j && j.apps && typeof j.apps === 'object' ? j.apps : {};
+  } catch { return {}; }
 }
 
 export async function hubCatalog(request, env) {
