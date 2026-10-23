@@ -1,6 +1,16 @@
 {
- "written": "2026-10-23T12:04:11.132Z",
+ "written": "2026-10-23T13:53:12.530Z",
  "apps": {
+  "multiview": {
+   "version": "2.4.9",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.4.9/Showcaller-Multiview-2.4.9-mac-arm64.zip",
+     "sha256": "dbdb21e6ecc540efc1aa6462102d06f8d4c816212d57d6749fddb65aae2df9d7",
+     "size": 159295695
+    }
+   }
+  },
   "intercom": {
    "version": "3.10.0",
    "builds": {
@@ -88,16 +98,6 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.0.1/Showcaller-NDI-Webcam-1.0.1-mac-arm64.zip",
      "sha256": "9dcda747d3afd19d6feeca9fd440f349ff7a0024253fa019f227335a19522c9a",
      "size": 128760381
-    }
-   }
-  },
-  "multiview": {
-   "version": "2.4.8",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.4.8/Showcaller-Multiview-2.4.8-mac-arm64.zip",
-     "sha256": "7e21e047a24162c636c3a673449c4a67ceaf735cb8aec0a1ded579f46d84de47",
-     "size": 159716384
     }
    }
   },
