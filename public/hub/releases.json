@@ -1,6 +1,16 @@
 {
- "written": "2026-10-23T14:15:01.659Z",
+ "written": "2026-10-23T14:24:20.173Z",
  "apps": {
+  "hub": {
+   "version": "1.5.2",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.5.2/Showcaller-Hub-1.5.2-mac-arm64.zip",
+     "sha256": "3885d2682b4fc02b1ecf75729a1013cebbbb3667a56b63dd17c5b853d2a45a43",
+     "size": 128520503
+    }
+   }
+  },
   "multiview": {
    "version": "2.4.10",
    "builds": {
@@ -18,16 +28,6 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.10.0/Showcaller-Intercom-Remote-3.10.0-mac-arm64.zip",
      "sha256": "08137495bf79b7b09298f6cbc14ee1ce55a2043deaf6296d1b810e3439cd79cd",
      "size": 129257390
-    }
-   }
-  },
-  "hub": {
-   "version": "1.5.1",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.5.1/Showcaller-Hub-1.5.1-mac-arm64.zip",
-     "sha256": "a29038f1ac55cc40c5fec1655ab9c009be212bcb08457b6ec344f0cbea852a76",
-     "size": 128521334
     }
    }
   },
