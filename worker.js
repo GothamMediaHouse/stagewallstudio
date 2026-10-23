@@ -2,7 +2,7 @@
 // the gothammediahouse.com project inquiry form, the free Multiview app's download form and version check,
 // the free tools page's waiting lists, every app's version check and one-click update (updates.js), and
 // Showcaller Hub's app list with full downloads from GitHub releases (hub.js), and Showcaller Intercom's join-from-anywhere
-// rooms (intercom.js).
+// rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js).
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
@@ -11,8 +11,10 @@ import { toolNotify, timerLatest, testkitLatest } from './tools.js';
 import { APPS, latestWithUpdate } from './updates.js';
 import { hubCatalog, download, hubDownload } from './hub.js';
 import { intercom, intercomPage } from './intercom.js';
+import { hubReport, hubInstalls } from './installs.js';
 
 export { IntercomRoom } from './intercom.js';
+export { HubInstalls } from './installs.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
@@ -27,6 +29,8 @@ const ROUTES = {
   '/api/testkit/latest': ['GET', latestWithUpdate('testkit', testkitLatest)],
   '/hub/catalog.json': ['GET', hubCatalog],
   '/api/hub-download': ['POST', hubDownload],
+  '/api/hub/report': ['POST', hubReport],
+  '/api/hub/installs': ['GET', hubInstalls],
 };
 for (const app of Object.keys(APPS)) ROUTES[`/api/${app}/latest`] ||= ['GET', latestWithUpdate(app)];
 
