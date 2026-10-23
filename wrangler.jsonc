@@ -8,6 +8,7 @@
   // Branch builds (pull requests) run `wrangler preview`, which needs this block; it can stay empty
   "previews": {},
   // Showcaller Intercom: one room per director's computer, so crew can join from anywhere (intercom.js)
-  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }] },
-  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }]
+  // Showcaller Hub: which apps each computer has installed, read by the Admin app (installs.js)
+  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }, { "name": "HUB_INSTALLS", "class_name": "HubInstalls" }] },
+  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }, { "tag": "hub-installs-v1", "new_sqlite_classes": ["HubInstalls"] }]
 }
