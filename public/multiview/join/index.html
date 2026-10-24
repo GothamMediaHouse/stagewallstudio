@@ -82,7 +82,7 @@ h1 { font-size: clamp(34px, 5vw, 54px); }
   <div class="wrap">
     <p class="eyebrow">Invite</p>
     <h1>You’re invited to a multiview</h1>
-    <p class="lede">This link sets up Showcaller Multiview on your computer with the cameras you were invited to see.</p>
+    <p class="lede" id="lede">This link sets up Showcaller Multiview on your computer with the cameras you were invited to see.</p>
 
     <p class="bad" id="broken" hidden>This invite link isn’t complete. Copy the whole link from the message you were sent (it’s long), or ask for a new one.</p>
 
@@ -93,12 +93,12 @@ h1 { font-size: clamp(34px, 5vw, 54px); }
       </li>
       <li>
         <h3>Open the invite in the app</h3>
-        <p>Your browser may ask to open Showcaller Multiview. Allow it. The app shows what the invite sets up, installs Tailscale (free) if it isn’t on your computer yet, and joins.</p>
+        <p id="how">Your browser may ask to open Showcaller Multiview. Allow it. The app shows what the invite sets up, installs Tailscale (free) if it isn’t on your computer yet, and joins.</p>
         <div class="row"><a class="btn primary" id="open" href="#">Open in Showcaller Multiview</a></div>
       </li>
       <li>
         <h3>Didn’t open?</h3>
-        <p>Copy the invite, then in Showcaller Multiview open Settings (the ⚙ button), and under Tailscale paste it into <b>Join with an invite</b> and click Join.</p>
+        <p id="where">Copy the invite, then in Showcaller Multiview open Settings (the ⚙ button), and under Tailscale paste it into <b>Join with an invite</b> and click Join.</p>
         <div class="row"><button class="btn sm" id="copy" type="button">Copy the invite</button></div>
       </li>
     </ol>
@@ -108,8 +108,14 @@ h1 { font-size: clamp(34px, 5vw, 54px); }
 <footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span style="margin-left:auto">Showcaller Multiview is a free app from <a href="/">Showcaller Studio</a>.</span></div></footer>
 <script>
 (() => {
-  const code = (location.hash.match(/SMV1\.[A-Za-z0-9_-]+/) || [])[0];
+  // SMV1: a Multiview invite (cameras + how to connect); SCL1: a Showcaller Link invite made in the Hub (connection only)
+  const code = (location.hash.match(/(SMV1|SCL1)\.[A-Za-z0-9_-]+/) || [])[0];
   if (!code) { document.getElementById('broken').hidden = false; document.getElementById('steps').hidden = true; return; }
+  if (code.startsWith('SCL1.')) {
+    document.getElementById('lede').textContent = 'This link connects Showcaller Multiview on your computer to the studio with Showcaller Link: built in and encrypted, with nothing else to install.';
+    document.getElementById('how').textContent = 'Your browser may ask to open Showcaller Multiview. Allow it. The app shows which studio the invite is for, and joins.';
+    document.getElementById('where').innerHTML = 'Copy the invite, then in Showcaller Multiview open Settings (the ⚙ button) → Remote access, paste it into <b>Join with an invite</b> and click Join.';
+  }
   const app = 'showcaller-multiview://join/' + code;
   const open = document.getElementById('open');
   open.href = app;
