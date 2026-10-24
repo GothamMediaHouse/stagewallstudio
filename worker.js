@@ -2,7 +2,8 @@
 // the gothammediahouse.com project inquiry form, the free Multiview app's download form and version check,
 // the free tools page's waiting lists, every app's version check and one-click update (updates.js), and
 // Showcaller Hub's app list with full downloads from GitHub releases (hub.js), and Showcaller Intercom's join-from-anywhere
-// rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js).
+// rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js), and the Showcaller Link
+// relay, so a studio can let clients in without opening a port on its router (link-relay.js).
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
@@ -12,9 +13,11 @@ import { APPS, latestWithUpdate } from './updates.js';
 import { hubCatalog, download, hubDownload } from './hub.js';
 import { intercom, intercomPage } from './intercom.js';
 import { hubReport, hubInstalls } from './installs.js';
+import { linkRelay } from './link-relay.js';
 
 export { IntercomRoom } from './intercom.js';
 export { HubInstalls } from './installs.js';
+export { LinkRelay } from './link-relay.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
@@ -41,6 +44,8 @@ export default {
     // Showcaller Intercom: crew joining from anywhere (intercom.js)
     if (url.pathname === '/intercom/host' || url.pathname === '/intercom/ws') return intercom(request, env);
     if (/^\/i\/[a-z0-9]{8,24}\/(d\/)?[A-Za-z0-9_-]{8,60}\/?$/.test(url.pathname) && request.method === 'GET') return intercomPage(request, env);
+    // Showcaller Link: studios and their clients meeting here, without a port opened at the studio (link-relay.js)
+    if (url.pathname === '/link/relay/host' || url.pathname === '/link/relay/data' || url.pathname === '/link/relay/c') return linkRelay(request, env);
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {
