@@ -1,6 +1,26 @@
 {
- "written": "2026-10-23T22:36:50.437Z",
+ "written": "2026-10-24T12:16:02.064Z",
  "apps": {
+  "intercom": {
+   "version": "3.11.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.11.0/Showcaller-Intercom-Remote-3.11.0-mac-arm64.zip",
+     "sha256": "2f4af025959210b46ef345e9bb200a2adc631ba8ffa5ef2662482e0f667c7029",
+     "size": 129257046
+    }
+   }
+  },
+  "ndiwebcam": {
+   "version": "1.1.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.1.0/Showcaller-NDI-Webcam-1.1.0-mac-arm64.zip",
+     "sha256": "1b1683cbbc12baae9eb4f5615d4b81085097b2a344795d8651f5761c2805be48",
+     "size": 128922143
+    }
+   }
+  },
   "multiview": {
    "version": "2.4.10",
    "builds": {
@@ -8,16 +28,6 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.4.10/Showcaller-Multiview-2.4.10-mac-arm64.zip",
      "sha256": "c33ef855223a39507fdc9a1b42745253be51bfec39dc5c013006381fb29857ae",
      "size": 159296009
-    }
-   }
-  },
-  "intercom": {
-   "version": "3.10.0",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.10.0/Showcaller-Intercom-Remote-3.10.0-mac-arm64.zip",
-     "sha256": "08137495bf79b7b09298f6cbc14ee1ce55a2043deaf6296d1b810e3439cd79cd",
-     "size": 129257390
     }
    }
   },
@@ -88,16 +98,6 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/playback-0.1.2/Showcaller-Playback-0.1.2-mac-arm64.zip",
      "sha256": "f7ab1ce13414ebdc1e3c654af0e57b5e64fd6048fa0d27431f4ed75ce173a6ec",
      "size": 152780372
-    }
-   }
-  },
-  "ndiwebcam": {
-   "version": "1.0.1",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.0.1/Showcaller-NDI-Webcam-1.0.1-mac-arm64.zip",
-     "sha256": "9dcda747d3afd19d6feeca9fd440f349ff7a0024253fa019f227335a19522c9a",
-     "size": 128760381
     }
    }
   },
