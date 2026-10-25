@@ -1,23 +1,23 @@
 {
- "written": "2026-10-24T23:31:54.636Z",
+ "written": "2026-10-25T00:03:56.793Z",
  "apps": {
   "timer": {
-   "version": "1.7.2",
+   "version": "1.7.3",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/timer-1.7.2/Showcaller-Timer-1.7.2-mac-arm64.zip",
-     "sha256": "778ea8c04b2f66d825fa21c832701f06f1c7c865c873522fbf51f641fc572a94",
-     "size": 134100106
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/timer-1.7.3/Showcaller-Timer-1.7.3-mac-arm64.zip",
+     "sha256": "d6bdb1e5c7f25f22b09209b56ddf837dd673f2680cbf2cad9a56fcd49d077939",
+     "size": 134100192
     }
    }
   },
   "switcher": {
-   "version": "1.1.2",
+   "version": "1.1.3",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.2/Showcaller-Switcher-1.1.2-mac-arm64.zip",
-     "sha256": "8e913cde13595deab91513f7d3b02897b4e532d8b724df3512748c018d2adf52",
-     "size": 152941351
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.3/Showcaller-Switcher-1.1.3-mac-arm64.zip",
+     "sha256": "1f1b00aa444e074e279252cdb55e15b55dfb9b8096bb9b6e7c2c3f49c1d774c6",
+     "size": 152941465
     }
    }
   },
@@ -32,22 +32,22 @@
    }
   },
   "multiview": {
-   "version": "2.6.2",
+   "version": "2.6.3",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.6.2/Showcaller-Multiview-2.6.2-mac-arm64.zip",
-     "sha256": "85317ec78eb874b0c3dbdb5471dbbf2944f847ee68439645674261f9172b5c36",
-     "size": 159737481
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.6.3/Showcaller-Multiview-2.6.3-mac-arm64.zip",
+     "sha256": "03188e574db01454047d3c2eb0fd0ca67496c9fcc37bce3ddd49fee956ca61c0",
+     "size": 159738021
     }
    }
   },
   "hub": {
-   "version": "1.7.2",
+   "version": "1.7.3",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.7.2/Showcaller-Hub-1.7.2-mac-arm64.zip",
-     "sha256": "329437514cba67085a1df351c6dbb282056259a20ef9ef30614c05f25f7b8b19",
-     "size": 128537141
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.7.3/Showcaller-Hub-1.7.3-mac-arm64.zip",
+     "sha256": "fab666e2f92223380e86e211265ba7008224e88086037aad2e13fccc9bcc00d4",
+     "size": 128537145
     }
    }
   },
