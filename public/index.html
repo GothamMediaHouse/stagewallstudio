@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Showcaller Studio · Apps for the people who run the show</title>
-<meta name="description" content="Showcaller Studio is a family of apps for live shows, sets and stages from Gotham Media House: Showcaller Screens for every screen on the set, plus Multiview, Timer, Replay, ISO, Playback, Switcher, Intercom and free tools, installed and licensed in one place by Showcaller Hub.">
+<meta name="description" content="Showcaller Studio is a family of apps for live shows from Gotham Media House: Screens, Playback, Multiview, Switcher, Replay, ISO, Timer and the Showcaller Helios intercom, installed and licensed in one place by Showcaller Hub.">
 <link rel="canonical" href="https://showcallerstudio.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Showcaller Studio">
@@ -20,8 +20,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
 <script>
   // Links made before Screens had its own page (the app's "Get in touch", old emails) point at sections
-  // of the old home page: send them to the same section on /screens/.
-  (function () { var h = location.hash.slice(1); if (/^(contact|pricing|types|features|questions|top)$/.test(h)) location.replace('/screens/#' + h); })();
+  // of the old home page: send them to the same section on /screens/. #contact stays: the home page has its own form now.
+  (function () { var h = location.hash.slice(1); if (/^(pricing|types|features|questions|top)$/.test(h)) location.replace('/screens/#' + h); })();
 </script>
 <style>
 /* Same look as the other pages (copied from the apps page), plus this page's own rules at the end. */
@@ -134,6 +134,37 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .hero .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .family { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .family img { width: 52px; height: 52px; }
+.family .grp { display: flex; gap: 10px; }
+.family { gap: 10px 26px; }
+/* app groups: each group has its own colour; amber stays the family colour */
+.g-screens { --g: #ffb224; } .g-cameras { --g: #5aa2ff; } .g-record { --g: #a07dff; } .g-timing { --g: #ff6a8d; }
+.group { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: 18px clamp(20px, 3vw, 40px); padding-top: 22px; border-top: 2px solid var(--g); }
+@media (max-width: 860px) { .group { grid-template-columns: minmax(0, 1fr); } }
+.group .ghead { display: flex; flex-direction: column; gap: 8px; }
+.group .ghead .eyebrow { color: var(--g); }
+.group .ghead p { color: var(--soft); font-size: 15.5px; }
+.group .tiles { background: none; border: 0; gap: 12px; }
+.group .tile { border: 1px solid var(--line); }
+.group .tile:hover { background: var(--panel); box-shadow: inset 0 2px 0 var(--g); }
+.helios.wide { width: 100%; margin-top: 0; padding: 20px 24px 20px 20px; border-top: 2px solid #2ee6c8; }
+.helios.wide img { width: 56px; height: 56px; }
+.helios.wide .lock { font-size: 20px; }
+.helios.wide .what { font-size: 15.5px; }
+/* contact form (same as the Screens page) */
+.cta > .wrap { align-items: center; text-align: center; gap: 22px; }
+.form { width: min(640px, 100%); display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left; }
+.form label { display: grid; gap: 6px; font-size: 14px; color: var(--soft); min-width: 0; }
+.form label.full { grid-column: 1 / -1; }
+.form input, .form textarea { font: 400 16px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line2); padding: 12px 14px; width: 100%; min-width: 0; border-radius: 0; }
+.form textarea { min-height: 120px; resize: vertical; }
+.form input:focus, .form textarea:focus { outline: none; border-color: var(--accent); }
+.form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form .row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.form .btn[disabled] { opacity: .6; cursor: wait; }
+#formMsg { font-size: 15px; color: var(--soft); }
+#formMsg.bad { color: #ff7a6b; }
+.sent { width: min(640px, 100%); border: 1px solid var(--accent); background: var(--accent-ground); padding: 22px; }
+@media (max-width: 560px) { .form { grid-template-columns: 1fr; } }
 /* Showcaller Helios is its own system with its own colour (Eclipse teal), so it sits under the amber row, not in it */
 .helios { --hx-panel: #0f191c; --hx-line: #1f3238; --hx-fg: #e8f4f2; --hx-muted: #8fb0ac; --hx-accent: #2ee6c8;
   display: flex; align-items: center; gap: 14px; width: min(640px, 100%); margin-top: 10px; padding: 14px 18px 14px 14px; text-align: left; text-decoration: none;
@@ -147,15 +178,6 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .helios .what { font-size: 14.5px; line-height: 1.4; color: var(--hx-muted); }
 .helios .go { flex: none; font: 600 14.5px var(--body); color: var(--hx-accent); white-space: nowrap; }
 @media (max-width: 520px) { .helios { flex-wrap: wrap; } .helios .go { flex-basis: 100%; padding-left: 62px; } }
-.feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(24px, 4vw, 56px); align-items: center; border: 1px solid var(--line2); background: var(--bg2); padding: clamp(22px, 3.4vw, 44px); }
-@media (max-width: 860px) { .feature { grid-template-columns: minmax(0, 1fr); } }
-.feature .txt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.feature .name { display: flex; align-items: center; gap: 14px; }
-.feature .name img { width: 72px; height: 72px; flex: none; }
-.feature .name h3 { font-size: clamp(24px, 2.4vw, 30px); }
-.feature .txt p { color: var(--soft); }
-.feature .go { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
-.feature .shot { width: 100%; height: auto; display: block; border: 1px solid var(--line2); box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
 .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
 @media (max-width: 1000px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tile:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 @media (max-width: 520px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
@@ -186,13 +208,13 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <span class="lock">Showcaller<span class="studio">Studio</span></span>
     </a>
     <nav>
-      <a href="/screens/">Screens</a>
       <a href="#apps">The apps</a>
+      <a href="/intercom/">Helios</a>
       <a href="/apps/">Hub</a>
       <a href="/tools/">Free tools</a>
       <a href="/backtime/">Backtime</a>
     </nav>
-    <a class="btn primary sm" href="/screens/#contact">Get in touch</a>
+    <a class="btn primary sm" href="#contact">Get in touch</a>
   </div>
 </header>
 
@@ -201,12 +223,12 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   <div class="wrap">
     <div class="eyebrow">Showcaller Studio · by Gotham Media House</div>
     <h1>Apps for the people who run the show.</h1>
-    <p class="lede">Screens on the set, cameras in one window, the countdown, the replay, the recordings and the switcher. Built by a production company for its own shows, and made to work together.</p>
+    <p class="lede">Screens and playback, cameras and switching, recording, timing and crew comms. Built by a production company for its own shows, and made to work together.</p>
     <div class="row">
       <a class="btn primary" href="#apps">See the apps</a>
       <a class="btn" href="/apps/">Get Showcaller Hub</a>
     </div>
-    <div class="family" aria-hidden="true"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></div>
+    <div class="family" aria-hidden="true"><span class="grp"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/groups/multiview.png" alt="" width="52" height="52"><img src="/media/apps/groups/switcher.png" alt="" width="52" height="52"><img src="/media/apps/groups/ndiwebcam.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/groups/replay.png" alt="" width="52" height="52"><img src="/media/apps/groups/iso.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/groups/timer.png" alt="" width="52" height="52"><img src="/media/apps/groups/testkit.png" alt="" width="52" height="52"></span></div>
     <a class="helios" href="/intercom/">
       <img src="/media/apps/helios.png" alt="" width="48" height="48">
       <span class="txt"><span class="lock">Showcaller <b>Helios</b></span><span class="what">The intercom system: panels, crew on their phones, beltpacks.</span></span>
@@ -219,28 +241,43 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   <div class="wrap">
     <div class="head">
       <div class="eyebrow">The apps</div>
-      <h2>Start with the screens.</h2>
+      <h2>Pick the ones your show needs.</h2>
+      <p class="lede">Each group has its own colour, so you can tell at a glance what an app is for. Every app installs from Showcaller Hub.</p>
     </div>
-    <div class="feature">
-      <div class="txt">
-        <div class="name"><img src="/media/apps/screens-512.png" alt="" width="72" height="72"><div><h3>Showcaller Screens</h3><span class="badge paid">Paid · 14-day free trial</span></div></div>
-        <p>Every screen on your set, run from one page. Video, stills, live cameras, web pages and graphics on set monitors, LED walls and projectors. One computer drives the screens; the crew runs them from a laptop, tablet or phone, with looks, cues and GO.</p>
-        <p>A Screens license also unlocks the Pro features in Timer and Multiview.</p>
-        <div class="go"><a class="btn primary" href="/screens/">More about Screens</a><a class="btn" href="/screens/#contact">Book a demo</a></div>
+    <div class="group g-screens">
+      <div class="ghead"><div class="eyebrow">Screens and playback</div><p>What the audience sees on the set.</p></div>
+      <div class="tiles">
+        <a class="tile" href="/screens/"><div class="top"><img src="/media/apps/studio.png" alt="" width="48" height="48"><h3>Showcaller Screens</h3></div><p>Every screen on the set, run from one page: video, stills, cameras and graphics on monitors, LED walls and projectors. A Screens key also unlocks the Pro features in Timer and Multiview.</p><span class="badge paid">Paid · 14-day free trial</span></a>
+        <a class="tile" href="/apps/#playback"><div class="top"><img src="/media/apps/playback.png" alt="" width="48" height="48"><h3>Showcaller Playback</h3></div><p>Cue lists of video, stills and sound, out to NDI and SDI.</p><span class="badge test">In testing</span></a>
       </div>
-      <a href="/screens/"><img class="shot" src="/media/poster4.jpg" alt="Showcaller Screens running a morning show: four set monitors, looks and cues" width="1280" height="800" loading="lazy"></a>
     </div>
-    <div class="tiles">
-      <a class="tile" href="/multiview/"><div class="top"><img src="/media/apps/multiview.png" alt="" width="48" height="48"><h3>Showcaller Multiview</h3></div><p>Every NDI camera on the network in one window, with PTZ control and ATEM tally.</p><span class="badge pro">Free + Pro</span></a>
-      <a class="tile" href="/tools/#timer"><div class="top"><img src="/media/apps/timer.png" alt="" width="48" height="48"><h3>Showcaller Timer</h3></div><p>A presenter countdown and stage timer, run from your phone.</p><span class="badge pro">Free + Pro</span></a>
-      <a class="tile" href="/apps/#replay"><div class="top"><img src="/media/apps/replay.png" alt="" width="48" height="48"><h3>Showcaller Replay</h3></div><p>Records every NDI source and plays any of them back as an instant replay.</p><span class="badge paid">Paid</span></a>
-      <a class="tile" href="/apps/#iso"><div class="top"><img src="/media/apps/iso.png" alt="" width="48" height="48"><h3>Showcaller ISO</h3></div><p>Records every NDI source to its own file, ready for the edit.</p><span class="badge paid">Paid</span></a>
-      <a class="tile" href="/apps/#playback"><div class="top"><img src="/media/apps/playback.png" alt="" width="48" height="48"><h3>Showcaller Playback</h3></div><p>Cue lists of video, stills and sound, out to NDI and SDI.</p><span class="badge test">In testing</span></a>
-      <a class="tile" href="/intercom/"><div class="top"><img src="/media/apps/intercom.png" alt="" width="48" height="48"><h3>Showcaller Intercom</h3></div><p>Crew talkback for one Mac or a whole control room, with a panel at every position and crew on their phones.</p><span class="badge test">In testing</span></a>
-      <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/switcher.png" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
-      <a class="tile" href="/tools/#testkit"><div class="top"><img src="/media/apps/testkit.png" alt="" width="48" height="48"><h3>Showcaller Test Kit</h3></div><p>NDI bars, tone, ident and a network check for load-in.</p><span class="badge ">Free</span></a>
-      <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/ndiwebcam.png" alt="" width="48" height="48"><h3>Showcaller NDI Webcam</h3></div><p>Turns a webcam or USB capture device into an NDI source.</p><span class="badge ">Free</span></a>
+    <div class="group g-cameras">
+      <div class="ghead"><div class="eyebrow">Cameras and switching</div><p>Seeing, steering and cutting the cameras.</p></div>
+      <div class="tiles">
+        <a class="tile" href="/multiview/"><div class="top"><img src="/media/apps/groups/multiview.png" alt="" width="48" height="48"><h3>Showcaller Multiview</h3></div><p>Every NDI camera on the network in one window, with PTZ control and ATEM tally.</p><span class="badge pro">Free + Pro</span></a>
+        <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/groups/switcher.png" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
+        <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/groups/ndiwebcam.png" alt="" width="48" height="48"><h3>Showcaller NDI Webcam</h3></div><p>Turns a webcam or USB capture device into an NDI source.</p><span class="badge ">Free</span></a>
+      </div>
     </div>
+    <div class="group g-record">
+      <div class="ghead"><div class="eyebrow">Recording and replay</div><p>Every source on disk, and the moment back on air.</p></div>
+      <div class="tiles">
+        <a class="tile" href="/apps/#replay"><div class="top"><img src="/media/apps/groups/replay.png" alt="" width="48" height="48"><h3>Showcaller Replay</h3></div><p>Records every NDI source and plays any of them back as an instant replay.</p><span class="badge paid">Paid</span></a>
+        <a class="tile" href="/apps/#iso"><div class="top"><img src="/media/apps/groups/iso.png" alt="" width="48" height="48"><h3>Showcaller ISO</h3></div><p>Records every NDI source to its own file, ready for the edit.</p><span class="badge paid">Paid</span></a>
+      </div>
+    </div>
+    <div class="group g-timing">
+      <div class="ghead"><div class="eyebrow">Timing and load-in</div><p>Keeping the show on time, and checking the rig first.</p></div>
+      <div class="tiles">
+        <a class="tile" href="/tools/#timer"><div class="top"><img src="/media/apps/groups/timer.png" alt="" width="48" height="48"><h3>Showcaller Timer</h3></div><p>A presenter countdown and stage timer, run from your phone. Follows a Backtime rundown.</p><span class="badge pro">Free + Pro</span></a>
+        <a class="tile" href="/tools/#testkit"><div class="top"><img src="/media/apps/groups/testkit.png" alt="" width="48" height="48"><h3>Showcaller Test Kit</h3></div><p>NDI bars, tone, ident and a network check for load-in.</p><span class="badge ">Free</span></a>
+      </div>
+    </div>
+    <a class="helios wide" href="/intercom/">
+      <img src="/media/apps/helios.png" alt="" width="56" height="56">
+      <span class="txt"><span class="lock">Showcaller <b>Helios</b></span><span class="what">Crew comms is its own system with its own colour: Frame in the rack, a Panel at every position, crew on their phones and Helio beltpacks. It has its own Helios Hub.</span></span>
+      <span class="go" aria-hidden="true">See Helios &rarr;</span>
+    </a>
   </div>
 </section>
 
@@ -268,14 +305,51 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a class="card" href="/tools/"><h3>Free tools</h3><p>An LED wall calculator, a pixel map maker, an NDI bandwidth calculator and a Companion module for Stream Deck. No sign-up.</p></a>
       <a class="card" href="/backtime/"><h3>Backtime</h3><p>Our rundown and script tool for live shows. Showcaller Timer follows it and can run the show from it.</p></a>
     </div>
-    <div class="trial">
-      <div class="txt"><h3>Want to see it on your set?</h3><p>Tell us what you're running and we'll show you how the apps fit. Licenses are by arrangement during the beta.</p></div>
-      <div class="go"><a class="btn primary" href="/screens/#contact">Get in touch</a></div>
-    </div>
+  </div>
+</section>
+<section class="cta" id="contact">
+  <div class="wrap">
+    <div class="eyebrow">Get in touch</div>
+    <h2>Want to see it on your set?</h2>
+    <p class="lede">Tell us what you're running and we'll show you how the apps fit together. Licenses are by arrangement during the beta.</p>
+    <form class="form" id="contactForm" novalidate>
+      <label>Your name<input name="name" autocomplete="name" required maxlength="120"></label>
+      <label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>
+      <label>Company or production<input name="company" autocomplete="organization" maxlength="160"></label>
+      <label>Phone (optional)<input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+      <label class="full">What's your show?<textarea name="message" required maxlength="5000" placeholder="For example: a three-camera talk show with an LED wall, crew comms for six and ISO recordings"></textarea></label>
+      <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="row"><button type="submit" class="btn primary" id="formBtn">Send</button><span id="formMsg" role="status" aria-live="polite"></span></div>
+    </form>
+    <div class="sent" id="formSent" hidden><b>Thanks, we've got it.</b><br><span class="small">We'll reply to the email you gave, usually within one working day.</span></div>
   </div>
 </section>
 </main>
 
 <footer style="border-top:1px solid var(--line)"><div class="wrap"><span>© 2026 Gotham Media House. All rights reserved.</span><span>Also from Gotham Media House: <a href="https://backtime.studio" target="_blank" rel="noopener">Backtime</a></span></div></footer>
+<script>
+  // contact form: posted to /api/contact (contact.js, sent with Resend), same as the Screens page's demo form
+  (function () {
+    var form = document.getElementById('contactForm'), started = Date.now();
+    form.onsubmit = async function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('formMsg'), btn = document.getElementById('formBtn');
+      var d = Object.fromEntries(new FormData(form));
+      msg.className = '';
+      if (!d.name.trim() || !d.message.trim()) { msg.className = 'bad'; msg.textContent = 'Add your name and a line about your show.'; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim())) { msg.className = 'bad'; msg.textContent = 'That email doesn\u2019t look right.'; return; }
+      d.plan = 'Home page enquiry'; d.ms = Date.now() - started;
+      btn.disabled = true; msg.textContent = 'Sending\u2026';
+      try {
+        var r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+        var j = await r.json().catch(function () { return {}; });
+        if (!r.ok) throw new Error(j.error || 'It didn\u2019t send.');
+        form.hidden = true; document.getElementById('formSent').hidden = false;
+      } catch (err) {
+        msg.className = 'bad'; msg.textContent = (err.message || 'It didn\u2019t send.') + ' Please try again in a minute.';
+      } finally { btn.disabled = false; }
+    };
+  })();
+</script>
 </body>
 </html>
