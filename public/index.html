@@ -137,7 +137,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .family .grp { display: flex; gap: 10px; }
 .family { gap: 10px 26px; }
 /* app groups: each group has its own colour; amber stays the family colour */
-.g-screens { --g: #ffb224; } .g-cameras { --g: #5aa2ff; } .g-record { --g: #a07dff; } .g-timing { --g: #ff6a8d; }
+.g-screens { --g: #ffb224; } .g-cameras { --g: #5aa2ff; } .g-record { --g: #a07dff; } .g-timing { --g: #ff6a8d; } .g-remote { --g: #c5c6cf; }
 .group { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: 18px clamp(20px, 3vw, 40px); padding-top: 22px; border-top: 2px solid var(--g); }
 @media (max-width: 860px) { .group { grid-template-columns: minmax(0, 1fr); } }
 .group .ghead { display: flex; flex-direction: column; gap: 8px; }
@@ -228,9 +228,9 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a class="btn primary" href="#apps">See the apps</a>
       <a class="btn" href="/apps/">Get Showcaller Hub</a>
     </div>
-    <div class="family" aria-hidden="true"><span class="grp"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"></span></div>
+    <div class="family" aria-hidden="true"><span class="grp"><img src="/media/apps/studio.png?v=2" alt="" width="52" height="52"><img src="/media/apps/playback.png?v=2" alt="" width="52" height="52"><img src="/media/apps/graphics.png?v=2" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/multiview.png?v=2" alt="" width="52" height="52"><img src="/media/apps/switcher.png?v=2" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png?v=2" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/replay.png?v=2" alt="" width="52" height="52"><img src="/media/apps/iso.png?v=2" alt="" width="52" height="52"><img src="/media/apps/stream.png?v=2" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/timer.png?v=2" alt="" width="52" height="52"><img src="/media/apps/testkit.png?v=2" alt="" width="52" height="52"></span><span class="grp"><img src="/media/apps/link.png?v=2" alt="" width="52" height="52"></span></div>
     <a class="helios" href="/intercom/">
-      <img src="/media/apps/helios.png" alt="" width="48" height="48">
+      <img src="/media/apps/helios.png?v=2" alt="" width="48" height="48">
       <span class="txt"><span class="lock">Showcaller <b>Helios</b></span><span class="what">The intercom system: panels, crew on their phones, beltpacks.</span></span>
       <span class="go" aria-hidden="true">See Helios &rarr;</span>
     </a>
@@ -247,37 +247,42 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
     <div class="group g-screens">
       <div class="ghead"><div class="eyebrow">Screens and playback</div><p>What the audience sees on the set.</p></div>
       <div class="tiles">
-        <a class="tile" href="/screens/"><div class="top"><img src="/media/apps/studio.png" alt="" width="48" height="48"><h3>Showcaller Screens</h3></div><p>Every screen on the set, run from one page: video, stills, cameras and graphics on monitors, LED walls and projectors. A Screens key also unlocks the Pro features in Timer and Multiview.</p><span class="badge paid">Paid · 14-day free trial</span></a>
-        <a class="tile" href="/apps/#playback"><div class="top"><img src="/media/apps/playback.png" alt="" width="48" height="48"><h3>Showcaller Playback</h3></div><p>Cue lists of video, stills and sound, out to NDI and SDI.</p><span class="badge test">In testing</span></a>
+        <a class="tile" href="/screens/"><div class="top"><img src="/media/apps/studio.png?v=2" alt="" width="48" height="48"><h3>Showcaller Screens</h3></div><p>Every screen on the set, run from one page: video, stills, cameras and graphics on monitors, LED walls and projectors. A Screens key also unlocks the Pro features in Timer and Multiview.</p><span class="badge paid">Paid · 14-day free trial</span></a>
+        <a class="tile" href="/apps/#playback"><div class="top"><img src="/media/apps/playback.png?v=2" alt="" width="48" height="48"><h3>Showcaller Playback</h3></div><p>Cue lists of video, stills and sound, out to NDI and SDI.</p><span class="badge test">In testing</span></a>
+        <a class="tile" href="/apps/#graphics"><div class="top"><img src="/media/apps/graphics.png?v=2" alt="" width="48" height="48"><h3>Showcaller Graphics</h3></div><p>Lower thirds, full screens, tickers and a bug, out over NDI with transparency.</p><span class="badge test">In testing</span></a>
       </div>
     </div>
     <div class="group g-cameras">
       <div class="ghead"><div class="eyebrow">Cameras and switching</div><p>Seeing, steering and cutting the cameras.</p></div>
       <div class="tiles">
-        <a class="tile" href="/multiview/"><div class="top"><img src="/media/apps/multiview.png" alt="" width="48" height="48"><h3>Showcaller Multiview</h3></div><p>Every NDI camera on the network in one window, with PTZ control and ATEM tally.</p><span class="badge pro">Free + Pro</span></a>
-        <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/switcher.png" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
-        <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/ndiwebcam.png" alt="" width="48" height="48"><h3>Showcaller NDI Webcam</h3></div><p>Turns a webcam or USB capture device into an NDI source.</p><span class="badge ">Free</span></a>
-        <a class="tile" href="/multiview/"><div class="top"><img src="/media/apps/groups/multiview.png" alt="" width="48" height="48"><h3>Showcaller Multiview</h3></div><p>Every NDI camera on the network in one window, with PTZ control and ATEM tally.</p><span class="badge pro">Free + Pro</span></a>
-        <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/groups/switcher.png" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
-        <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/groups/ndiwebcam.png" alt="" width="48" height="48"><h3>Showcaller Webcam</h3></div><p>Turns a webcam, capture device or screen into an NDI® source.</p><span class="badge ">Free</span></a>
+        <a class="tile" href="/multiview/"><div class="top"><img src="/media/apps/multiview.png?v=2" alt="" width="48" height="48"><h3>Showcaller Multiview</h3></div><p>Every NDI camera on the network in one window, with PTZ control and ATEM tally.</p><span class="badge pro">Free + Pro</span></a>
+        <a class="tile" href="/switcher/"><div class="top"><img src="/media/apps/switcher.png?v=2" alt="" width="48" height="48"><h3>Showcaller Switcher</h3></div><p>A two M/E NDI production switcher with keys, audio and recording.</p><span class="badge test">In testing</span></a>
+        <a class="tile" href="/apps/#ndiwebcam"><div class="top"><img src="/media/apps/ndiwebcam.png?v=2" alt="" width="48" height="48"><h3>Showcaller Webcam</h3></div><p>Turns a webcam, capture device or screen into an NDI® source.</p><span class="badge ">Free</span></a>
       </div>
     </div>
     <div class="group g-record">
       <div class="ghead"><div class="eyebrow">Recording and replay</div><p>Every source on disk, and the moment back on air.</p></div>
       <div class="tiles">
-        <a class="tile" href="/apps/#replay"><div class="top"><img src="/media/apps/replay.png" alt="" width="48" height="48"><h3>Showcaller Replay</h3></div><p>Records every NDI source and plays any of them back as an instant replay.</p><span class="badge paid">Paid</span></a>
-        <a class="tile" href="/apps/#iso"><div class="top"><img src="/media/apps/iso.png" alt="" width="48" height="48"><h3>Showcaller ISO</h3></div><p>Records every NDI source to its own file, ready for the edit.</p><span class="badge paid">Paid</span></a>
+        <a class="tile" href="/apps/#replay"><div class="top"><img src="/media/apps/replay.png?v=2" alt="" width="48" height="48"><h3>Showcaller Replay</h3></div><p>Records every NDI source and plays any of them back as an instant replay.</p><span class="badge paid">Paid</span></a>
+        <a class="tile" href="/apps/#iso"><div class="top"><img src="/media/apps/iso.png?v=2" alt="" width="48" height="48"><h3>Showcaller ISO</h3></div><p>Records every NDI source to its own file, ready for the edit.</p><span class="badge paid">Paid</span></a>
+        <a class="tile" href="/apps/#stream"><div class="top"><img src="/media/apps/stream.png?v=2" alt="" width="48" height="48"><h3>Showcaller Stream</h3></div><p>One source out to YouTube, Facebook, Twitch, RTMP and SRT at once, with a recording.</p><span class="badge test">In testing</span></a>
       </div>
     </div>
     <div class="group g-timing">
       <div class="ghead"><div class="eyebrow">Timing and load-in</div><p>Keeping the show on time, and checking the rig first.</p></div>
       <div class="tiles">
-        <a class="tile" href="/tools/#timer"><div class="top"><img src="/media/apps/timer.png" alt="" width="48" height="48"><h3>Showcaller Timer</h3></div><p>A presenter countdown and stage timer, run from your phone. Follows a Backtime rundown.</p><span class="badge pro">Free + Pro</span></a>
-        <a class="tile" href="/tools/#testkit"><div class="top"><img src="/media/apps/testkit.png" alt="" width="48" height="48"><h3>Showcaller Test Kit</h3></div><p>NDI bars, tone, ident and a network check for load-in.</p><span class="badge ">Free</span></a>
+        <a class="tile" href="/tools/#timer"><div class="top"><img src="/media/apps/timer.png?v=2" alt="" width="48" height="48"><h3>Showcaller Timer</h3></div><p>A presenter countdown and stage timer, run from your phone. Follows a Backtime rundown.</p><span class="badge pro">Free + Pro</span></a>
+        <a class="tile" href="/tools/#testkit"><div class="top"><img src="/media/apps/testkit.png?v=2" alt="" width="48" height="48"><h3>Showcaller Test Kit</h3></div><p>NDI bars, tone, ident and a network check for load-in.</p><span class="badge ">Free</span></a>
+      </div>
+    </div>
+    <div class="group g-remote">
+      <div class="ghead"><div class="eyebrow">Working remotely</div><p>Your own encrypted way in to the studio.</p></div>
+      <div class="tiles">
+        <a class="tile" href="/apps/#link"><div class="top"><img src="/media/apps/link.png?v=2" alt="" width="48" height="48"><h3>Showcaller Link</h3></div><p>The studio’s own encrypted way in for clients’ Showcaller apps, on the computer that’s always on.</p><span class="badge ">Free</span></a>
       </div>
     </div>
     <a class="helios wide" href="/intercom/">
-      <img src="/media/apps/helios.png" alt="" width="56" height="56">
+      <img src="/media/apps/helios.png?v=2" alt="" width="56" height="56">
       <span class="txt"><span class="lock">Showcaller <b>Helios</b></span><span class="what">Crew comms is its own system with its own colour: Frame in the rack, a Panel at every position, crew on their phones and Helio beltpacks. It has its own Helios Hub.</span></span>
       <span class="go" aria-hidden="true">See Helios &rarr;</span>
     </a>
@@ -287,7 +292,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 <section class="alt">
   <div class="wrap">
     <div class="hubband">
-      <img src="/media/apps/hub.png" alt="" width="88" height="88">
+      <img src="/media/apps/hub.png?v=2" alt="" width="88" height="88">
       <div class="txt">
         <div class="eyebrow">Showcaller Hub</div>
         <h2>One download. One place for your keys.</h2>
