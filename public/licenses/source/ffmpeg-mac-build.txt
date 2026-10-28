@@ -1,0 +1,42 @@
+FFmpeg for macOS (universal: arm64 + x86_64), LGPL build for Showcaller
+=======================================================================
+
+ffmpeg   FFmpeg 7.1.5, statically linked with libvpx 1.15.2.
+         License: LGPL version 2.1 or later (built WITHOUT --enable-gpl, --enable-nonfree
+         and --enable-version3; no libx264, no libx265).
+         Minimum macOS 11.0. Ad-hoc signed (codesign -s -). Links only system libraries in
+         /usr/lib and /System (see VERIFY.txt).
+         sha256 6a734d2fcbb915f7ad1e16a754a7451eb9d53abe85693770aed151bdea84f791
+
+Built 2026-10-28 on macOS 26.6.2 (arm64), Apple clang version 21.0.0 (clang-2100.3.34.2), macOS SDK 27.0, nasm 3.02.
+The x86_64 slice was cross-compiled on Apple silicon with clang -arch x86_64.
+
+Licenses in this folder:
+  COPYING.LGPLv2.1   FFmpeg's LGPL v2.1 text
+  LICENSE.md         FFmpeg's licensing notes
+  libvpx-LICENSE     libvpx BSD-3-Clause license
+  libvpx-PATENTS     libvpx patent grant
+
+Corresponding source (unmodified upstream releases), in this folder (/licenses/source/):
+  ffmpeg-7.1.5.tar.xz       https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz
+                            sha256 de668509caf9e35e3cd162473441fdb29538c6d96ed080292b3cf9e6fc5d558f
+  ffmpeg-7.1.5.tar.xz.asc   upstream signature
+  libvpx-1.15.2.tar.gz      https://github.com/webmproject/libvpx/archive/refs/tags/v1.15.2.tar.gz
+                            sha256 26fcd3db88045dee380e581862a6ef106f49b74b6396ee95c2993a260b4636aa
+Build and verify scripts: build.sh (run "build.sh arm64" and "build.sh x86_64"), verify.sh
+Then: lipo -create build/arm64/bin/ffmpeg build/x86_64/bin/ffmpeg -output mac/ffmpeg && codesign -s - --force mac/ffmpeg
+
+Environment for every configure: MACOSX_DEPLOYMENT_TARGET=11.0,
+  CF="-arch <ARCH> -mmacosx-version-min=11.0 -isysroot <MacOSX SDK>"
+  libvpx built with CFLAGS=CXXFLAGS=LDFLAGS=$CF
+  ffmpeg built with PKG_CONFIG_LIBDIR=build/<ARCH>/lib/pkgconfig (only libvpx is visible to pkg-config)
+
+Exact configure lines (SDK = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk):
+
+  libvpx configure: --target=arm64-darwin20-gcc --prefix=~/Documents/Showcaller/Releases/Tools/ffmpeg-lgpl/build/arm64 --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9 --enable-vp8 --enable-pic
+  libvpx configure: --target=x86_64-darwin20-gcc --prefix=~/Documents/Showcaller/Releases/Tools/ffmpeg-lgpl/build/x86_64 --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9 --enable-vp8 --enable-pic
+  ffmpeg configure: --prefix=~/Documents/Showcaller/Releases/Tools/ffmpeg-lgpl/build/arm64 --cc=clang --enable-static --disable-shared --disable-doc --disable-ffplay --disable-ffprobe --disable-autodetect --enable-videotoolbox --enable-audiotoolbox --enable-avfoundation --enable-securetransport --enable-zlib --enable-bzlib --enable-iconv --enable-libvpx --pkg-config=pkg-config --pkg-config-flags=--static --extra-libs=-liconv --extra-cflags=-arch arm64 -mmacosx-version-min=11.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --extra-ldflags=-arch arm64 -mmacosx-version-min=11.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk
+  ffmpeg configure: --prefix=~/Documents/Showcaller/Releases/Tools/ffmpeg-lgpl/build/x86_64 --cc=clang --enable-static --disable-shared --disable-doc --disable-ffplay --disable-ffprobe --disable-autodetect --enable-videotoolbox --enable-audiotoolbox --enable-avfoundation --enable-securetransport --enable-zlib --enable-bzlib --enable-iconv --enable-libvpx --pkg-config=pkg-config --pkg-config-flags=--static --extra-libs=-liconv --extra-cflags=-arch x86_64 -mmacosx-version-min=11.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --extra-ldflags=-arch x86_64 -mmacosx-version-min=11.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --arch=x86_64 --enable-cross-compile --target-os=darwin
+
+Note: --extra-libs=-liconv was added because 7.1's configure enables iconv on macOS without
+adding -liconv to the link line (the first link failed on _iconv). --enable-securetransport was accepted.
