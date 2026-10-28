@@ -20,7 +20,7 @@ async function releases(env) {
   const hit = await cache.match(key);
   if (hit) return hit.json();
   const out = await published(env), api = await fromGitHub(env);
-  for (const [app, r] of Object.entries(api || {})) if (!out[app] || !newer(out[app].version, r.version)) out[app] = r;
+  for (const [app, r] of Object.entries(api || {})) out[app] = combine(out[app], r);
   // A list GitHub refused isn't cached, so the next request asks again
   if (api) await cache.put(key, new Response(JSON.stringify(out), { headers: { 'Cache-Control': 'max-age=600' } }));
   return out;
@@ -34,24 +34,36 @@ async function fromGitHub(env) {
     return r.ok ? newest(await r.json()) : null;
   } catch { return null; }
 }
-// GitHub's list of releases → the newest release of each app, with its builds
+// GitHub's list of releases → each app's newest download for each platform. A platform's build can be older
+// than the app's newest version (the Windows version of an app can come out after the Mac one), so every build
+// carries its own version; the app's version is the newest of them.
 export function newest(list) {
   const out = {};
   for (const rel of list || []) {
     const m = String(rel.tag_name || '').match(/^([a-z][a-z-]*)-(\d+\.\d+\.\d+)$/); // also intercom-frame-3.7.0
     if (!m || rel.draft || rel.prerelease) continue;
     const [, app, version] = m;
-    if (out[app] && !newer(version, out[app].version)) continue;
     const builds = {};
     for (const a of rel.assets || []) {
       const p = String(a.name || '').match(PLATFORM);
       if (!p || a.state !== 'uploaded') continue;
       const sha = String(a.digest || '').replace(/^sha256:/, '');
-      builds[p[1] || p[2]] = { url: a.browser_download_url, sha256: /^[0-9a-f]{64}$/.test(sha) ? sha : undefined, size: a.size };
+      builds[p[1] || p[2]] = { url: a.browser_download_url, sha256: /^[0-9a-f]{64}$/.test(sha) ? sha : undefined, size: a.size, version };
     }
-    if (Object.keys(builds).length) out[app] = { version, builds };
+    if (Object.keys(builds).length) out[app] = combine(out[app], { version, builds });
   }
   return out;
+}
+// Two lists of one app's builds → the newer build for each platform (a build without its own version is the list's)
+function combine(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  const builds = {};
+  for (const r of [a, b]) for (const [p, x] of Object.entries(r.builds || {})) {
+    const v = VERSION.test(x.version || '') ? x.version : r.version;
+    if (!builds[p] || newer(v, builds[p].version)) builds[p] = { ...x, version: v };
+  }
+  return { version: newer(b.version, a.version) ? b.version : a.version, builds };
 }
 // The list Publish to the Hub wrote (public/hub/releases.json: { apps: <the same shape> })
 async function published(env) {
