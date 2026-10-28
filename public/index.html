@@ -134,6 +134,19 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .hero .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .family { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .family img { width: 52px; height: 52px; }
+/* Showcaller Helios is its own system with its own colour (Eclipse teal), so it sits under the amber row, not in it */
+.helios { --hx-panel: #0f191c; --hx-line: #1f3238; --hx-fg: #e8f4f2; --hx-muted: #8fb0ac; --hx-accent: #2ee6c8;
+  display: flex; align-items: center; gap: 14px; width: min(640px, 100%); margin-top: 10px; padding: 14px 18px 14px 14px; text-align: left; text-decoration: none;
+  background: linear-gradient(120deg, rgba(46, 230, 200, .10), rgba(46, 230, 200, 0) 70%), var(--hx-panel); border: 1px solid var(--hx-line); color: var(--hx-fg); transition: border-color .15s; }
+.helios:hover { border-color: var(--hx-accent); }
+.helios:focus-visible { outline-color: var(--hx-accent); }
+.helios img { width: 48px; height: 48px; flex: none; }
+.helios .txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.helios .lock { font: 600 17px/1.2 var(--display); letter-spacing: -.01em; }
+.helios .lock b { font: 600 11px/1 var(--body); letter-spacing: .32em; text-transform: uppercase; color: var(--hx-accent); margin-left: 4px; vertical-align: 2px; }
+.helios .what { font-size: 14.5px; line-height: 1.4; color: var(--hx-muted); }
+.helios .go { flex: none; font: 600 14.5px var(--body); color: var(--hx-accent); white-space: nowrap; }
+@media (max-width: 520px) { .helios { flex-wrap: wrap; } .helios .go { flex-basis: 100%; padding-left: 62px; } }
 .feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(24px, 4vw, 56px); align-items: center; border: 1px solid var(--line2); background: var(--bg2); padding: clamp(22px, 3.4vw, 44px); }
 @media (max-width: 860px) { .feature { grid-template-columns: minmax(0, 1fr); } }
 .feature .txt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -193,7 +206,12 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <a class="btn primary" href="#apps">See the apps</a>
       <a class="btn" href="/apps/">Get Showcaller Hub</a>
     </div>
-    <div class="family" aria-hidden="true"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/intercom.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></div>
+    <div class="family" aria-hidden="true"><img src="/media/apps/studio.png" alt="" width="52" height="52"><img src="/media/apps/multiview.png" alt="" width="52" height="52"><img src="/media/apps/timer.png" alt="" width="52" height="52"><img src="/media/apps/replay.png" alt="" width="52" height="52"><img src="/media/apps/iso.png" alt="" width="52" height="52"><img src="/media/apps/playback.png" alt="" width="52" height="52"><img src="/media/apps/switcher.png" alt="" width="52" height="52"><img src="/media/apps/testkit.png" alt="" width="52" height="52"><img src="/media/apps/ndiwebcam.png" alt="" width="52" height="52"></div>
+    <a class="helios" href="/intercom/">
+      <img src="/media/apps/helios.png" alt="" width="48" height="48">
+      <span class="txt"><span class="lock">Showcaller <b>Helios</b></span><span class="what">The intercom system: panels, crew on their phones, beltpacks.</span></span>
+      <span class="go" aria-hidden="true">See Helios &rarr;</span>
+    </a>
   </div>
 </section>
 
