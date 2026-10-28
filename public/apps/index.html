@@ -288,6 +288,8 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
   Promise.all(btns.map((b) => fetch(`/download/hub/${b.dataset.p}`, { method: 'HEAD', redirect: 'manual' }).then((r) => r.type === 'opaqueredirect' || (r.status >= 300 && r.status < 400)).catch(() => false)))
     .then((ok) => {
       btns.forEach((b, i) => { b.hidden = !ok[i]; });
+      // Once the Windows Hub is online, the PC note says what runs there
+      if (ok[btns.findIndex((b) => b.dataset.p === 'win-x64')]) document.querySelector('#windows span').innerHTML = '<b>Showcaller Hub runs on Windows (PC) too.</b> The apps come to Windows one at a time: on a PC the Hub lists the rest under “Coming to Windows” and shows each one’s Install button the day it’s out.';
       if (!ok.some(Boolean)) return;
       // the first one that's online is the main button
       const first = btns.find((b) => !b.hidden); btns.forEach((b) => b.classList.toggle('primary', b === first));
