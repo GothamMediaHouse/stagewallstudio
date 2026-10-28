@@ -6,9 +6,12 @@
 // Used by worker.js; multiview, timer and testkit keep their older answers (from the Cloudflare
 // variables) when there's no newer zip.
 const TOOLS = 'https://showcallerstudio.com/tools/';
+const HELIOS = 'https://showcallerstudio.com/intercom/';
 export const APPS = {
   multiview: null, timer: null, testkit: null, // answered by multiview.js / tools.js first
   replay: TOOLS, iso: TOOLS, switcher: TOOLS, playback: TOOLS, intercom: 'https://showcallerstudio.com/intercom/', ndiwebcam: TOOLS, hub: TOOLS,
+  // Helios (the intercom system): the Frame, Panel and Comms, Helios Hub, and the Helio beltpacks' firmware (helio)
+  'intercom-frame': HELIOS, 'intercom-panel': HELIOS, 'intercom-comms': HELIOS, 'helios-hub': HELIOS, helio: HELIOS,
 };
 const VERSION = /^\d+\.\d+\.\d+$/;
 const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
