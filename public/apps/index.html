@@ -102,6 +102,15 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 .app .shot { width: 100%; height: auto; display: block; border: 1px solid var(--line2); }
 .app p { color: var(--soft); font-size: 15.5px; }
 .app .more { font-size: 14.5px; margin-top: -6px; }
+/* app groups: the same colours as the icons and Showcaller Hub */
+.g-screens { --g: #ffb224; } .g-cameras { --g: #5aa2ff; } .g-record { --g: #a07dff; } .g-timing { --g: #ff6a8d; } .g-remote { --g: #c5c6cf; } .g-helios { --g: #2ee6c8; }
+.grouphead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-top: 18px; border-top: 2px solid var(--g); margin-top: 18px; }
+.grouphead:first-of-type { margin-top: 0; }
+.grouphead h3 { color: var(--g); font-size: 22px; }
+.grouphead span { color: var(--soft); font-size: 15px; }
+.apps + .grouphead { margin-top: 26px; }
+#apps .apps { background: none; border: 0; gap: 12px; }
+#apps .app { border: 1px solid var(--line); }
 .hubshot { width: min(1040px, 100%); height: auto; border: 1px solid var(--line2); box-shadow: 0 30px 80px rgba(0, 0, 0, .5); margin-top: 10px; }
 .badge { font: 600 11px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; padding: 6px 9px; border: 1px solid var(--line2); color: var(--soft); white-space: nowrap; }
 .badge.paid { border-color: var(--accent); color: var(--accent); background: var(--accent-ground); }
@@ -159,7 +168,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
 
 <section class="hero" id="top" style="border-top:0">
   <div class="wrap">
-    <img class="hubicon" src="/media/apps/hub.png" alt="" width="112" height="112">
+    <img class="hubicon" src="/media/apps/hub.png?v=2" alt="" width="112" height="112">
     <div class="eyebrow">Showcaller Hub</div>
     <h1>Every Showcaller app, one download.</h1>
     <p class="lede">Showcaller Hub installs the apps you need, keeps them all up to date with one click, and holds your license keys so every paid app you own is unlocked on that computer.</p>
@@ -193,68 +202,100 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       <h2>Made for the people who run the show.</h2>
       <p class="lede">Install any of them from Showcaller Hub. The free ones stay free; the paid ones start with a 14-day trial.</p>
     </div>
-    <div class="apps">
+    <div class="grouphead g-screens"><h3>Screens and playback</h3><span>What the audience sees on the set.</span></div>
+    <div class="apps g-screens">
       <article class="app" id="studio">
-        <div class="top"><img class="ico" src="/media/apps/studio.png" alt="" width="56" height="56"><h3>Showcaller Screens</h3><span class="badge paid">Paid</span></div>
+        <div class="top"><img class="ico" src="/media/apps/studio.png?v=2" alt="" width="56" height="56"><h3>Showcaller Screens</h3><span class="badge paid">Paid</span></div>
         <img class="shot" src="/media/apps/studio.jpg" alt="Showcaller Screens" width="1200" height="750" loading="lazy">
         <p>Every screen on your set from one page: video, stills, cameras and graphics on monitors, LED walls and projectors, with looks and GO.</p>
         <p class="more small">14-day free trial. <a href="/screens/">More about it</a></p>
       </article>
+      <article class="app" id="playback">
+        <div class="top"><img class="ico" src="/media/apps/playback.png?v=2" alt="" width="56" height="56"><h3>Showcaller Playback</h3><span class="badge test">In testing</span></div>
+        <img class="shot" src="/media/apps/playback.jpg" alt="Showcaller Playback" width="1200" height="750" loading="lazy">
+        <p>Plays video, stills and sound from cue lists, out to NDI with transparency, and to SDI through a display output and a converter.</p>
+        <p class="more small">Paid when it’s out, with a 14-day free trial.</p>
+      </article>
+      <article class="app" id="graphics">
+        <div class="top"><img class="ico" src="/media/apps/graphics.png?v=2" alt="" width="56" height="56"><h3>Showcaller Graphics</h3><span class="badge test">In testing</span></div>
+        <p>Lower thirds, full screens, tickers and a bug, out over NDI with transparency (or fill and key) and to a screen for SDI. Runs on its own or from a Backtime rundown.</p>
+        <p class="more small">Paid when it’s out, with a 14-day free trial.</p>
+      </article>
+    </div>
+    <div class="grouphead g-cameras"><h3>Cameras and switching</h3><span>Seeing, steering and cutting the cameras.</span></div>
+    <div class="apps g-cameras">
       <article class="app" id="multiview">
-        <div class="top"><img class="ico" src="/media/apps/multiview.png" alt="" width="56" height="56"><h3>Showcaller Multiview</h3><span class="badge pro">Free + Pro</span></div>
+        <div class="top"><img class="ico" src="/media/apps/multiview.png?v=2" alt="" width="56" height="56"><h3>Showcaller Multiview</h3><span class="badge pro">Free + Pro</span></div>
         <img class="shot" src="/media/apps/multiview.jpg" alt="Showcaller Multiview" width="1200" height="750" loading="lazy">
         <p>An NDI multiviewer. Every camera on the network in one window, with PTZ control, streams, and a page for phones.</p>
         <p class="more small">Pro, with a Screens license: ATEM switcher control and tally. <a href="/multiview/">More about it</a></p>
       </article>
-      <article class="app" id="timer">
-        <div class="top"><img class="ico" src="/media/apps/timer.png" alt="" width="56" height="56"><h3>Showcaller Timer</h3><span class="badge pro">Free + Pro</span></div>
-        <img class="shot" src="/media/apps/timer.jpg" alt="Showcaller Timer" width="1200" height="750" loading="lazy">
-        <p>A presenter countdown and stage timer run from your phone, with a running order and messages to the presenter.</p>
-        <p class="more small">Pro, with a Screens license: confidence monitor, producer page and Backtime control. <a href="/tools/#timer">More about it</a> · <a href="/backtime/">Try the Backtime sample</a></p>
+      <article class="app" id="switcher">
+        <div class="top"><img class="ico" src="/media/apps/switcher.png?v=2" alt="" width="56" height="56"><h3>Showcaller Switcher</h3><span class="badge test">In testing</span></div>
+        <img class="shot" src="/media/apps/switcher.jpg" alt="Showcaller Switcher" width="1200" height="750" loading="lazy">
+        <p>A two M/E NDI production switcher with keys, audio, media players and recording, plus hardware panels.</p>
+        <p class="more small">Paid when it’s out, with a 14-day free trial. <a href="/switcher/">More about it</a></p>
       </article>
+      <article class="app" id="ndiwebcam">
+        <div class="top"><img class="ico" src="/media/apps/ndiwebcam.png?v=2" alt="" width="56" height="56"><h3>Showcaller Webcam</h3><span class="badge ">Free</span></div>
+        <img class="shot" src="/media/apps/ndiwebcam.jpg" alt="Showcaller Webcam" width="1200" height="750" loading="lazy">
+        <p>Turns a webcam, USB capture device or screen into an NDI® source on the network.</p>
+        <p class="more small">Mac now, Windows (PC) coming soon.</p>
+      </article>
+    </div>
+    <div class="grouphead g-record"><h3>Recording and replay</h3><span>Every source on disk, and the moment back on air.</span></div>
+    <div class="apps g-record">
       <article class="app" id="replay">
-        <div class="top"><img class="ico" src="/media/apps/replay.png" alt="" width="56" height="56"><h3>Showcaller Replay</h3><span class="badge paid">Paid</span></div>
+        <div class="top"><img class="ico" src="/media/apps/replay.png?v=2" alt="" width="56" height="56"><h3>Showcaller Replay</h3><span class="badge paid">Paid</span></div>
         <img class="shot" src="/media/apps/replay.jpg" alt="Showcaller Replay" width="1200" height="750" loading="lazy">
         <p>Records every NDI source on the show and plays any of them back as an instant replay.</p>
         <p class="more small">14-day free trial.</p>
       </article>
       <article class="app" id="iso">
-        <div class="top"><img class="ico" src="/media/apps/iso.png" alt="" width="56" height="56"><h3>Showcaller ISO</h3><span class="badge paid">Paid</span></div>
+        <div class="top"><img class="ico" src="/media/apps/iso.png?v=2" alt="" width="56" height="56"><h3>Showcaller ISO</h3><span class="badge paid">Paid</span></div>
         <img class="shot" src="/media/apps/iso.jpg" alt="Showcaller ISO" width="1200" height="750" loading="lazy">
         <p>Records every NDI source to its own file at the same time, ready for the edit.</p>
         <p class="more small">14-day free trial.</p>
       </article>
-      <article class="app" id="playback">
-        <div class="top"><img class="ico" src="/media/apps/playback.png" alt="" width="56" height="56"><h3>Showcaller Playback</h3><span class="badge test">In testing</span></div>
-        <img class="shot" src="/media/apps/playback.jpg" alt="Showcaller Playback" width="1200" height="750" loading="lazy">
-        <p>Plays video, stills and sound from cue lists, out to NDI with transparency, and to SDI through a display output and a converter.</p>
+      <article class="app" id="stream">
+        <div class="top"><img class="ico" src="/media/apps/stream.png?v=2" alt="" width="56" height="56"><h3>Showcaller Stream</h3><span class="badge test">In testing</span></div>
+        <p>A streaming encoder: one NDI source, screen or camera out to YouTube, Facebook, Twitch, any RTMP server and SRT at once, with a slate, a recording and automatic reconnects.</p>
         <p class="more small">Paid when it’s out, with a 14-day free trial.</p>
       </article>
-      <article class="app" id="intercom">
-        <div class="top"><img class="ico" src="/media/apps/helios.png" alt="" width="56" height="56"><h3>Showcaller Helios</h3><span class="badge test">In testing</span></div>
-        <img class="shot" src="/media/apps/intercom.jpg" alt="Showcaller Helios" width="1200" height="750" loading="lazy">
-        <p>The intercom system: party lines, IFB with program sound, cue lights and tally. Run Helios Remote on one Mac for a small show or a field crew, or run the Frame in the rack with the Comms app for the comms engineer and a Panel at every other position. Crew join from a phone with a link, from anywhere, or wear a Helio beltpack. Helios Hub installs and updates it all, beltpack firmware too.</p>
-        <p class="icrow small"><span><img src="/media/apps/intercom.png" alt="" width="28" height="28">Remote</span><span><img src="/media/apps/intercom-frame.png" alt="" width="28" height="28">Frame</span><span><img src="/media/apps/intercom-comms.png" alt="" width="28" height="28">Comms</span><span><img src="/media/apps/intercom-panel.png" alt="" width="28" height="28">Panel</span><span><img src="/media/apps/helios-hub.png" alt="" width="28" height="28">Helios Hub</span></p>
-        <p class="more small">Helios Remote is free for up to 4 crew; the Frame, Comms and more crew need a key. Showcaller Helios was called Showcaller Intercom. <a href="/intercom/">More about it</a></p>
-      </article>
-      <article class="app" id="switcher">
-        <div class="top"><img class="ico" src="/media/apps/switcher.png" alt="" width="56" height="56"><h3>Showcaller Switcher</h3><span class="badge test">In testing</span></div>
-        <img class="shot" src="/media/apps/switcher.jpg" alt="Showcaller Switcher" width="1200" height="750" loading="lazy">
-        <p>A two M/E NDI production switcher with keys, audio, media players and recording, plus hardware panels.</p>
-        <p class="more small">Paid when it’s out, with a 14-day free trial. <a href="/switcher/">More about it</a></p>
+    </div>
+    <div class="grouphead g-timing"><h3>Timing and load-in</h3><span>Keeping the show on time, and checking the rig first.</span></div>
+    <div class="apps g-timing">
+      <article class="app" id="timer">
+        <div class="top"><img class="ico" src="/media/apps/timer.png?v=2" alt="" width="56" height="56"><h3>Showcaller Timer</h3><span class="badge pro">Free + Pro</span></div>
+        <img class="shot" src="/media/apps/timer.jpg" alt="Showcaller Timer" width="1200" height="750" loading="lazy">
+        <p>A presenter countdown and stage timer run from your phone, with a running order and messages to the presenter.</p>
+        <p class="more small">Pro, with a Screens license: confidence monitor, producer page and Backtime control. <a href="/tools/#timer">More about it</a> · <a href="/backtime/">Try the Backtime sample</a></p>
       </article>
       <article class="app" id="testkit">
-        <div class="top"><img class="ico" src="/media/apps/testkit.png" alt="" width="56" height="56"><h3>Showcaller Test Kit</h3><span class="badge ">Free</span></div>
+        <div class="top"><img class="ico" src="/media/apps/testkit.png?v=2" alt="" width="56" height="56"><h3>Showcaller Test Kit</h3><span class="badge ">Free</span></div>
         <img class="shot" src="/media/apps/testkit.jpg" alt="Showcaller Test Kit" width="1200" height="750" loading="lazy">
         <p>NDI test signals and a network check for when something on the show network isn’t right.</p>
         <p class="more small">Bars, tone, ident and timecode over NDI. <a href="/tools/#testkit">More about it</a></p>
       </article>
-      <article class="app" id="ndiwebcam">
-        <div class="top"><img class="ico" src="/media/apps/ndiwebcam.png" alt="" width="56" height="56"><h3>Showcaller Webcam</h3><span class="badge ">Free</span></div>
-        <img class="shot" src="/media/apps/ndiwebcam.jpg" alt="Showcaller Webcam" width="1200" height="750" loading="lazy">
-        <p>Turns a webcam, USB capture device or screen into an NDI® source on the network.</p>
-        <p class="more small">Mac now, Windows (PC) coming soon.</p>
+    </div>
+    <div class="grouphead g-remote"><h3>Working remotely</h3><span>Your own encrypted way in to the studio.</span></div>
+    <div class="apps g-remote">
+      <article class="app" id="link">
+        <div class="top"><img class="ico" src="/media/apps/link.png?v=2" alt="" width="56" height="56"><h3>Showcaller Link</h3><span class="badge ">Free</span></div>
+        <p>The studio’s own encrypted way in for clients’ Showcaller apps. It runs on the computer that’s always on at the studio, so Multiview and the others can reach it from anywhere.</p>
+        <p class="more small">Mac and Windows (PC).</p>
       </article>
+    </div>
+    <div class="grouphead g-helios"><h3>Showcaller Helios</h3><span>Crew comms is its own system, with its own Helios Hub.</span></div>
+    <div class="apps g-helios">
+      <article class="app" id="intercom">
+        <div class="top"><img class="ico" src="/media/apps/helios.png?v=2" alt="" width="56" height="56"><h3>Showcaller Helios</h3><span class="badge test">In testing</span></div>
+        <img class="shot" src="/media/apps/intercom.jpg" alt="Showcaller Helios" width="1200" height="750" loading="lazy">
+        <p>The intercom system: party lines, IFB with program sound, cue lights and tally. Run Helios Remote on one Mac for a small show or a field crew, or run the Frame in the rack with the Comms app for the comms engineer and a Panel at every other position. Crew join from a phone with a link, from anywhere, or wear a Helio beltpack. Helios Hub installs and updates it all, beltpack firmware too.</p>
+        <p class="icrow small"><span><img src="/media/apps/intercom.png?v=2" alt="" width="28" height="28">Remote</span><span><img src="/media/apps/intercom-frame.png?v=2" alt="" width="28" height="28">Frame</span><span><img src="/media/apps/intercom-comms.png?v=2" alt="" width="28" height="28">Comms</span><span><img src="/media/apps/intercom-panel.png?v=2" alt="" width="28" height="28">Panel</span><span><img src="/media/apps/helios-hub.png?v=2" alt="" width="28" height="28">Helios Hub</span></p>
+        <p class="more small">Helios Remote is free for up to 4 crew; the Frame, Comms and more crew need a key. Showcaller Helios was called Showcaller Intercom. <a href="/intercom/">More about it</a></p>
+      </article>
+    </div>
     </div>
   </div>
 </section>
