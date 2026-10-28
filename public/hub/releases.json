@@ -1,5 +1,5 @@
 {
- "written": "2026-10-28T19:38:53.715Z",
+ "written": "2026-10-28T20:18:11.032Z",
  "apps": {
   "intercom-panel": {
    "version": "3.14.0",
@@ -81,6 +81,12 @@
      "sha256": "2d38b34be7ff2a2586f8feed67ecb8abafda6c9c21361c1304b3f727f2221631",
      "size": 135032163,
      "version": "1.7.11"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/timer-1.7.11/Showcaller-Timer-1.7.11-win-x64.exe",
+     "sha256": "5e460a1c93236f422dd39118333ab0b0d6e23a8f29705bb44183e3d2ba4a3e24",
+     "size": 113043695,
+     "version": "1.7.11"
     }
    }
   },
@@ -91,6 +97,12 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.9/Showcaller-Switcher-1.1.9-mac-arm64.zip",
      "sha256": "4f7efb607174c19cbeaeab3ec45e369fe4450516b27b101cce3815ac6c5ebdbc",
      "size": 153730942,
+     "version": "1.1.9"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.9/Showcaller-Switcher-1.1.9-win-x64.exe",
+     "sha256": "73314453b95b17040adf3eb42d29ddfcb7f7d116829a9a4a4cbab69f52726928",
+     "size": 134582034,
      "version": "1.1.9"
     }
    }
@@ -103,6 +115,12 @@
      "sha256": "2b57021af57c53ecaca0144e9234600e0d48703d83c95b879d9186d774855c02",
      "size": 153597718,
      "version": "0.3.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/playback-0.3.0/Showcaller-Playback-0.3.0-win-x64.exe",
+     "sha256": "28a8587b4457a1bd81680fb3d8160b0db6b6134eeb1416576a6c3ecee8c35d62",
+     "size": 134500252,
+     "version": "0.3.0"
     }
    }
   },
@@ -113,6 +131,12 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.4/Showcaller-Multiview-2.7.4-mac-arm64.zip",
      "sha256": "f64014d299207dc7226c4d1d639150c1257ae0f60aa4bc7366cf855cb653a12a",
      "size": 160776844,
+     "version": "2.7.4"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.4/Showcaller-Multiview-2.7.4-win-x64.exe",
+     "sha256": "067c264d16336f0b86ceed83da95c4e037550967b888d2f5bc44f848aac193f2",
+     "size": 139796070,
      "version": "2.7.4"
     }
    }
@@ -125,6 +149,12 @@
      "sha256": "f1a0c2d0ca3f998370bc090b7ff1b939cb7482a969f433d70793d2070f36b4c6",
      "size": 129589945,
      "version": "1.0.4"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.0.4/Showcaller-Test-Kit-1.0.4-win-x64.exe",
+     "sha256": "2dcd401936b2bddecda10127c035b1c50c0e0f30fa8d362cfe85dddeab6d3e9f",
+     "size": 112540755,
+     "version": "1.0.4"
     }
    }
   },
@@ -135,6 +165,12 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.1/Showcaller-Screens-7.7.1-mac-arm64.zip",
      "sha256": "bff537cc99d1566a4e66421dff31f9927ad8e0cbd259e8d4f0b2ac934a6867c0",
      "size": 135647122,
+     "version": "7.7.1"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.1/Showcaller-Screens-7.7.1-win-x64.exe",
+     "sha256": "b85887428c3e2269109715bae4e399d8ccd7aa2e5706e55a0fc19b6099b76f91",
+     "size": 117807091,
      "version": "7.7.1"
     }
    }
@@ -147,6 +183,12 @@
      "sha256": "156a2a3dcb4ce97ac34cd05cdfed084cb6585a05ade3e93c2aa0a625520554fc",
      "size": 153491251,
      "version": "2.3.8"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/replay-2.3.8/Showcaller-Replay-2.3.8-win-x64.exe",
+     "sha256": "fa9ccd6c28cde8fe3b038f66dfef05ee87041c7d584a788347dad04816547fc8",
+     "size": 134467842,
+     "version": "2.3.8"
     }
    }
   },
@@ -158,6 +200,12 @@
      "sha256": "00dd326024a23fd8da4f384a6e83af49ba1ea093268d9e5950b25031d2310b07",
      "size": 129504645,
      "version": "1.1.3"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.1.3/Showcaller-NDI-Webcam-1.1.3-win-x64.exe",
+     "sha256": "dc7b1f623eb72f4e9646e6f0d88b1a8a12544c55259f752ec5f2215f1ef1e2fc",
+     "size": 112478276,
+     "version": "1.1.3"
     }
    }
   },
@@ -168,6 +216,12 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/iso-2.3.8/Showcaller-ISO-2.3.8-mac-arm64.zip",
      "sha256": "0e22c8422ef5e701b40f90589aad9ef4113f75d721ebebf204cbc9374cb36e6b",
      "size": 153679018,
+     "version": "2.3.8"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/iso-2.3.8/Showcaller-ISO-2.3.8-win-x64.exe",
+     "sha256": "7ce65fcbe7b445a8a7cf3b0b0b076e7eab591f16e4a0bc6f521962b10f1d3081",
+     "size": 134528297,
      "version": "2.3.8"
     },
     "mac-x64": {
