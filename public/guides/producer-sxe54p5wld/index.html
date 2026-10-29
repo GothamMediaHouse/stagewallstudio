@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon-32.png">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Showcaller Producer Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app-dark console. Step rail on the left, one step at a time on the right, each with a live mockup of the real app. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e;
+  --panel: #131519;
+  --panel-2: #1a1d22;
+  --line: #262a31;
+  --fg: #eceef1;
+  --muted: #9aa1ab;
+  --dim: #6b727c;
+  --amber: #ffb224;      /* Showcaller family / Hub */
+  --amber-ink: #1a1203;
+  --blue: #5aa2ff;       /* Cameras and switching group (Multiview) */
+  --pgm: #e5484d;
+  --pvw: #3dbb5a;
+  --warn: #f5a524;
+  --ok: #3dbb5a;
+  --bad: #e5484d;
+  --win: #0c0d0f;
+  --display: "Sora", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font: 15px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+kbd { font: 500 12px var(--mono); background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; color: var(--fg); white-space: nowrap; }
+
+/* ---------- page frame ---------- */
+.top { border-bottom: 1px solid var(--line); background: var(--panel); }
+.top-in { max-width: 1240px; margin: 0 auto; padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 16px var(--display); }
+.brand .sq { width: 12px; height: 12px; border-radius: 3px; background: var(--amber); }
+.brand small { font: 600 10px var(--display); letter-spacing: .18em; color: var(--amber); text-transform: uppercase; }
+.top .meta { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 36px; }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; }
+.rail h2 { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 10px 12px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail a { display: grid; grid-template-columns: 26px 1fr; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 14px; }
+.rail a .n { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font: 600 11px var(--display); background: var(--panel-2); border: 1px solid var(--line); color: var(--dim); }
+.rail a:hover { background: var(--panel); color: var(--fg); }
+.rail a.on { background: var(--panel-2); color: var(--fg); }
+.rail a.on .n { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); }
+.rail a.done .n { color: var(--amber); }
+.rail .grp { font: 600 10px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 14px 0 4px 12px; }
+
+.step { min-width: 0; }
+.eyebrow { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin: 0 0 6px; }
+.step h1 { font: 600 clamp(24px, 3.2vw, 32px)/1.2 var(--display); margin: 0 0 10px; text-wrap: balance; letter-spacing: -.01em; }
+.lede { color: var(--muted); max-width: 66ch; margin: 0 0 22px; font-size: 16px; }
+.lede b, .cols b, .tips b { color: var(--fg); font-weight: 600; }
+.try { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--blue); margin: 0 0 10px; }
+.try::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(90,162,255,.18); }
+.how { list-style: none; counter-reset: how; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; max-width: 76ch; }
+.how li { counter-increment: how; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; color: var(--muted); font-size: 15px; }
+.how li::before { content: counter(how); width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel-2); display: grid; place-items: center; font: 600 12px var(--display); color: var(--amber); }
+.how li b { color: var(--fg); font-weight: 600; }
+.how li small { display: block; color: var(--dim); font-size: 13px; margin-top: 3px; }
+.howh { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 12px; }
+.hubfoot { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); background: #0f1013; flex-wrap: wrap; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 28px; margin-top: 24px; }
+.cols > div { min-width: 0; }
+.cols h3 { font: 600 14px var(--display); margin: 0 0 6px; }
+.cols p, .cols ul { margin: 0; color: var(--muted); font-size: 14px; }
+.cols ul { padding-left: 18px; display: grid; gap: 4px; }
+.note { margin-top: 22px; padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 8px; background: var(--panel); color: var(--muted); font-size: 14px; max-width: 76ch; }
+.note b { color: var(--fg); }
+.nav { display: flex; gap: 10px; margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.btn { color: var(--fg); border: 1px solid var(--line); background: var(--panel-2); border-radius: 8px; padding: 9px 16px; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: #3a3f48; }
+.btn.primary { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
+.btn.primary:hover { filter: brightness(1.06); }
+.nav .grow { flex: 1; }
+
+/* ---------- app window mockups ---------- */
+.win { border: 1px solid var(--line); border-radius: 12px; background: var(--win); overflow: hidden; box-shadow: 0 24px 60px -30px rgba(0,0,0,.8); }
+.win-bar { height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 12px; background: #17191d; border-bottom: 1px solid var(--line); }
+.win-bar i { width: 11px; height: 11px; border-radius: 50%; background: #3a3d44; }
+.win-bar span { margin-left: 10px; font-size: 12px; color: var(--dim); }
+.scroll-x { overflow-x: auto; }
+
+.mvbar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #0f1013; flex-wrap: wrap; }
+.mvbrand { display: flex; align-items: center; gap: 7px; font: 600 13px var(--display); }
+.mvbrand .sq { width: 10px; height: 10px; border-radius: 3px; background: var(--blue); }
+.mvbrand small { font: 600 9px var(--display); letter-spacing: .16em; color: var(--blue); }
+.lays { display: flex; gap: 4px; }
+.lay { width: 30px; height: 24px; border-radius: 6px; border: 1px solid transparent; background: transparent; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.lay svg { width: 18px; height: 12px; fill: #8b929c; }
+.lay:hover { background: var(--panel-2); }
+.lay.on { background: #1d2737; border-color: #2c3f5c; }
+.lay.on svg { fill: var(--blue); }
+.mvbar .sp { flex: 1; }
+.qual { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 2px; gap: 2px; font-size: 12px; }
+.qual span { color: var(--dim); padding: 0 6px; }
+.qual button { border: 0; background: transparent; padding: 3px 9px; border-radius: 6px; cursor: pointer; color: var(--muted); font-weight: 600; font-size: 12px; }
+.qual button.on { background: var(--blue); color: #06111f; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; border: 0; background: transparent; padding: 3px 6px; border-radius: 6px; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
+.chip.on::before { background: var(--ok); }
+.chip.warn::before { background: var(--warn); }
+.chip.bad::before { background: var(--bad); }
+.chip.bad { color: #f2a7a9; }
+.clock { font: 600 14px var(--display); font-variant-numeric: tabular-nums; }
+.ib { width: 28px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); display: grid; place-items: center; font-size: 13px; color: var(--muted); }
+
+.grid { display: grid; gap: 2px; background: #000; aspect-ratio: 16 / 9; position: relative; }
+.tile { position: relative; background: #050506 center / cover no-repeat; min-width: 0; min-height: 0; overflow: hidden; cursor: pointer; user-select: none; }
+.tile.empty { display: grid; place-items: center; color: var(--dim); font-size: 12px; cursor: pointer; }
+.tile .lbl { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.72); padding: 1px 8px; border-radius: 5px; font: 600 11px var(--body); white-space: nowrap; }
+.tile .inf { position: absolute; top: 5px; left: 7px; font: 500 10px var(--mono); color: rgba(255,255,255,.75); text-shadow: 0 1px 2px #000; }
+.tile .tag { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font: 700 10px var(--display); letter-spacing: .06em; padding: 1px 7px; border-radius: 4px; color: #fff; }
+.tile.pgm { box-shadow: inset 0 0 0 3px var(--pgm); }
+.tile.pvw { box-shadow: inset 0 0 0 3px var(--pvw); }
+.tile.pgm .tag { background: var(--pgm); }
+.tile.pvw .tag { background: var(--pvw); }
+.tile .ptzb { position: absolute; top: 5px; right: 6px; font: 600 10px var(--body); background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.18); border-radius: 5px; padding: 1px 6px; color: #fff; opacity: 0; transition: opacity .15s; }
+.tile:hover .ptzb, .tile .ptzb.show { opacity: 1; }
+.tile .msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 10px; font-size: 12px; color: #d8dbe0; background: rgba(0,0,0,.62); }
+.tile .lag { position: absolute; top: 5px; right: 7px; font: 600 10px var(--body); color: #1a1203; background: var(--warn); padding: 1px 6px; border-radius: 4px; }
+.tile .meter { position: absolute; left: 6px; bottom: 6px; width: 5px; height: 34%; display: flex; gap: 2px; }
+.ctx { position: absolute; z-index: 5; min-width: 200px; background: #23262c; border: 1px solid #353942; border-radius: 8px; padding: 5px; box-shadow: 0 12px 30px rgba(0,0,0,.6); font-size: 12px; }
+.ctx div { padding: 4px 10px 4px 22px; border-radius: 5px; position: relative; cursor: pointer; white-space: nowrap; }
+.ctx div:hover { background: var(--blue); color: #06111f; }
+.ctx div.dis { color: var(--dim); cursor: default; background: none; }
+.ctx div.chk::before { content: "✓"; position: absolute; left: 7px; }
+.ctx hr { border: 0; border-top: 1px solid #353942; margin: 4px 0; }
+
+/* ATEM bar */
+.abar { display: flex; align-items: center; gap: 14px; padding: 8px 12px; background: #0f1013; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.aname { font: 600 12px var(--display); min-width: 120px; }
+.aname small { display: flex; align-items: center; gap: 5px; font: 500 11px var(--body); color: var(--muted); }
+.aname small::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+.arows { display: grid; gap: 4px; }
+.arow { display: flex; align-items: center; gap: 4px; }
+.arow > span { font: 600 9px var(--display); letter-spacing: .1em; color: var(--dim); width: 30px; }
+.ab { border: 1px solid #30343c; background: #1b1e23; border-radius: 6px; padding: 4px 9px; font: 700 11px var(--display); cursor: pointer; }
+.ab.pg { background: var(--pgm); border-color: var(--pgm); color: #fff; }
+.ab.pv { background: var(--pvw); border-color: var(--pvw); color: #fff; }
+.ago { display: flex; gap: 6px; margin-left: auto; }
+.ago .ab { padding: 9px 16px; font-size: 13px; }
+
+/* PTZ panel */
+.ptzwrap { display: grid; grid-template-columns: minmax(0, 1fr) 230px; background: #000; }
+.ptzpanel { background: #121418; border-left: 1px solid var(--line); padding: 12px; display: grid; gap: 12px; align-content: start; font-size: 12px; }
+.ptzpanel h4 { margin: 0; font: 600 13px var(--display); display: flex; justify-content: space-between; gap: 6px; }
+.ptzpanel h4 em { font: 500 11px var(--body); color: var(--ok); font-style: normal; }
+.pad { width: 120px; height: 120px; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle, #1f232a 0 55%, #181b20 56%); border: 1px solid #30343c; position: relative; touch-action: none; cursor: grab; }
+.pad .knob { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: var(--blue); left: 40px; top: 40px; box-shadow: 0 4px 12px rgba(0,0,0,.5); transition: transform .15s; }
+.pad.drag .knob { transition: none; }
+.prow { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.prow > span { color: var(--muted); }
+.prow .ab { padding: 4px 12px; user-select: none; }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.presets .ab.on { border-color: var(--blue); color: var(--blue); }
+
+/* Hub mockup */
+.hubbar { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #0f1013; }
+.hubbar .tabs { display: flex; gap: 4px; }
+.hubbar .tabs button { border: 0; background: transparent; padding: 5px 11px; border-radius: 7px; color: var(--muted); font-weight: 600; font-size: 13px; cursor: pointer; }
+.hubbar .tabs button.on { background: var(--panel-2); color: var(--fg); }
+.hubbody { padding: 16px; display: grid; gap: 12px; }
+.sect h5 { margin: 0; font: 600 13px var(--display); color: var(--blue); }
+.sect p { margin: 2px 0 10px; color: var(--dim); font-size: 12px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.card { border: 1px solid var(--line); border-radius: 10px; background: #121418; padding: 12px; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 12px; }
+.card .ico { width: 44px; height: 44px; border-radius: 10px; grid-row: span 3; display: grid; place-items: center; }
+.card b { font: 600 14px var(--display); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.kind { font: 700 9px var(--display); letter-spacing: .08em; padding: 2px 6px; border-radius: 4px; border: 1px solid #2c3f5c; color: var(--blue); }
+.card p { margin: 0; color: var(--muted); font-size: 12px; }
+.card .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; font-size: 12px; }
+.hb { border: 0; border-radius: 7px; padding: 6px 12px; font-weight: 700; font-size: 12px; background: var(--amber); color: var(--amber-ink); cursor: pointer; }
+.hb.ghost { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); }
+.prog { height: 5px; border-radius: 3px; background: var(--panel-2); overflow: hidden; flex: 1; max-width: 140px; }
+.prog i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .2s linear; }
+.lic { padding: 18px; display: grid; gap: 10px; max-width: 620px; }
+.lic h5 { margin: 0; font: 600 16px var(--display); }
+.lic p { margin: 0; color: var(--muted); font-size: 12px; }
+.lic textarea { width: 100%; background: #0d0e11; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); font: 500 12px var(--mono); padding: 8px; resize: none; }
+.keyrow { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; background: #121418; }
+.keyrow b { font: 500 12px var(--mono); }
+.okline { color: var(--ok); font-size: 12px; }
+
+/* browser + dialogs */
+.browser .url { flex: 1; margin-left: 10px; height: 20px; border-radius: 6px; background: #0d0e11; border: 1px solid var(--line); font-size: 11px; color: var(--muted); display: flex; align-items: center; padding: 0 10px; overflow: hidden; white-space: nowrap; }
+.site { padding: 26px 22px; display: grid; gap: 14px; background: radial-gradient(120% 90% at 100% 0%, #1d1608 0%, var(--win) 55%); }
+.site h4 { margin: 0; font: 600 22px var(--display); }
+.site p { margin: 0; color: var(--muted); font-size: 13px; max-width: 52ch; }
+.site .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.stage-mock { position: relative; }
+.dlg { position: absolute; inset: 0; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 14px; }
+.sheet { width: min(400px, 100%); background: #1a1d22; border: 1px solid #30343c; border-radius: 12px; padding: 16px; display: grid; gap: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.6); font-size: 12px; }
+.sheet h4 { margin: 0; font: 600 15px var(--display); }
+.sheet p { margin: 0; color: var(--muted); }
+.sheet ol { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 4px; }
+.sheet .acts { display: flex; justify-content: flex-end; gap: 8px; }
+.mail { padding: 16px 18px; display: grid; gap: 8px; font-size: 13px; background: #f4f5f7; color: #1d2025; }
+.mail .hd { color: #59606b; font-size: 12px; }
+.mail a { color: #0a63d9; word-break: break-all; cursor: pointer; text-decoration: underline; }
+
+/* phone */
+.phonepair { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 22px; align-items: center; }
+.phone { width: 230px; aspect-ratio: 9 / 19; border-radius: 34px; border: 8px solid #24272d; background: #08090b; position: relative; overflow: hidden; justify-self: center; }
+.phone .notch { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 74px; height: 20px; border-radius: 12px; background: #000; z-index: 2; }
+.phone .scr { position: absolute; inset: 34px 8px 12px; display: grid; gap: 6px; align-content: start; }
+.phone .scr .grid { aspect-ratio: auto; grid-template-columns: 1fr 1fr; background: transparent; gap: 4px; }
+.phone .scr .tile { aspect-ratio: 16 / 9; border-radius: 4px; }
+.phone .pbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.phone .pbtns .ab { padding: 10px; }
+.phone .ph { font: 600 11px var(--display); color: var(--muted); display: flex; justify-content: space-between; }
+.setpane { padding: 16px; display: grid; gap: 10px; font-size: 12px; }
+.setpane h5 { margin: 0; font: 600 15px var(--display); }
+.setpane p { margin: 0; color: var(--muted); }
+.setpane .st { display: flex; justify-content: space-between; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.setpane code { font: 500 11px var(--mono); color: var(--blue); word-break: break-all; }
+
+/* status legend */
+.legend { display: grid; gap: 8px; }
+.lg { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 16px; align-items: start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.lg .chip { justify-self: start; background: #0f1013; border: 1px solid var(--line); padding: 4px 9px; }
+.lg p { margin: 0; color: var(--muted); font-size: 14px; }
+.lg p b { color: var(--fg); }
+.lgh { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 18px 0 2px; }
+.tmsg { justify-self: start; font-size: 12px; background: #0f1013; border: 1px solid var(--line); border-radius: 6px; padding: 4px 9px; color: #d8dbe0; }
+.tmsg.lagc { background: var(--warn); color: #1a1203; border-color: var(--warn); font-weight: 600; }
+
+/* troubleshooting */
+details { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; padding: 13px 16px; font: 600 15px var(--display); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--amber); font-weight: 700; }
+details[open] summary::after { content: "–"; }
+details .in { padding: 0 16px 14px; color: var(--muted); font-size: 14px; }
+details .in ol, details .in ul { margin: 0; padding-left: 20px; display: grid; gap: 5px; }
+details .in b { color: var(--fg); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.check { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel); font-size: 14px; color: var(--muted); }
+.check b { display: block; color: var(--fg); font: 600 14px var(--display); margin-bottom: 4px; }
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 22px; margin-top: 18px; font-size: 14px; color: var(--muted); }
+.keys div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--line); padding: 5px 0; }
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .rail { position: static; }
+  .rail h2, .rail .grp { display: none; }
+  .rail ol { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; }
+  .rail a { grid-template-columns: 22px auto; white-space: nowrap; border: 1px solid var(--line); }
+  .ptzwrap { grid-template-columns: minmax(0, 1fr); }
+  .ptzpanel { border-left: 0; border-top: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .phonepair { grid-template-columns: minmax(0, 1fr); }
+  .lg { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+@media (max-width: 560px) {
+  .mvbar .lays .lay:nth-child(n+4) { display: none; }
+  .mvbar .clock, .mvbar .ib { display: none; }
+  .abar .aname { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <div class="brand"><span class="sq"></span>Showcaller <small>Studio</small></div>
+  <div class="meta">Producer guide · Watching the studio from home · Hub 1.13 · Multiview 2.8</div>
+</div></header>
+
+<div class="wrap">
+  <nav class="rail" aria-label="Steps">
+    <h2>Guide</h2>
+    <ol id="rail"></ol>
+  </nav>
+  <main class="step" id="step" aria-live="polite"></main>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ---------- pretend camera pictures (drawn once, used as tile backgrounds) ----------
+  const CAMS = {};
+  function scene(kind) {
+    const c = document.createElement('canvas'); c.width = 640; c.height = 360;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, 0, 360);
+    const sky = { wide: ['#1b2440', '#0b0f1c'], host: ['#2a1d3a', '#100b18'], guest: ['#13303a', '#08141a'], aud: ['#1a1a1f', '#070708'], slides: ['#0d0f14', '#0d0f14'] }[kind];
+    bg.addColorStop(0, sky[0]); bg.addColorStop(1, sky[1]); g.fillStyle = bg; g.fillRect(0, 0, 640, 360);
+    const beam = (x, col) => { const r = g.createRadialGradient(x, -40, 10, x, 120, 300); r.addColorStop(0, col); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 640, 360); };
+    const person = (x, y, s, shirt, skin) => {
+      g.fillStyle = shirt; g.beginPath(); g.ellipse(x, y + s * 1.55, s * 1.25, s * 1.0, 0, Math.PI, 0); g.fill();
+      g.fillRect(x - s * 1.25, y + s * 1.55, s * 2.5, s * 2);
+      g.fillStyle = skin; g.beginPath(); g.ellipse(x, y, s * .62, s * .75, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(20,14,10,.85)'; g.beginPath(); g.ellipse(x, y - s * .38, s * .66, s * .42, 0, Math.PI, 0); g.fill();
+    };
+    if (kind === 'wide') {
+      beam(180, 'rgba(255,190,110,.35)'); beam(460, 'rgba(120,170,255,.3)');
+      g.fillStyle = '#20263a'; g.fillRect(110, 40, 420, 150); // LED wall
+      const w = g.createLinearGradient(110, 40, 530, 190); w.addColorStop(0, '#ffb224'); w.addColorStop(1, '#5aa2ff'); g.globalAlpha = .55; g.fillStyle = w; g.fillRect(118, 48, 404, 134); g.globalAlpha = 1;
+      g.fillStyle = 'rgba(255,255,255,.85)'; g.font = '600 26px Sora, sans-serif'; g.fillText('SUMMIT 2026', 236, 125);
+      g.fillStyle = '#2a2f3d'; g.fillRect(0, 280, 640, 80);
+      person(250, 215, 20, '#2d3d66', '#d9a77f'); person(390, 218, 20, '#5b2f3c', '#a8724f');
+      g.fillStyle = '#3a3f4c'; g.fillRect(200, 262, 240, 30);
+    } else if (kind === 'host' || kind === 'guest') {
+      beam(kind === 'host' ? 220 : 420, kind === 'host' ? 'rgba(255,190,110,.32)' : 'rgba(120,220,255,.25)');
+      g.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 6; i++) g.fillRect(40 + i * 100, 40, 50, 200);
+      person(kind === 'host' ? 300 : 340, 150, 64, kind === 'host' ? '#2d3d66' : '#5b2f3c', kind === 'host' ? '#d9a77f' : '#a8724f');
+    } else if (kind === 'aud') {
+      beam(320, 'rgba(255,255,255,.12)');
+      for (let r = 0; r < 4; r++) for (let i = 0; i < 12; i++) {
+        const x = 30 + i * 52 + (r % 2) * 26, y = 200 + r * 42, s = 11 + r * 2.5;
+        g.fillStyle = '#16181e'; g.beginPath(); g.ellipse(x, y, s * .7, s * .85, 0, 0, Math.PI * 2); g.fill();
+        g.fillRect(x - s * 1.2, y + s, s * 2.4, 40);
+      }
+    } else {
+      g.fillStyle = '#f2f3f5'; g.fillRect(40, 30, 560, 300);
+      g.fillStyle = '#ffb224'; g.fillRect(40, 30, 10, 300);
+      g.fillStyle = '#16181d'; g.font = '700 30px Sora, sans-serif'; g.fillText('Q3 roadmap', 80, 92);
+      g.fillStyle = '#6b727c'; g.font = '400 18px Inter, sans-serif';
+      ['Launch in three cities', 'Partner programme', 'Live Q&A after this session'].forEach((t, i) => { g.fillRect(84, 136 + i * 46, 8, 8); g.fillText(t, 104, 145 + i * 46); });
+    }
+    return c.toDataURL('image/jpeg', .82);
+  }
+  const CAMLIST = [
+    { id: 'wide', name: 'Cam 1 Wide', src: 'COG-CTRL-01 (Cam 1 Wide)' },
+    { id: 'host', name: 'Cam 2 Host', src: 'PTZ-K600N-2 (Cam 2 Host)' },
+    { id: 'guest', name: 'Cam 3 Guest', src: 'PTZ-K600N-3 (Cam 3 Guest)' },
+    { id: 'aud', name: 'Cam 4 Audience', src: 'PTZ-K600N-4 (Cam 4 Audience)' },
+    { id: 'slides', name: 'Slides', src: 'SLIDES-PC (Keynote)' },
+  ];
+  CAMLIST.forEach((c) => { CAMS[c.id] = scene(c.id); });
+  const cam = (id) => CAMLIST.find((c) => c.id === id);
+
+  // ---------- small building blocks ----------
+  const LAYOUTS = {
+    '1': { cols: '1fr', rows: '1fr', n: 1, icon: '<rect x="0" y="0" width="18" height="12" rx="1.5"/>' },
+    '1x2': { cols: '1fr 1fr', rows: '1fr', n: 2, icon: '<rect width="8.5" height="12" rx="1.5"/><rect x="9.5" width="8.5" height="12" rx="1.5"/>' },
+    '2x2': { cols: '1fr 1fr', rows: '1fr 1fr', n: 4, icon: '<rect width="8.5" height="5.5" rx="1"/><rect x="9.5" width="8.5" height="5.5" rx="1"/><rect y="6.5" width="8.5" height="5.5" rx="1"/><rect x="9.5" y="6.5" width="8.5" height="5.5" rx="1"/>' },
+    '1+5': { cols: '1fr 1fr 1fr', rows: '1fr 1fr 1fr', n: 6, big: true, icon: '<rect width="11.5" height="7.5" rx="1"/><rect x="12.5" width="5.5" height="3.5" rx=".8"/><rect x="12.5" y="4.25" width="5.5" height="3.25" rx=".8"/><rect y="8.5" width="5.5" height="3.5" rx=".8"/><rect x="6.25" y="8.5" width="5.25" height="3.5" rx=".8"/><rect x="12.5" y="8.5" width="5.5" height="3.5" rx=".8"/>' },
+    '3x3': { cols: '1fr 1fr 1fr', rows: '1fr 1fr 1fr', n: 9, icon: [0, 1, 2].map((r) => [0, 1, 2].map((c) => `<rect x="${c * 6.25}" y="${r * 4.25}" width="5.5" height="3.5" rx=".8"/>`).join('')).join('') },
+  };
+  const layBtns = (on) => Object.entries(LAYOUTS).map(([k, l]) => `<button class="lay${k === on ? ' on' : ''}" data-lay="${k}" title="Layout ${k}" aria-label="Layout ${k}"><svg viewBox="0 0 18 12">${l.icon}</svg></button>`).join('');
+  const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  function mvbar({ lay = '2x2', q = 'auto', link = ['on', 'Studio · 28 ms'], extra = '' } = {}) {
+    return `<div class="mvbar"><div class="mvbrand"><span class="sq"></span>Showcaller <small>MULTIVIEW</small></div>
+      <div class="lays">${layBtns(lay)}</div><span class="sp"></span>
+      <div class="qual" data-qual><span>Quality</span><button data-q="light"${q === 'light' ? ' class="on"' : ''}>Low</button><button data-q="auto"${q === 'auto' ? ' class="on"' : ''}>Auto</button><button data-q="full"${q === 'full' ? ' class="on"' : ''}>Full</button></div>
+      ${link ? `<span class="chip ${link[0]}" data-linkchip>${esc(link[1])}</span>` : ''}<span class="chip on">NDI</span>${extra}
+      <span class="clock" data-clock>${now()}</span><span class="ib">⟳</span><span class="ib">⚙</span></div>`;
+  }
+  function tileHTML(c, { info = '', tag = '', ptz = false, msg = '', lag = '' } = {}) {
+    if (!c) return '<div class="tile empty">Click to choose a source</div>';
+    return `<div class="tile${tag ? ' ' + tag : ''}" style="background-image:url(${CAMS[c.id]})" data-cam="${c.id}">
+      ${info ? `<span class="inf">${esc(info)}</span>` : ''}${tag ? `<span class="tag">${tag === 'pgm' ? 'PGM' : 'PVW'}</span>` : ''}
+      ${ptz ? '<span class="ptzb">PTZ</span>' : ''}${lag ? `<span class="lag">${esc(lag)}</span>` : ''}
+      <span class="lbl">${esc(c.name)}</span>${msg ? `<div class="msg">${esc(msg)}</div>` : ''}</div>`;
+  }
+  const win = (title, inner, cls = '') => `<div class="win ${cls}"><div class="win-bar"><i></i><i></i><i></i><span>${esc(title)}</span></div>${inner}</div>`;
+  const ticker = [];
+  setInterval(() => document.querySelectorAll('[data-clock]').forEach((el) => { el.textContent = now(); }), 1000);
+
+  // ---------- the steps ----------
+  const STEPS = [
+    { id: 'start', grp: 'Set up', t: 'Before you start' },
+    { id: 'hub', t: 'Get Showcaller Hub' },
+    { id: 'update', t: 'Already installed? Update' },
+    { id: 'install', t: 'Install Multiview' },
+    { id: 'license', t: 'Add a license (if sent)' },
+    { id: 'join', t: 'Join the studio' },
+    { id: 'tiles', grp: 'Watching', t: 'Layouts and tiles' },
+    { id: 'quality', t: 'Picture quality' },
+    { id: 'tally', t: 'Tally and the ATEM bar' },
+    { id: 'ptz', t: 'Moving a camera (PTZ)' },
+    { id: 'phone', t: 'Watch on your phone' },
+    { id: 'status', grp: 'When something looks off', t: 'What the lights mean' },
+    { id: 'help', t: 'Troubleshooting' },
+  ];
+
+  const R = {};
+
+  R.start = () => ({
+    eb: 'Welcome',
+    h: 'Watch the studio cameras live, from home',
+    lede: 'Your production team uses <b>Showcaller Multiview</b> to let you see every camera in the studio on your own computer, with tally lights, and steer the robotic cameras if you are asked to. You install it once with <b>Showcaller Hub</b>, then click the invite link you are sent. It takes about ten minutes the first time.',
+    body: `<div class="checks">
+      <div class="check"><b>A Mac or Windows PC</b>A laptop is fine. macOS 12 or newer, or Windows 10 or 11.</div>
+      <div class="check"><b>Home internet</b>Wired or good Wi-Fi. 5 Mbit/s down is plenty; the studio sizes the pictures to fit your connection.</div>
+      <div class="check"><b>Your invite link</b>Sent to you privately by the studio. It works like a password, so please don't forward it.</div>
+      <div class="check"><b>Nothing else</b>No VPN, no NDI software and no router settings. The connection to the studio is built in and encrypted.</div>
+    </div>
+    <div class="note"><b>Already have Showcaller Hub or Multiview?</b> You might, from an earlier show. Please update both to the newest version before you join: <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later. Older versions may not connect to the studio. The <b>Already installed? Update</b> step shows how.</div>
+    <p class="howh" style="margin-top:24px">What you'll do</p>
+    <ol class="how">
+      <li><span><b>Get Showcaller Hub</b> from showcallerstudio.com/apps, or update it if you already have it.<small>About 3 minutes.</small></span></li>
+      <li><span><b>Install or update Showcaller Multiview</b> from inside Hub.<small>About 2 minutes.</small></span></li>
+      <li><span><b>Add a license key</b>, only if the studio sent you one.<small>30 seconds.</small></span></li>
+      <li><span><b>Click your invite link</b> and press Join. The studio's cameras appear.<small>Under a minute.</small></span></li>
+      <li><span><b>Do a quick check</b> before show day: pick Low, Auto or Full, find your tally, try a camera move if you'll be steering.<small>A few minutes. Best done the day before.</small></span></li>
+    </ol>
+    <div class="cols">
+      <div><h3>How it fits together</h3><p><b>Hub</b> installs and updates the Showcaller apps on your computer and holds your license. <b>Multiview</b> is the screen of camera tiles you watch. <b>Showcaller Link</b>, built into both, carries the pictures from the studio to you.</p></div>
+      <div><h3>How to use this guide</h3><p>Work down the steps on the left. The app pictures on each page are live: click, double-click and right-click them to see what the real app does.</p></div>
+    </div>`,
+  });
+
+  R.hub = () => ({
+    eb: 'Set up',
+    steps: [
+      'Open <b>showcallerstudio.com/apps</b> in any web browser on the computer you\'ll watch on.',
+      'Click the <b>Download</b> button for your computer (Mac or Windows). The download is a few hundred megabytes.<small>Already have Hub? Skip to the next step and update it instead.</small>',
+      '<b>Mac:</b> open your <b>Downloads</b> folder. If the download is a .zip, double-click it. Drag <b>Showcaller Hub</b> into <b>Applications</b>, then double-click it there.<small>If macOS says it was downloaded from the internet, click <b>Open</b>.</small>',
+      '<b>Windows:</b> double-click the downloaded <b>Showcaller-Hub-…-win-x64.exe</b>. If a blue <b>"Windows protected your PC"</b> box appears, click <b>More info</b>, then <b>Run anyway</b>. Hub installs and opens by itself.',
+      'Hub opens on its <b>Apps</b> tab, with the Showcaller apps grouped by what they do. Leave it open for the next step.',
+    ],
+    h: 'Download Showcaller Hub',
+    lede: 'Go to <b>showcallerstudio.com/apps</b> and download Hub for your computer. Hub is the one app that installs everything else.',
+    mock: win('showcallerstudio.com/apps', `<div class="site">
+        <div class="eyebrow" style="margin:0">Showcaller apps</div>
+        <h4>One app installs them all</h4>
+        <p>Showcaller Hub installs and updates every Showcaller app on this computer and holds your license key.</p>
+        <div class="row"><a class="btn primary" href="https://showcallerstudio.com/apps/" target="_blank" rel="noopener">Download for Mac</a><a class="btn" href="https://showcallerstudio.com/apps/" target="_blank" rel="noopener">Download for Windows</a></div>
+      </div>`, 'browser'),
+    body: `<div class="cols">
+      <div><h3>On a Mac</h3><ul><li>Open the download and drag <b>Showcaller Hub</b> into <b>Applications</b>.</li><li>Open it from Applications or Launchpad.</li><li>It's signed by Gotham Media House and checked by Apple, so it opens normally.</li></ul></div>
+      <div><h3>On Windows</h3><ul><li>Run the downloaded installer.</li><li>If Windows says <b>"Windows protected your PC"</b>, click <b>More info</b>, then <b>Run anyway</b>.</li></ul></div>
+      <div><h3>Where it lives</h3><p>Hub keeps running in the <b>menu bar</b> (Mac) or the <b>system tray</b> (Windows) so it can keep your apps up to date. Closing its window just hides it.</p></div>
+    </div>
+    <div class="note"><b>Already have Hub?</b> Update it first. Click <b>Check for updates</b> in Hub's window (or click the Hub icon in the menu bar or tray, then <b>Check for Updates</b>) and install what it offers. You need Hub <b>1.13</b> or later; the version is shown at the bottom of its window. If an old Hub doesn't offer an update, download it again from showcallerstudio.com/apps and install it over the old one.</div>`,
+  });
+
+  R.update = () => ({
+    eb: 'Set up · if you had Showcaller before',
+    h: 'Already installed? Update to the newest version',
+    lede: 'If Showcaller Hub or Multiview is already on your computer from an earlier show, update both before you join. The studio uses the newest versions, and older ones may not connect, or may be missing the controls this guide shows. You need <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later.',
+    steps: [
+      'Open Hub. On a Mac, click the Hub icon in the <b>menu bar</b> at the top of the screen and choose <b>Open Showcaller Hub…</b>. On Windows, click the Hub icon in the <b>system tray</b> (bottom right; you may need the ^ arrow). Or open it from Applications or the Start menu.',
+      'If there\'s a button at the bottom of Hub saying <b>Update Hub to 1.13.x</b>, click it first. Hub downloads the new version and restarts.<small>Your Hub version is shown at the bottom left of its window.</small>',
+      'Click <b>Check for updates</b> at the top right.',
+      'On the <b>Showcaller Multiview</b> card, click <b>Update to 2.8.2</b> (or a newer number). If several apps have updates, <b>Update all</b> does them together.<small>If Multiview is open, it restarts by itself when the update is ready. Your tiles and studio connection are kept.</small>',
+      'Check it worked: in Multiview, click <b>⚙ Settings</b>. The version is at the bottom left of the Settings window.',
+    ],
+    tryit: 'Click Update Hub, then Update on the Multiview card.',
+    mock: win('Showcaller Hub', `<div class="hubbar"><div class="brand" style="font-size:14px"><span class="sq"></span>Showcaller <small>Hub</small></div>
+        <div class="tabs"><button class="on">Apps</button><button>License</button><button>Studio link</button></div><span style="flex:1"></span><button class="hb ghost">Check for updates</button></div>
+      <div class="hubbody"><div class="sect"><h5>Cameras and switching</h5><p>Seeing, steering and cutting the cameras.</p>
+        <div class="cards">
+          <div class="card"><div class="ico" style="background:#16243a"><svg width="26" height="18" viewBox="0 0 18 12" fill="#5aa2ff">${LAYOUTS['2x2'].icon}</svg></div>
+            <b>Showcaller Multiview <span class="kind">FREE + PRO</span></b><p>Watch NDI cameras from anywhere, with tally and ATEM control (Pro).</p>
+            <div class="foot" id="upFoot"><span>Installed · 2.6.4</span><button class="hb" id="upMv">Update to 2.8.2</button></div></div>
+        </div></div></div>
+      <div class="hubfoot" id="hubFoot"><span>Showcaller Hub 1.9.0</span><button class="hb" id="upHub">Update Hub to 1.13.3</button></div>`),
+    body: `<div class="cols">
+      <div><h3>Multiview installed without Hub?</h3><p>If you installed Multiview from a download link before, Hub still finds it in Applications (or Program Files) and offers the update. You don't need to uninstall anything.</p></div>
+      <div><h3>No update offered on an old Hub?</h3><p>Very old versions of Hub can't update themselves. Download Hub again from <b>showcallerstudio.com/apps</b> and install it over the old one (see <b>Get Showcaller Hub</b>). Your license and settings are kept.</p></div>
+      <div><h3>"Update" in Multiview's toolbar</h3><p>Multiview shows <b>Update 2.x</b> in its toolbar when there's a newer version. Clicking it opens the download page; updating from Hub is quicker.</p></div>
+    </div>
+    <div class="note"><b>Update before show day, not during the show.</b> An update takes a minute or two and restarts the app.</div>`,
+    on(root) {
+      const bar = (el, done) => {
+        el.innerHTML = '<span>Updating…</span><div class="prog"><i></i></div>';
+        let p = 0; const b = $('.prog i', el);
+        const t = setInterval(() => { p += 10; b.style.width = Math.min(p, 100) + '%'; if (p >= 100) { clearInterval(t); done(); } }, 110);
+        ticker.push(t);
+      };
+      $('#upHub', root).onclick = () => { const f = $('#hubFoot', root); bar(f, () => { f.innerHTML = '<span>Showcaller Hub 1.13.3</span><span class="okline">Up to date</span>'; }); };
+      $('#upMv', root).onclick = () => { const f = $('#upFoot', root); bar(f, () => { f.innerHTML = '<span class="okline">Installed · 2.8.2 · up to date</span><button class="hb ghost">Open</button>'; }); };
+    },
+  });
+
+  R.install = () => ({
+    eb: 'Set up',
+    steps: [
+      'In Hub, stay on the <b>Apps</b> tab and scroll to <b>Cameras and switching</b>.',
+      'On the <b>Showcaller Multiview</b> card, click <b>Install</b>. A bar shows the download; it takes a minute or two.<small>Already installed? The card says <b>Update to 2.8.2</b> instead: click that.</small>',
+      'When the card says <b>Installed</b>, click <b>Open</b>. Multiview opens with empty tiles. That\'s expected: the cameras arrive when you join the studio.',
+      'Mac: if you\'re asked whether Multiview may <b>find devices on your local network</b>, or <b>accept incoming connections</b>, click <b>Allow</b>.',
+    ],
+    h: 'Install Multiview from Hub',
+    lede: 'In Hub\'s <b>Apps</b> tab, find <b>Showcaller Multiview</b> under <b>Cameras and switching</b> and click <b>Install</b>. When it finishes, click <b>Open</b>.',
+    tryit: 'Click Install on the Multiview card.',
+    mock: win('Showcaller Hub', `<div class="hubbar"><div class="brand" style="font-size:14px"><span class="sq"></span>Showcaller <small>Hub</small></div>
+        <div class="tabs"><button class="on">Apps</button><button>License</button><button>Studio link</button></div></div>
+      <div class="hubbody"><div class="sect"><h5>Cameras and switching</h5><p>Seeing, steering and cutting the cameras.</p>
+        <div class="cards">
+          <div class="card"><div class="ico" style="background:#16243a"><svg width="26" height="18" viewBox="0 0 18 12" fill="#5aa2ff">${LAYOUTS['2x2'].icon}</svg></div>
+            <b>Showcaller Multiview <span class="kind">FREE + PRO</span></b><p>Watch NDI cameras from anywhere, with tally and ATEM control (Pro).</p>
+            <div class="foot" id="mvFoot"><span>Not installed</span><button class="hb" id="mvInstall">Install · 182 MB</button></div></div>
+          <div class="card" style="opacity:.55"><div class="ico" style="background:#16243a"><svg width="24" height="18" viewBox="0 0 24 18" fill="#5aa2ff"><rect x="1" y="3" width="15" height="12" rx="2"/><path d="M17 7l6-3v10l-6-3z"/></svg></div>
+            <b>Showcaller NDI Webcam <span class="kind">FREE</span></b><p>Turns a webcam or capture device into an NDI source.</p>
+            <div class="foot"><span>Not installed</span><button class="hb ghost">Install</button></div></div>
+        </div></div></div>`),
+    body: `<div class="cols">
+      <div><h3>You only install the one app</h3><p>The other apps in Hub are for the studio crew. You need just Multiview.</p></div>
+      <div><h3>Already installed?</h3><p>If the card shows <b>Update to 2.8.2</b> (or newer), click it before you join. You need Multiview <b>2.8.2</b> or later. Multiview also shows <b>Update available</b> in its toolbar when there's a newer version.</p></div>
+      <div><h3>First open on a Mac</h3><p>If macOS asks whether Multiview may <b>find devices on your local network</b>, click <b>Allow</b>.</p></div>
+    </div>`,
+    on(root) {
+      $('#mvInstall', root).onclick = () => {
+        const f = $('#mvFoot', root);
+        f.innerHTML = '<span>Installing…</span><div class="prog"><i></i></div>';
+        let p = 0; const bar = $('.prog i', f);
+        const t = setInterval(() => { p += 9; bar.style.width = Math.min(p, 100) + '%'; if (p >= 100) { clearInterval(t); f.innerHTML = '<span class="okline">Installed · 2.8.2</span><button class="hb">Open</button>'; } }, 120);
+        ticker.push(t);
+      };
+    },
+  });
+
+  R.license = () => ({
+    eb: 'Set up · only if you were sent a key',
+    steps: [
+      'Copy the whole key from the studio\'s email, from <b>UPS2-</b> to the last character. It\'s long; that\'s normal.',
+      'In Hub, click the <b>License</b> tab.',
+      'Paste the key into <b>Add a license key</b> and click <b>Add this key</b>.',
+      'The key appears in the list with what it unlocks (Multiview Pro). Multiview picks it up straight away, even if it\'s open.',
+    ],
+    h: 'Add a license key',
+    lede: 'Watching the cameras is <b>free</b>. A license is only needed if the studio wants you to use the <b>ATEM switcher controls</b>. If they sent you a key (it starts with <b>UPS2-</b>), add it once in Hub and every Showcaller app on your computer picks it up.',
+    tryit: 'Click Add this key.',
+    mock: win('Showcaller Hub', `<div class="hubbar"><div class="brand" style="font-size:14px"><span class="sq"></span>Showcaller <small>Hub</small></div>
+        <div class="tabs"><button>Apps</button><button class="on">License</button><button>Studio link</button></div></div>
+      <div class="lic"><h5>License</h5>
+        <p>Your license key lists every Showcaller app you bought. Add it here once and every app on this computer picks it up, even the ones that are open.</p>
+        <div id="keys"></div>
+        <label for="keyin" style="font-size:12px;font-weight:600">Add a license key</label>
+        <textarea id="keyin" rows="2" spellcheck="false">UPS2-eyJ0byI6IkFjbWUgUHJvZHVjdGlvbnMiLCJwIjpbInN0dWRpbyJdfQ.k3Jx…</textarea>
+        <div style="display:flex;gap:10px;align-items:center"><button class="hb" id="keyUse">Add this key</button><span id="keyMsg" class="okline"></span></div></div>`),
+    body: `<div class="cols">
+      <div><h3>Paste the whole key</h3><p>Copy everything from <b>UPS2-</b> to the end. If it says the key isn't complete, copy it again from the email.</p></div>
+      <div><h3>Already in Multiview?</h3><p>You can also paste it in Multiview under <b>Settings → License</b>. Either place works.</p></div>
+      <div><h3>No key?</h3><p>Skip this step. Everything else in this guide works without one, and the ATEM bar simply stays hidden.</p></div>
+    </div>`,
+    on(root) {
+      $('#keyUse', root).onclick = () => {
+        $('#keys', root).innerHTML = '<div class="keyrow"><b>UPS2-eyJ0byI6…k3Jx</b><span>Acme Productions · unlocks <b style="font-family:var(--body);color:var(--blue)">Multiview Pro</b>, Timer Pro</span></div>';
+        $('#keyMsg', root).textContent = 'Added. Every app on this computer uses it now.';
+        $('#keyin', root).value = '';
+      };
+    },
+  });
+
+  R.join = () => ({
+    eb: 'Set up',
+    steps: [
+      'Make sure Multiview is <b>installed and up to date</b> (see the earlier steps).',
+      'Open the studio\'s email or message <b>on the same computer</b> and click the invite link.',
+      'Your browser opens a showcallerstudio.com page and asks to open <b>Showcaller Multiview</b>. Click <b>Open</b> (or <b>Allow</b>). Tick "always allow" if offered.',
+      'Multiview shows <b>Join a camera network</b>, listing the cameras the studio set up for you. Click <b>Join</b>.',
+      'The toolbar shows <b>Connecting to the studio…</b> in amber, then the studio\'s name and a number in green, like <b>Studio · 28 ms</b>. The tiles fill in within about 10 seconds.',
+    ],
+    h: 'Join the studio with your invite link',
+    lede: 'The studio sends you a link that starts with <b>showcallerstudio.com/multiview/join/</b>. Click it on the computer where Multiview is installed. It opens the app, which asks once whether to join. Click <b>Join</b> and the cameras appear.',
+    tryit: 'Click the link in the email, then Join.',
+    mock: `<div class="stage-mock" id="joinStage"></div>`,
+    body: `<div class="cols">
+      <div><h3>If the link doesn't open the app</h3><p>Open Multiview, go to <b>Settings → Remote access</b>, paste the link into <b>Join with an invite</b> and click <b>Join</b>.</p></div>
+      <div><h3>What joining does</h3><p>It connects your computer to the studio, encrypted, and sets up the tiles the way the studio arranged them. Your own tiles are replaced.</p></div>
+      <div><h3>Next time</h3><p>You don't need the link again. Open Multiview and it reconnects to the studio by itself.</p></div>
+    </div>
+    <div class="note"><b>Keep the link private.</b> It carries your own key to the studio. If it gets out, tell the studio and they'll remove it and send you a new one.</div>`,
+    on(root) {
+      const st = $('#joinStage', root);
+      const grid = () => `<div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${['wide', 'host', 'guest', 'slides'].map((id) => tileHTML(cam(id))).join('')}</div>`;
+      const show = (n) => {
+        if (n === 0) st.innerHTML = win('Mail', `<div class="mail"><div class="hd"><b>From:</b> Studio producer &nbsp;·&nbsp; <b>Subject:</b> Cameras for Thursday</div>
+          <div>Hi! Here's your link to watch the studio cameras. Install Showcaller Multiview first, then click:</div>
+          <a id="jLink">https://showcallerstudio.com/multiview/join/#SMV1.eyJsIjp7Im4iOiJTdHVkaW8i…</a><div>See you on the call.</div></div>`);
+        if (n === 1) st.innerHTML = win('Showcaller Multiview', mvbar({ link: null }) + `<div style="position:relative">${`<div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${tileHTML(null).repeat(4)}</div>`}
+          <div class="dlg"><div class="sheet"><h4>Join a camera network</h4>
+          <p>This invite sets up 4 cameras (Cam 1 Wide, Cam 2 Host, Cam 3 Guest, Slides) and connects this computer to <b style="color:var(--fg)">Studio</b> with Showcaller Link. Your current tiles are replaced.</p>
+          <div class="acts"><button class="hb ghost">Not now</button><button class="hb" id="jJoin">Join</button></div></div></div></div>`);
+        if (n === 2) {
+          st.innerHTML = win('Showcaller Multiview', mvbar({ link: ['warn', 'Connecting to the studio…'] }) + `<div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${['wide', 'host', 'guest', 'slides'].map((id) => tileHTML(cam(id), { msg: 'Connecting to the studio through Showcaller Link…' })).join('')}</div>`);
+          ticker.push(setTimeout(() => show(3), 2200));
+        }
+        if (n === 3) {
+          st.innerHTML = win('Showcaller Multiview', mvbar({ link: ['on', 'Studio · 28 ms'] }) + grid()) + '<p style="margin:10px 0 0;font-size:13px;color:var(--muted)">Connected. <a href="#" id="jAgain" style="color:var(--blue)">Show it again</a></p>';
+          $('#jAgain', st).onclick = (e) => { e.preventDefault(); show(0); };
+        }
+        const l = $('#jLink', st); if (l) l.onclick = () => show(1);
+        const j = $('#jJoin', st); if (j) j.onclick = () => show(2);
+      };
+      show(0);
+    },
+  });
+
+  R.tiles = () => ({
+    eb: 'Watching',
+    steps: [
+      'Pick a layout with the grid buttons at the top: 1 big tile, 2 side by side, 4, 1 big + 5 small, 9, and more. The menu <b>Layout</b> has every option.',
+      'To see one camera big, <b>double-click</b> its tile, or press its number key. Press <kbd>Esc</kbd> to go back to all tiles.',
+      'To change what a tile shows, <b>right-click</b> it and pick a camera from the list. On a Mac trackpad, right-click is a two-finger click.',
+      'To rename a tile, right-click it and choose <b>Rename…</b>. To hear a camera, choose <b>Listen</b>; one tile plays sound at a time, and the volume is in <b>Settings → Sound</b>.',
+      'Press <kbd>F</kbd> for full screen. Multiview keeps your screen from going to sleep while it\'s open.',
+    ],
+    h: 'Layouts and tiles',
+    lede: 'Pick a layout from the row of grid buttons at the top. Each tile shows one camera. <b>Double-click</b> a tile to show it big, and press <kbd>Esc</kbd> to go back. <b>Right-click</b> a tile (or click an empty one) to choose what it shows.',
+    tryit: 'Change the layout, double-click a tile, right-click a tile.',
+    mock: `<div id="tilesMock" style="position:relative"></div>`,
+    body: `<div class="keys">
+        <div><span>Show a tile big</span><span><kbd>Double-click</kbd> or <kbd>1</kbd>–<kbd>9</kbd></span></div>
+        <div><span>Back to all tiles</span><kbd>Esc</kbd></div>
+        <div><span>Full screen</span><kbd>F</kbd></div>
+        <div><span>Choose a tile's camera</span><kbd>Right-click</kbd></div>
+        <div><span>Cycle picture quality</span><kbd>Q</kbd></div>
+        <div><span>Refresh sources</span><kbd>R</kbd></div>
+      </div>
+      <div class="cols">
+        <div><h3>Names and sound</h3><p>Rename a tile from its right-click menu. To hear a camera's audio, choose <b>Listen</b> in the same menu; one tile plays at a time.</p></div>
+        <div><h3>Your layout sticks</h3><p>Multiview remembers your layout and tiles for next time. Re-clicking the invite link puts the studio's layout back.</p></div>
+      </div>`,
+    on(root) {
+      const box = $('#tilesMock', root);
+      const st = { lay: '2x2', tiles: ['wide', 'host', 'guest', 'slides', 'aud', null, null, null, null], solo: -1 };
+      const render = () => {
+        const L = LAYOUTS[st.lay];
+        let inner;
+        if (st.solo >= 0) inner = `<div class="grid" style="grid-template-columns:1fr;grid-template-rows:1fr">${tileHTML(cam(st.tiles[st.solo]), { info: '1280×720 · 30 · sized for this connection' }).replace('class="tile', `data-i="${st.solo}" class="tile`)}</div>`;
+        else inner = `<div class="grid" style="grid-template-columns:${L.cols};grid-template-rows:${L.rows}">${Array.from({ length: L.n }, (_, i) => {
+          const h = tileHTML(st.tiles[i] && cam(st.tiles[i])).replace('class="tile', `data-i="${i}" class="tile`);
+          return L.big && i === 0 ? h.replace('class="tile', 'style="grid-column:span 2;grid-row:span 2;background-image:url(' + (st.tiles[0] ? CAMS[st.tiles[0]] : '') + ')" class="tile').replace(/style="background-image[^"]*"\s*/, '') : h;
+        }).join('')}</div>`;
+        box.innerHTML = win('Showcaller Multiview', mvbar({ lay: st.lay }) + `<div style="position:relative" id="tg">${inner}${st.solo >= 0 ? '<button class="hb ghost" id="back" style="position:absolute;right:10px;bottom:10px">Esc · back to all</button>' : ''}</div>`);
+        box.querySelectorAll('[data-lay]').forEach((b) => { b.onclick = () => { st.lay = b.dataset.lay; st.solo = -1; render(); }; });
+        box.querySelectorAll('[data-i]').forEach((t) => {
+          const i = +t.dataset.i;
+          t.ondblclick = () => { if (st.tiles[i]) { st.solo = st.solo >= 0 ? -1 : i; render(); } };
+          t.oncontextmenu = (e) => { e.preventDefault(); menu(i, e); };
+          t.onclick = (e) => { if (!st.tiles[i]) menu(i, e); };
+        });
+        const b = $('#back', box); if (b) b.onclick = () => { st.solo = -1; render(); };
+      };
+      const menu = (i, e) => {
+        const tg = $('#tg', box); const r = tg.getBoundingClientRect();
+        const m = document.createElement('div'); m.className = 'ctx';
+        m.innerHTML = `<div class="dis">Tile ${i + 1}</div>${CAMLIST.map((c) => `<div data-c="${c.id}" class="${st.tiles[i] === c.id ? 'chk' : ''}">${esc(c.src)}</div>`).join('')}<hr><div class="dis">Rename…</div><div data-solo>Show big</div><div class="dis">Listen (sound from this tile)</div><div class="dis">Camera controls (PTZ)</div><div data-clear>Clear</div>`;
+        tg.querySelectorAll('.ctx').forEach((x) => x.remove());
+        tg.appendChild(m);
+        const x = Math.min(e.clientX - r.left, r.width - 230), y = Math.min(e.clientY - r.top, r.height - 220);
+        m.style.left = Math.max(4, x) + 'px'; m.style.top = Math.max(4, y) + 'px';
+        m.onclick = (ev) => {
+          const d = ev.target.closest('div'); if (!d || d.classList.contains('dis')) return;
+          if (d.dataset.c) st.tiles[i] = d.dataset.c;
+          if (d.hasAttribute('data-clear')) st.tiles[i] = null;
+          if (d.hasAttribute('data-solo') && st.tiles[i]) st.solo = i;
+          render();
+        };
+        setTimeout(() => document.addEventListener('click', function off(ev) { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener('click', off); } }), 0);
+      };
+      const key = (e) => {
+        if (!box.isConnected) return document.removeEventListener('keydown', key);
+        if (e.target.closest('input,textarea')) return;
+        if (e.key === 'Escape' && st.solo >= 0) { st.solo = -1; render(); }
+        const n = +e.key; if (n >= 1 && n <= 9 && st.tiles[n - 1] && n <= LAYOUTS[st.lay].n) { st.solo = n - 1; render(); }
+      };
+      document.addEventListener('keydown', key);
+      render();
+    },
+  });
+
+  R.quality = () => ({
+    eb: 'Watching',
+    h: 'Picture quality: Low, Auto or Full',
+    lede: 'The <b>Quality</b> buttons in the toolbar trade sharpness for smoothness. From home, the studio shrinks each camera to fit your connection, so <b>Auto</b> is right almost all the time.',
+    tryit: 'Click Low, Auto and Full.',
+    mock: `<div id="qMock"></div><div id="qText" class="note" style="border-left-color:var(--blue)"></div>`,
+    body: `<div class="cols">
+      <div><h3>Pictures running late?</h3><p>Pick <b>Low</b>. Smaller pictures arrive sooner, which matters more than sharpness when you're calling shots.</p></div>
+      <div><h3>"sized for this connection"</h3><p>Turn on <b>View → Picture info</b> to see each tile's size. This note means the studio is fitting the picture to your internet, and it steps back up when your connection allows.</p></div>
+      <div><h3>Shortcut</h3><p>Press <kbd>Q</kbd> to cycle through the three settings.</p></div>
+    </div>`,
+    on(root) {
+      const box = $('#qMock', root), txt = $('#qText', root);
+      const Q = {
+        light: { info: '640×360 · 30 · sized for this connection', blur: 1.1, t: '<b>Low</b> asks for the smallest pictures. It uses the least internet and has the shortest delay. Best on hotel Wi-Fi, a phone hotspot, or when pictures run late.' },
+        auto: { info: '1280×720 · 30 · sized for this connection', blur: .35, t: '<b>Auto</b> (recommended) lets the studio size each picture to your connection, and gives a tile showing big more detail than small ones.' },
+        full: { info: '1920×1080 · 30', blur: 0, t: '<b>Full</b> sends each camera\'s full picture. It is the sharpest but uses the most internet and can fall behind on a slow connection. Use it for checking focus or framing, then go back to Auto.' },
+      };
+      let q = 'auto';
+      const render = () => {
+        box.innerHTML = win('Showcaller Multiview', mvbar({ q }) + `<div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${['wide', 'host', 'guest', 'slides'].map((id) => tileHTML(cam(id), { info: Q[q].info }).replace('style="', `style="filter:blur(${Q[q].blur}px);`)).join('')}</div>`);
+        txt.innerHTML = Q[q].t;
+        box.querySelectorAll('[data-q]').forEach((b) => { b.onclick = () => { q = b.dataset.q; render(); }; });
+      };
+      render();
+    },
+  });
+
+  R.tally = () => ({
+    eb: 'Watching · Pro',
+    steps: [
+      '<b>Just watching?</b> Look for the coloured borders: red <b>PGM</b> is on air, green <b>PVW</b> is up next. Nothing to click.',
+      '<b>Asked to switch?</b> Make sure your license key is added (see <b>Add a license</b>) and <b>View → ATEM switcher bar</b> is ticked.',
+      'Choose the next shot: click its tile, or its button on the <b>PVW</b> row. It turns green.',
+      'Take it: <b>CUT</b> (or <kbd>Space</kbd>) switches instantly; <b>AUTO</b> (or <kbd>Return</kbd>) uses the transition picked with MIX, DIP or WIPE.',
+      'If a button turns red, the switcher refused the command. Point at it to see why, and tell the studio.',
+    ],
+    h: 'Tally and the ATEM switcher bar',
+    lede: 'When the studio links tiles to its ATEM switcher, a <b style="color:var(--pgm)">red border and PGM</b> means that camera is live on air, and a <b style="color:var(--pvw)">green border and PVW</b> means it is up next. If you have a license and the studio asks you to switch, the bar along the bottom cuts the show.',
+    tryit: 'Click a PVW button (or a tile), then CUT or AUTO.',
+    mock: `<div id="aMock"></div>`,
+    body: `<div class="keys">
+        <div><span>Put a camera in preview</span><span>Click its tile or PVW button</span></div>
+        <div><span>Cut to preview</span><kbd>Space</kbd></div>
+        <div><span>Mix to preview</span><kbd>Return</kbd></div>
+      </div>
+      <div class="note"><b>These buttons switch the live show.</b> Only use CUT, AUTO, FTB and REC if the studio has asked you to run the switcher. If you're just watching, tally still works and you can ignore the bar, or hide it under <b>View → ATEM switcher bar</b>.</div>`,
+    on(root) {
+      const box = $('#aMock', root);
+      const ins = [['wide', 'CAM1'], ['host', 'CAM2'], ['guest', 'CAM3'], ['slides', 'SLDS']];
+      let pg = 0, pv = 1, style = 0, busy = false;
+      const render = () => {
+        const tiles = ins.map(([id], i) => tileHTML(cam(id), { tag: i === pg ? 'pgm' : i === pv ? 'pvw' : '' }).replace('class="tile', `data-i="${i}" class="tile`)).join('');
+        const row = (k) => ins.map(([, s], i) => `<button class="ab${k === 'pg' && i === pg ? ' pg' : ''}${k === 'pv' && i === pv ? ' pv' : ''}" data-${k}="${i}">${s}</button>`).join('') + `<button class="ab">BLK</button><button class="ab">BARS</button>`;
+        box.innerHTML = win('Showcaller Multiview', mvbar({}) + `<div class="grid" tabindex="0" id="ag" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${tiles}</div>
+          <div class="abar"><div class="aname">ATEM SDI Extreme ISO<small>Studio</small></div>
+          <div class="arows"><div class="arow"><span>PGM</span>${row('pg')}</div><div class="arow"><span>PVW</span>${row('pv')}</div></div>
+          <div class="arows"><div class="arow">${['MIX', 'DIP', 'WIPE'].map((s, i) => `<button class="ab" data-st="${i}" style="${i === style ? 'border-color:var(--amber);color:var(--amber)' : ''}">${s}</button>`).join('')}</div></div>
+          <div class="ago"><button class="ab" id="aCut">CUT</button><button class="ab" id="aAuto">AUTO</button></div></div>`);
+        box.querySelectorAll('[data-pv],[data-i]').forEach((b) => { b.onclick = () => { const i = +(b.dataset.pv ?? b.dataset.i); if (i !== pg) { pv = i; render(); } }; });
+        box.querySelectorAll('[data-pg]').forEach((b) => { b.onclick = () => { const i = +b.dataset.pg; if (i === pv) pv = pg; pg = i; render(); }; });
+        box.querySelectorAll('[data-st]').forEach((b) => { b.onclick = () => { style = +b.dataset.st; render(); }; });
+        $('#aCut', box).onclick = cut; $('#aAuto', box).onclick = auto;
+      };
+      const cut = () => { [pg, pv] = [pv, pg]; render(); };
+      const auto = () => {
+        if (busy) return; busy = true;
+        const b = $('#aAuto', box); b.classList.add('pg');
+        const tiles = box.querySelectorAll('[data-i]'); tiles[pv].classList.add('pgm');
+        ticker.push(setTimeout(() => { busy = false; cut(); }, 700));
+      };
+      const key = (e) => {
+        if (!box.isConnected) return document.removeEventListener('keydown', key);
+        if (e.target.closest('input,textarea,button,a')) return;
+        if (e.key === ' ') { e.preventDefault(); cut(); }
+        if (e.key === 'Enter') auto();
+      };
+      document.addEventListener('keydown', key);
+      render();
+    },
+  });
+
+  R.ptz = () => ({
+    eb: 'Watching',
+    steps: [
+      'Point at the camera\'s tile and click <b>PTZ</b> in its top-right corner (or right-click → <b>Camera controls (PTZ)</b>). The control panel opens beside the picture.',
+      'Drag the round <b>joystick</b> to pan and tilt. The further you drag, the faster it moves. Let go to stop.',
+      'Hold <b>Zoom −</b> or <b>Zoom +</b>. Focus is on <b>Auto</b>, which suits almost every shot.',
+      'Set <b>Speed</b> low (left) for slow, smooth moves on air, and higher to reframe quickly off air.',
+      'Click a number under <b>Presets</b> to jump to a shot the studio saved. Ask them which number is which.',
+    ],
+    h: 'Moving a robotic camera (PTZ)',
+    lede: 'Point at a tile and click the small <b>PTZ</b> button in its corner (or choose <b>Camera controls</b> from its right-click menu). Drag the joystick to pan and tilt, hold <b>Zoom +/−</b>, and click a numbered <b>preset</b> to jump to a saved shot.',
+    tryit: 'Drag the blue knob, hold zoom, click a preset.',
+    mock: `<div id="pMock"></div>`,
+    body: `<div class="cols">
+      <div><h3>"· direct"</h3><p>Next to the camera name means your moves go straight to the camera, so it answers at once even if the picture is a moment behind.</p></div>
+      <div><h3>Small moves</h3><p>Lower the <b>Speed</b> for slow, on-air moves. Let go and the camera stops.</p></div>
+      <div><h3>Presets</h3><p>Click a number to recall it. <b>Shift-click</b> (or hold) saves the current shot to that number, which overwrites the studio's preset, so only do it if they've asked.</p></div>
+    </div>
+    <div class="note"><b>Check before you move a camera that's on air.</b> If its tile has a red PGM border, the audience sees every move.</div>`,
+    on(root) {
+      const box = $('#pMock', root);
+      const st = { x: 50, y: 45, z: 130, preset: 0 };
+      const P = [null, { x: 50, y: 45, z: 130 }, { x: 30, y: 35, z: 190 }, { x: 72, y: 40, z: 210 }, { x: 50, y: 60, z: 100 }];
+      box.innerHTML = win('Showcaller Multiview', mvbar({ lay: '1' }) + `<div class="ptzwrap"><div class="grid" style="grid-template-columns:1fr;grid-template-rows:1fr"><div class="tile" id="pt" style="background-image:url(${CAMS.host})"><span class="ptzb show">PTZ</span><span class="lbl">Cam 2 Host</span></div></div>
+        <div class="ptzpanel"><h4>Cam 2 Host <em>· direct</em></h4>
+          <div class="pad" id="pad"><div class="knob"></div></div>
+          <div class="prow"><span>Zoom</span><span><button class="ab" data-z="-1">−</button> <button class="ab" data-z="1">+</button></span></div>
+          <div class="prow"><span>Focus</span><span><button class="ab">Auto</button></span></div>
+          <div class="prow"><span>Speed</span><input type="range" id="pspd" min="1" max="10" value="5" style="width:110px" aria-label="Speed"></div>
+          <div><div style="color:var(--muted);margin-bottom:5px">Presets</div><div class="presets">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<button class="ab" data-p="${n}">${n}</button>`).join('')}</div></div>
+        </div></div>`);
+      const pt = $('#pt', box), pad = $('#pad', box), knob = $('.knob', pad);
+      const draw = () => { pt.style.backgroundSize = st.z + '%'; pt.style.backgroundPosition = `${st.x}% ${st.y}%`; box.querySelectorAll('[data-p]').forEach((b) => b.classList.toggle('on', +b.dataset.p === st.preset)); };
+      let vec = null, loop = null;
+      const spd = () => +$('#pspd', box).value / 5;
+      const tick = () => { if (vec) { st.x = Math.max(0, Math.min(100, st.x + vec[0] * 1.6 * spd())); st.y = Math.max(0, Math.min(100, st.y + vec[1] * 1.6 * spd())); st.preset = 0; draw(); } };
+      const move = (e) => {
+        const r = pad.getBoundingClientRect(); let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+        const d = Math.hypot(dx, dy), m = 40; if (d > m) { dx *= m / d; dy *= m / d; }
+        knob.style.transform = `translate(${dx}px, ${dy}px)`; vec = [dx / m, dy / m];
+      };
+      pad.onpointerdown = (e) => { pad.setPointerCapture(e.pointerId); pad.classList.add('drag'); move(e); clearInterval(loop); loop = setInterval(tick, 40); ticker.push(loop); };
+      pad.onpointermove = (e) => { if (pad.classList.contains('drag')) move(e); };
+      pad.onpointerup = pad.onpointercancel = () => { pad.classList.remove('drag'); knob.style.transform = ''; vec = null; clearInterval(loop); };
+      box.querySelectorAll('[data-z]').forEach((b) => {
+        let t; const d = +b.dataset.z;
+        const stop = () => clearInterval(t);
+        b.onpointerdown = () => { t = setInterval(() => { st.z = Math.max(100, Math.min(260, st.z + d * 4 * spd())); st.preset = 0; draw(); }, 40); ticker.push(t); };
+        b.onpointerup = b.onpointerleave = b.onpointercancel = stop;
+      });
+      box.querySelectorAll('[data-p]').forEach((b) => { b.onclick = () => { const p = P[+b.dataset.p]; if (p) { Object.assign(st, p); st.preset = +b.dataset.p; pt.style.transition = 'background-position .8s ease, background-size .8s ease'; draw(); setTimeout(() => { pt.style.transition = ''; }, 850); } }; });
+      draw();
+    },
+  });
+
+  R.phone = () => ({
+    eb: 'Watching',
+    steps: [
+      'In Multiview, click <b>⚙</b> (top right) and choose <b>Phone view</b>.',
+      'Click <b>Turn on</b>. Links appear underneath.',
+      'Send yourself the <b>first link</b> (the "same Wi-Fi" one): by email, a message to yourself, or AirDrop.',
+      'Open it on your phone or tablet in Safari or Chrome. Make sure the phone is on the <b>same Wi-Fi</b> as your computer, not on mobile data.',
+      'Tap a tile to see it big. Tip: <b>Add to Home Screen</b> from the browser\'s share menu to open it like an app next time.',
+    ],
+    h: 'Watch on your phone or tablet',
+    lede: 'Multiview can share its tiles to a phone, tablet or any web browser, with tally and nothing to install. In Multiview, open <b>Settings → Phone view</b> and click <b>Turn on</b>. Open the first link on a phone that\'s on the <b>same Wi-Fi</b> as your computer.',
+    tryit: 'Click Turn on.',
+    mock: `<div class="phonepair"><div id="phSet"></div><div class="phone"><span class="notch"></span><div class="scr" id="phScr"></div></div></div>`,
+    body: `<div class="cols">
+      <div><h3>Your computer stays the source</h3><p>The phone shows what's on Multiview's screen, so keep Multiview open and your computer awake while you use it.</p></div>
+      <div><h3>First time on a Mac</h3><p>macOS may ask whether Multiview can <b>accept incoming connections</b>. Click <b>Allow</b>, or the phone can't reach it.</p></div>
+      <div><h3>Who can watch</h3><p>Anyone with the link can watch, so keep it to yourself. <b>Make a new link</b> stops the old ones working.</p></div>
+    </div>`,
+    on(root) {
+      const set = $('#phSet', root), scr = $('#phScr', root);
+      let on = false;
+      const render = () => {
+        set.innerHTML = win('Settings', `<div class="setpane"><h5>Phone view</h5>
+          <p>Watch the tiles on a phone, tablet or any web browser, with no app to install. The page shows the tiles that are on this screen, with ATEM tally, Cut and Auto.</p>
+          <div class="st"><span style="color:${on ? 'var(--ok)' : 'var(--muted)'}">${on ? 'On · 1 phone watching' : 'Off'}</span><button class="hb" id="phOn">${on ? 'Turn off' : 'Turn on'}</button></div>
+          ${on ? '<div class="st" style="display:grid;gap:4px"><span>Same Wi-Fi</span><code>http://192.168.1.24:8090/?k=7f3a9c2e</code></div><div class="st" style="display:grid;gap:4px;opacity:.6"><span>Away (needs Tailscale)</span><code>http://100.88.14.9:8090/?k=7f3a9c2e</code></div>' : ''}</div>`);
+        scr.innerHTML = on ? `<div class="ph"><span>Showcaller Multiview</span><span style="color:var(--ok)">● live</span></div>
+          <div class="grid">${[['wide', 'pgm'], ['host', 'pvw'], ['guest', ''], ['slides', '']].map(([id, t]) => tileHTML(cam(id), { tag: t })).join('')}</div>
+          <div class="pbtns"><button class="ab">CUT</button><button class="ab">AUTO</button></div>
+          <div class="ph" style="font-weight:500;font-family:var(--body)">Tap a tile to see it big</div>`
+          : '<div class="ph" style="justify-content:center;margin-top:60%;color:var(--dim)">Waiting for a link…</div>';
+        $('#phOn', set).onclick = () => { on = !on; render(); };
+      };
+      render();
+    },
+  });
+
+  R.status = () => ({
+    eb: 'When something looks off',
+    h: 'What the lights and messages mean',
+    lede: 'The coloured dots in Multiview\'s toolbar tell you how your connection to the studio is doing. Point at one in the app for more detail. <b>Green</b> is fine, <b>amber</b> is working but slow or still starting, <b>red</b> needs a look.',
+    mock: '',
+    body: `<div class="legend">
+      <div class="lgh">Toolbar</div>
+      <div class="lg"><span class="chip on">Studio · 28 ms</span><p><b>Connected to the studio.</b> The number is how long a round trip takes. Under 100 ms is great; up to 250 ms is fine for watching.</p></div>
+      <div class="lg"><span class="chip warn">Studio · 340 ms</span><p><b>Connected, but slow.</b> Pictures and camera moves will lag. Switch Quality to <b>Low</b>, and if you can, move closer to the router or plug in a cable.</p></div>
+      <div class="lg"><span class="chip warn">Connecting to the studio…</span><p><b>Still reaching the studio.</b> This normally takes a few seconds. If it stays for more than a minute, see Troubleshooting.</p></div>
+      <div class="lg"><span class="chip bad">Studio link down</span><p><b>Can't reach the studio.</b> Check your own internet first. If yours is fine, the studio's computer may be off or restarting: let them know.</p></div>
+      <div class="lg"><span class="chip on">NDI</span><p><b>The camera system on your computer is working.</b> It's built into the app, so this should always be green.</p></div>
+      <div class="lg"><span class="chip warn">Tailscale (relayed)</span><p><b>Only if the studio set you up with Tailscale.</b> Tailscale couldn't connect directly and is going through its relay, so pictures lag. A wired connection or a home network (not hotel, office or guest Wi-Fi) usually fixes it. Most producers won't see a Tailscale light at all.</p></div>
+      <div class="lgh">On a tile</div>
+      <div class="lg"><span class="tmsg">Connecting to the studio through Showcaller Link…</span><p><b>The camera is starting.</b> The first picture can take 5 to 10 seconds. Give it a moment before pressing Refresh.</p></div>
+      <div class="lg"><span class="tmsg lagc">1.4 s behind</span><p><b>The picture is arriving late</b> because the internet can't keep up. Multiview catches up by itself; switching to <b>Low</b> helps it stay caught up.</p></div>
+      <div class="lg"><span class="tmsg">The studio stopped sending this camera</span><p><b>The camera went away at the studio end</b>, for example it was unplugged or renamed. It comes back on its own when the studio fixes it.</p></div>
+      <div class="lg"><span class="tmsg">1280×720 · 30 · sized for this connection</span><p><b>Picture info</b> (View → Picture info). The studio is fitting this camera to your connection. All normal.</p></div>
+    </div>`,
+  });
+
+  R.help = () => ({
+    eb: 'When something looks off',
+    h: 'Troubleshooting',
+    lede: 'Most problems are fixed by one of these. If none works, send the studio a screenshot of the Multiview window and they can check the studio end.',
+    mock: '',
+    body: `<p class="howh">Before the show: a 5-minute check</p>
+      <ol class="how">
+        <li><span><b>The day before</b>, open Hub and click <b>Check for updates</b>. Update Multiview if it offers one.</span></li>
+        <li><span>Open Multiview. The toolbar should show the studio in <b>green</b> with a number under 250 ms.</span></li>
+        <li><span>Every tile shows a picture. If one is black, right-click it and pick the camera again.</span></li>
+        <li><span>Pick <b>Auto</b> quality. If anything shows "behind", try <b>Low</b>.</span></li>
+        <li><span>If you'll steer cameras, try a small PTZ move on a camera that isn't on air, and ask the studio which presets to use.</span></li>
+        <li><span>Plug in your laptop's charger, close video downloads and cloud backups, and sit near the router or use a cable.</span></li>
+      </ol>
+      <details open><summary>It says "Connecting to the studio…" and never connects</summary><div class="in"><ol>
+        <li>Check your internet: open any website.</li>
+        <li>Wait a full minute. The first connection can go through <b>showcallerstudio.com</b>, which is a little slower to start.</li>
+        <li>Open <b>Settings → Remote access</b> and click <b>Test</b> next to Showcaller Link. It says exactly what it can't reach.</li>
+        <li>If you're on a work, hotel or guest network, try your home Wi-Fi or a phone hotspot. Some networks block the connection.</li>
+        <li>Still stuck? The studio computer may be off. Let the studio know.</li></ol></div></details>
+      <details><summary>"Over Tailscale" or "through showcallerstudio.com"?</summary><div class="in">
+        <p style="margin:0 0 8px">Point at the green <b>Studio · ms</b> light to see how you're connected. Both are encrypted and private; you don't need to change anything.</p><ul>
+        <li><b>Directly</b>: your computer reaches the studio straight away. Shortest delay.</li>
+        <li><b>Over Tailscale</b>: only if the studio added your computer to its Tailscale network. Also direct and fast.</li>
+        <li><b>Through showcallerstudio.com</b>: the relay used when there's no direct way in. Works from anywhere, with a little more delay.</li></ul></div></details>
+      <details><summary>Pictures are behind or freezing</summary><div class="in"><ol>
+        <li>Set Quality to <b>Low</b>.</li>
+        <li>Close anything else using your internet: video calls in another window, cloud backups, downloads.</li>
+        <li>Plug in a network cable or sit closer to the router.</li>
+        <li>Fewer tiles helps too: pick a smaller layout, or double-click the one camera you need.</li></ol></div></details>
+      <details><summary>A tile is black or says "Click to choose a source"</summary><div class="in"><ol>
+        <li>Right-click the tile and pick the camera again from the list.</li>
+        <li>Press <kbd>R</kbd> (or the ⟳ button) to refresh the list of cameras.</li>
+        <li>If the camera isn't in the list at all, it isn't on at the studio. Ask them.</li>
+        <li>To start fresh, click your invite link again. It puts the studio's layout back.</li></ol></div></details>
+      <details><summary>The PTZ controls don't move the camera</summary><div class="in"><ul>
+        <li>Not every camera can move. Fixed cameras ignore PTZ.</li>
+        <li>If the panel says <b>Waiting for the camera…</b>, the picture hasn't started yet. Wait for it, then try again.</li>
+        <li>If the camera moves late, the picture is probably behind: switch Quality to <b>Low</b> and moves will line up again.</li></ul></div></details>
+      <details><summary>There's no ATEM bar or tally</summary><div class="in"><ul>
+        <li>The switcher controls need a license key: see <a href="#license" style="color:var(--blue)">Add a license</a>.</li>
+        <li>Check <b>View → ATEM switcher bar</b> is ticked.</li>
+        <li>Tally only shows on tiles the studio has linked to a switcher input.</li></ul></div></details>
+      <details><summary>The app wants an update</summary><div class="in"><p style="margin:0">Click <b>Update available</b> in Multiview's toolbar, or <b>Update</b> on its card in Hub. It takes under a minute. Avoid updating in the middle of a show.</p></div></details>`,
+  });
+
+  // ---------- routing ----------
+  const rail = $('#rail'), main = $('#step');
+  rail.innerHTML = STEPS.map((s, i) => `${s.grp ? `<li class="grp">${esc(s.grp)}</li>` : ''}<li><a href="#${s.id}" data-id="${s.id}"><span class="n">${i + 1}</span><span>${esc(s.t)}</span></a></li>`).join('');
+  let seen = new Set();
+  try { seen = new Set(JSON.parse(localStorage.getItem('scpg-seen') || '[]')); } catch (e) { /* storage off */ }
+  function go(id, scroll) {
+    ticker.splice(0).forEach((t) => { clearInterval(t); clearTimeout(t); });
+    const i = Math.max(0, STEPS.findIndex((s) => s.id === id));
+    const s = STEPS[i], d = R[s.id]();
+    seen.add(s.id); try { localStorage.setItem('scpg-seen', JSON.stringify([...seen])); } catch (e) { /* storage off */ }
+    rail.querySelectorAll('a').forEach((a) => { a.classList.toggle('on', a.dataset.id === s.id); a.classList.toggle('done', seen.has(a.dataset.id) && a.dataset.id !== s.id); });
+    const prev = STEPS[i - 1], next = STEPS[i + 1];
+    main.innerHTML = `<p class="eyebrow">${esc(d.eb)}</p><h1>${d.h}</h1><p class="lede">${d.lede}</p>
+      ${d.steps ? `<p class="howh">Step by step</p><ol class="how">${d.steps.map((x) => `<li><span>${x}</span></li>`).join('')}</ol>` : ''}
+      ${d.tryit ? `<p class="try">Try it: ${esc(d.tryit)}</p>` : ''}${d.mock ? `<div class="scroll-x">${d.mock}</div>` : ''}${d.body || ''}
+      <div class="nav">${prev ? `<a class="btn" href="#${prev.id}">← ${esc(prev.t)}</a>` : ''}<span class="grow"></span>${next ? `<a class="btn primary" href="#${next.id}">${esc(next.t)} →</a>` : '<a class="btn" href="#start">Back to the start</a>'}</div>`;
+    if (d.on) d.on(main);
+    const ra = rail.querySelector('a.on'); if (ra && ra.scrollIntoView && window.innerWidth <= 900) ra.scrollIntoView({ block: 'nearest', inline: 'center' });
+    if (scroll) window.scrollTo({ top: 0 });
+  }
+  const route = () => go((location.hash || '#start').slice(1), true);
+  window.addEventListener('hashchange', route);
+  go((location.hash || '#start').slice(1), false);
+})();
+</script>
+</body>
+</html>
