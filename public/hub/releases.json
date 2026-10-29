@@ -1,5 +1,5 @@
 {
- "written": "2026-10-29T14:50:10.236Z",
+ "written": "2026-10-29T15:37:45.792Z",
  "apps": {
   "testkit": {
    "version": "1.1.0",
@@ -172,6 +172,12 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/link-1.2.5/Showcaller-Link-1.2.5-mac-arm64.zip",
      "sha256": "9265f7912aa3ef64c3c8da7892be2e7dfbc6ec3048f6d398bb58ec08f451a778",
      "size": 159415782,
+     "version": "1.2.5"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/link-1.2.5/Showcaller-Link-1.2.5-win-x64.exe",
+     "sha256": "9b8c7928fcc71f750f3395549ae8ddf3fb7a06c6f3b11ee65d7cf5991c7b979b",
+     "size": 156856996,
      "version": "1.2.5"
     }
    }
