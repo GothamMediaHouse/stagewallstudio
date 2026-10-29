@@ -1,6 +1,23 @@
 {
- "written": "2026-10-29T00:56:47.268Z",
+ "written": "2026-10-29T13:44:09.125Z",
  "apps": {
+  "testkit": {
+   "version": "1.1.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.1.0/Showcaller-Test-Kit-1.1.0-mac-arm64.zip",
+     "sha256": "fb16bbcd13bc49589549ed2e97344b0f01cbf020b9def8138acf304bab79abd9",
+     "size": 129569162,
+     "version": "1.1.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.1.0/Showcaller-Test-Kit-1.1.0-win-x64.exe",
+     "sha256": "b8a11e6adbc62f30fec6ae056cf34d2603d89ac1fa60d237c0676fbf82d51402",
+     "size": 112531768,
+     "version": "1.1.0"
+    }
+   }
+  },
   "switcher": {
    "version": "1.2.5",
    "builds": {
@@ -18,6 +35,23 @@
     }
    }
   },
+  "studio": {
+   "version": "7.7.2",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.2/Showcaller-Screens-7.7.2-mac-arm64.zip",
+     "sha256": "3b3eefed7bf6c7ac78e54155c1d7622109e09c3ba3f88b6253cf7e32d46ac78b",
+     "size": 135752522,
+     "version": "7.7.2"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.2/Showcaller-Screens-7.7.2-win-x64.exe",
+     "sha256": "325f6c46a6d9d99e84a3b62892e613d2f7d80351acfe9cbf7e6e3c3c4f0437fc",
+     "size": 117807580,
+     "version": "7.7.2"
+    }
+   }
+  },
   "timer": {
    "version": "1.7.12",
    "builds": {
@@ -32,23 +66,6 @@
      "sha256": "5e460a1c93236f422dd39118333ab0b0d6e23a8f29705bb44183e3d2ba4a3e24",
      "size": 113043695,
      "version": "1.7.11"
-    }
-   }
-  },
-  "testkit": {
-   "version": "1.0.5",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.0.5/Showcaller-Test-Kit-1.0.5-mac-arm64.zip",
-     "sha256": "58741be9766c1be78256072c384f88f8ed128d7e6dd4bc7468ebed9b284f8663",
-     "size": 129542930,
-     "version": "1.0.5"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.0.4/Showcaller-Test-Kit-1.0.4-win-x64.exe",
-     "sha256": "2dcd401936b2bddecda10127c035b1c50c0e0f30fa8d362cfe85dddeab6d3e9f",
-     "size": 112540755,
-     "version": "1.0.4"
     }
    }
   },
@@ -239,23 +256,6 @@
      "sha256": "5a446828aab416fd7948ea030afd2de533297a4d9a1c5d7f4d37a186991e34a0",
      "size": 134589214,
      "version": "0.3.1"
-    }
-   }
-  },
-  "studio": {
-   "version": "7.7.1",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.1/Showcaller-Screens-7.7.1-mac-arm64.zip",
-     "sha256": "4c2930651f0330b09afee64684c3158c777e1e7cca3df7fe7101a034105a552d",
-     "size": 135751276,
-     "version": "7.7.1"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.7.1/Showcaller-Screens-7.7.1-win-x64.exe",
-     "sha256": "b85887428c3e2269109715bae4e399d8ccd7aa2e5706e55a0fc19b6099b76f91",
-     "size": 117807091,
-     "version": "7.7.1"
     }
    }
   }
