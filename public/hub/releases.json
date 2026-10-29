@@ -1,14 +1,14 @@
 {
- "written": "2026-10-29T00:11:30.812Z",
+ "written": "2026-10-29T00:39:19.615Z",
  "apps": {
   "switcher": {
-   "version": "1.2.4",
+   "version": "1.2.5",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.2.4/Showcaller-Switcher-1.2.4-mac-arm64.zip",
-     "sha256": "498a62a03873c2672ef183eb0791f55752c8f6d35139de4517384e90b195bde6",
-     "size": 157433655,
-     "version": "1.2.4"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.2.5/Showcaller-Switcher-1.2.5-mac-arm64.zip",
+     "sha256": "90d0aa355831ba0abc6dc7a2213e5a9d6c937ab92e1d87705fe620408f99b0a9",
+     "size": 157436447,
+     "version": "1.2.5"
     },
     "win-x64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.9/Showcaller-Switcher-1.1.9-win-x64.exe",
@@ -213,10 +213,10 @@
      "version": "1.11.0"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.9.0/Showcaller-Hub-1.9.0-win-x64.exe",
-     "sha256": "6aa721f067dc07cdf871187dbbf6ee0835c58176a363ee40c885cc176ef827dc",
-     "size": 134711936,
-     "version": "1.9.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.11.0/Showcaller-Hub-1.11.0-win-x64.exe",
+     "sha256": "0888e2d67e61ccc9e6f157bcebf944755bfca61cc2f8f3562b2f5340de4bfcc1",
+     "size": 146592064,
+     "version": "1.11.0"
     }
    }
   },
