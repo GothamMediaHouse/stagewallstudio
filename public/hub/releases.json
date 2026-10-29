@@ -1,14 +1,20 @@
 {
- "written": "2026-10-28T23:35:17.309Z",
+ "written": "2026-10-29T00:11:30.812Z",
  "apps": {
-  "intercom": {
-   "version": "3.15.1",
+  "switcher": {
+   "version": "1.2.4",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.15.1/Showcaller-Helios-Remote-3.15.1-mac-arm64.zip",
-     "sha256": "b0c7fe0c344b8759b8ed2617762c05845f53d49f7a05d4d343569cfc45d2d97b",
-     "size": 130134045,
-     "version": "3.15.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.2.4/Showcaller-Switcher-1.2.4-mac-arm64.zip",
+     "sha256": "498a62a03873c2672ef183eb0791f55752c8f6d35139de4517384e90b195bde6",
+     "size": 157433655,
+     "version": "1.2.4"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.9/Showcaller-Switcher-1.1.9-win-x64.exe",
+     "sha256": "73314453b95b17040adf3eb42d29ddfcb7f7d116829a9a4a4cbab69f52726928",
+     "size": 134582034,
+     "version": "1.1.9"
     }
    }
   },
@@ -43,23 +49,6 @@
      "sha256": "2dcd401936b2bddecda10127c035b1c50c0e0f30fa8d362cfe85dddeab6d3e9f",
      "size": 112540755,
      "version": "1.0.4"
-    }
-   }
-  },
-  "switcher": {
-   "version": "1.2.3",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.2.3/Showcaller-Switcher-1.2.3-mac-arm64.zip",
-     "sha256": "b21ce92dc709bf1f403c1760b46ca3283263efea9adc1a85f51baa482a333878",
-     "size": 157433384,
-     "version": "1.2.3"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-1.1.9/Showcaller-Switcher-1.1.9-win-x64.exe",
-     "sha256": "73314453b95b17040adf3eb42d29ddfcb7f7d116829a9a4a4cbab69f52726928",
-     "size": 134582034,
-     "version": "1.1.9"
     }
    }
   },
@@ -199,6 +188,17 @@
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-comms-3.15.1/Showcaller-Helios-Comms-Control-3.15.1-mac-arm64.zip",
      "sha256": "e29a1722b0137e721b8c08fbd6c1e0e19a9ba875a5fc6a9578c858bc2ed1f42c",
      "size": 129120998,
+     "version": "3.15.1"
+    }
+   }
+  },
+  "intercom": {
+   "version": "3.15.1",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.15.1/Showcaller-Helios-Remote-3.15.1-mac-arm64.zip",
+     "sha256": "b0c7fe0c344b8759b8ed2617762c05845f53d49f7a05d4d343569cfc45d2d97b",
+     "size": 130134045,
      "version": "3.15.1"
     }
    }
