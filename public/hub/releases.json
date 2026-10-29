@@ -1,20 +1,20 @@
 {
- "written": "2026-10-29T17:50:14.419Z",
+ "written": "2026-10-29T18:22:03.279Z",
  "apps": {
   "testkit": {
-   "version": "1.2.0",
+   "version": "1.3.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.2.0/Showcaller-Test-Kit-1.2.0-mac-arm64.zip",
-     "sha256": "973d99ae5801e576185c54b67645f7b3a7286e70f237f8daf60227e682c759c8",
-     "size": 129598926,
-     "version": "1.2.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.3.0/Showcaller-Test-Kit-1.3.0-mac-arm64.zip",
+     "sha256": "ab821261d88b077afcf8437901dd43d5d6d63916274663d14f8a17c5b7be4087",
+     "size": 129601716,
+     "version": "1.3.0"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.2.0/Showcaller-Test-Kit-1.2.0-win-x64.exe",
-     "sha256": "64376158a3e2ff1bb118ca16afe4e12bc7cccfde70236424c4d0efaa846364b1",
-     "size": 112555533,
-     "version": "1.2.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/testkit-1.3.0/Showcaller-Test-Kit-1.3.0-win-x64.exe",
+     "sha256": "6f86304b030c2eeaadc024e89ca252598e083ac0a02fd5e6a597b91ebe6b85cf",
+     "size": 112557947,
+     "version": "1.3.0"
     }
    }
   },
