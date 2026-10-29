@@ -256,6 +256,66 @@ details .in b { color: var(--fg); }
 .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 22px; margin-top: 18px; font-size: 14px; color: var(--muted); }
 .keys div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--line); padding: 5px 0; }
 
+/* Screens control page mockup */
+.sc { background: var(--win); font-size: 12px; }
+.sctop { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #0f1013; flex-wrap: wrap; }
+.scbrand { display: flex; align-items: center; gap: 7px; font: 600 13px var(--display); margin-right: 4px; }
+.scbrand .sq { width: 10px; height: 10px; border-radius: 3px; background: var(--amber); }
+.scbrand small { font: 600 9px var(--display); letter-spacing: .16em; color: var(--amber); }
+.kindb { font: 700 9px var(--display); letter-spacing: .1em; padding: 3px 7px; border-radius: 5px; background: rgba(255,178,36,.14); color: var(--amber); border: 1px solid rgba(255,178,36,.35); }
+.scb { border: 1px solid var(--line); background: var(--panel-2); border-radius: 7px; padding: 5px 10px; font-weight: 600; font-size: 12px; cursor: pointer; }
+.scb.blk { background: #2a1416; border-color: #5a2427; color: #ffb4b6; }
+.scb.blk.on { background: var(--pgm); border-color: var(--pgm); color: #fff; }
+.scb.on { border-color: var(--amber); color: var(--amber); }
+.scmain { display: grid; grid-template-columns: minmax(0, 1fr) 210px; }
+.scleft { padding: 10px 12px; display: grid; gap: 10px; min-width: 0; }
+.schead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--muted); }
+.schead b { color: var(--fg); font: 600 12px var(--display); }
+.schead .sp { flex: 1; }
+.take { border: 0; border-radius: 7px; padding: 6px 16px; font: 700 12px var(--display); letter-spacing: .06em; background: #1e3a24; color: #7fd892; cursor: pointer; }
+.take.live { background: var(--pvw); color: #fff; }
+.take:disabled { opacity: .45; cursor: default; }
+.mons { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.mon { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #121418; cursor: pointer; text-align: left; padding: 0; }
+.mon.tg { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+.mon .pic { aspect-ratio: 16 / 9; background: #000 center / cover no-repeat; position: relative; }
+.mon .pic .nx { position: absolute; right: 4px; bottom: 4px; width: 46%; aspect-ratio: 16 / 9; background: #000 center / cover no-repeat; border: 2px solid var(--pvw); border-radius: 3px; }
+.mon .pic .nx::after { content: "NEXT"; position: absolute; top: -2px; left: -2px; background: var(--pvw); color: #fff; font: 700 8px var(--display); padding: 1px 4px; border-radius: 2px 0 2px 0; }
+.mon .pic .bo { position: absolute; inset: 0; background: #000; display: grid; place-items: center; font: 700 10px var(--display); letter-spacing: .12em; color: #5a5f68; }
+.mon .strip { padding: 5px 7px; display: grid; gap: 1px; }
+.mon .strip b { font: 600 11px var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mon .strip span { color: var(--dim); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lkbar { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; border-radius: 5px; padding: 3px 10px; font-weight: 600; font-size: 11px; color: var(--muted); cursor: pointer; }
+.seg button.on { background: var(--panel-2); color: var(--fg); }
+.looks { display: flex; gap: 6px; flex-wrap: wrap; }
+.look { border: 1px solid var(--line); background: #121418; border-radius: 8px; padding: 7px 12px; font-weight: 600; cursor: pointer; }
+.look.on { border-color: var(--amber); color: var(--amber); }
+.cues { display: grid; gap: 4px; }
+.cue { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 5px 8px; border-radius: 6px; border: 1px solid transparent; color: var(--muted); }
+.cue.nxt { border-color: var(--pvw); color: var(--fg); }
+.cue.done { opacity: .5; }
+.cue b { font: 600 11px var(--display); color: var(--dim); }
+.gorow { display: flex; align-items: center; gap: 10px; }
+.go { border: 0; border-radius: 8px; padding: 9px 22px; font: 700 14px var(--display); background: var(--pvw); color: #fff; cursor: pointer; }
+.go:disabled { opacity: .4; cursor: default; }
+.lib { border-left: 1px solid var(--line); padding: 10px; display: grid; gap: 8px; align-content: start; background: #0f1013; }
+.lib .seg { justify-self: start; }
+.libgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.src { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #121418; cursor: pointer; padding: 0; text-align: left; }
+.src .th { aspect-ratio: 16 / 9; background: #000 center / cover no-repeat; position: relative; }
+.src .th i { position: absolute; top: 2px; right: 2px; font: 700 8px var(--display); font-style: normal; background: var(--pgm); color: #fff; border-radius: 3px; padding: 0 3px; }
+.src span { display: block; padding: 3px 5px; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toast { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); background: #23262c; border: 1px solid #353942; border-radius: 8px; padding: 6px 12px; font-size: 12px; white-space: nowrap; box-shadow: 0 8px 20px rgba(0,0,0,.5); }
+.rmt { display: grid; gap: 8px; }
+.rmt .big { border: 1px solid var(--line); border-radius: 10px; background: #15171b; padding: 12px; font: 700 13px var(--display); text-align: center; cursor: pointer; }
+.rmt .big.red { background: #2a1416; border-color: #5a2427; color: #ffb4b6; }
+.rmt .big.red.on { background: var(--pgm); color: #fff; }
+.rmt .big.green { background: var(--pvw); border-color: var(--pvw); color: #fff; font-size: 18px; }
+.rmt .nt { font-size: 11px; color: var(--muted); text-align: center; }
+.rmt .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
 @media (max-width: 900px) {
   .wrap { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .rail { position: static; }
@@ -266,7 +326,11 @@ details .in b { color: var(--fg); }
   .ptzpanel { border-left: 0; border-top: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .phonepair { grid-template-columns: minmax(0, 1fr); }
   .lg { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .scmain { grid-template-columns: minmax(0, 1fr); }
+  .lib { border-left: 0; border-top: 1px solid var(--line); }
+  .libgrid { grid-template-columns: repeat(3, 1fr); }
 }
+@media (max-width: 640px) { .mons { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) {
   .mvbar .lays .lay:nth-child(n+4) { display: none; }
   .mvbar .clock, .mvbar .ib { display: none; }
@@ -279,7 +343,7 @@ details .in b { color: var(--fg); }
 
 <header class="top"><div class="top-in">
   <div class="brand"><span class="sq"></span>Showcaller <small>Studio</small></div>
-  <div class="meta">Producer guide · Watching the studio from home · Hub 1.13 · Multiview 2.8</div>
+  <div class="meta">Producer guide · Hub 1.13 · Multiview 2.8 · Screens 7.7</div>
 </div></header>
 
 <div class="wrap">
@@ -346,6 +410,93 @@ details .in b { color: var(--fg); }
     { id: 'slides', name: 'Slides', src: 'SLIDES-PC (Keynote)' },
   ];
   CAMLIST.forEach((c) => { CAMS[c.id] = scene(c.id); });
+  // set-screen graphics for the Screens steps
+  function art(kind) {
+    const c = document.createElement('canvas'); c.width = 640; c.height = 360;
+    const g = c.getContext('2d');
+    if (kind === 'black') { g.fillStyle = '#000'; g.fillRect(0, 0, 640, 360); return c.toDataURL('image/jpeg', .8); }
+    const cols = { open: ['#ffb224', '#c2410c', '#1b1030'], sponsor: ['#0e7490', '#0b3b4f', '#06141c'], brk: ['#5aa2ff', '#1e3a8a', '#0a0f24'], count: ['#14161b', '#0b0c0e', '#000'] }[kind];
+    const gr = g.createLinearGradient(0, 0, 640, 360); gr.addColorStop(0, cols[0]); gr.addColorStop(.55, cols[1]); gr.addColorStop(1, cols[2]);
+    g.fillStyle = gr; g.fillRect(0, 0, 640, 360);
+    g.globalAlpha = .18; g.strokeStyle = '#fff'; g.lineWidth = 2;
+    for (let i = 0; i < 9; i++) { g.beginPath(); g.arc(520, 300, 60 + i * 46, 0, Math.PI * 2); g.stroke(); }
+    g.globalAlpha = 1; g.fillStyle = '#fff'; g.textAlign = 'center';
+    const T = { open: ['SUMMIT 2026', 'Welcome'], sponsor: ['Presented by', 'NORTHWIND'], brk: ['We’ll be right back', 'Break · 15 min'], count: ['05:00', 'Starting soon'] }[kind];
+    g.font = kind === 'count' ? '700 120px Sora, sans-serif' : '700 54px Sora, sans-serif';
+    g.fillText(T[0], 320, kind === 'count' ? 210 : 180);
+    g.font = '500 24px Inter, sans-serif'; g.globalAlpha = .8; g.fillText(T[1], 320, kind === 'count' ? 260 : 226);
+    return c.toDataURL('image/jpeg', .82);
+  }
+  ['open', 'sponsor', 'brk', 'count', 'black'].forEach((k) => { CAMS[k] = art(k); });
+  const SRC = {
+    open: { n: 'Show open loop', t: 'media' }, sponsor: { n: 'Sponsor loop', t: 'media' }, brk: { n: 'Break slate', t: 'media' },
+    wide: { n: 'Cam 1 Wide (NDI)', t: 'inputs' }, host: { n: 'Cam 2 Host (NDI)', t: 'inputs' }, guest: { n: 'Cam 3 Guest (NDI)', t: 'inputs' },
+    count: { n: 'Countdown 5:00', t: 'graphics' }, black: { n: 'Black', t: 'graphics' },
+  };
+  const MONS = ['Left wing', 'Center left', 'Center right', 'Right wing'];
+  const LOOKS = [
+    { n: 'Doors', set: ['brk', 'count', 'count', 'sponsor'] },
+    { n: 'Show open', set: ['open', 'open', 'open', 'open'] },
+    { n: 'Interview', set: ['open', 'host', 'guest', 'open'] },
+    { n: 'Break', set: ['sponsor', 'brk', 'brk', 'sponsor'] },
+  ];
+  // Clickable copy of the Screens control page. opts.strip: 'looks' | 'cues'
+  function screensMock(box, opts = {}) {
+    const st = { cur: ['brk', 'count', 'count', 'sponsor'], next: {}, tg: new Set(), mode: opts.mode || 'next', black: false, tab: 'media', strip: opts.strip || 'looks', cue: 0, toast: '' };
+    const CUES = [{ l: 0, note: 'Doors open. Countdown on the centre screens.' }, { l: 1, note: 'Walk-on music.' }, { l: 2, note: 'Host and guest cameras.' }, { l: 3, note: 'Sponsor loop on the wings.' }];
+    let tt;
+    const say = (m) => { st.toast = m; clearTimeout(tt); tt = setTimeout(() => { st.toast = ''; render(); }, 1800); ticker.push(tt); };
+    const apply = (i, src) => { st.cur[i] = src; delete st.next[i]; };
+    const pick = (src) => {
+      if (!st.tg.size) { say('Tap a monitor first'); return render(); }
+      st.tg.forEach((i) => { if (st.mode === 'next') st.next[i] = src; else apply(i, src); });
+      render();
+    };
+    const look = (k) => {
+      LOOKS[k].set.forEach((src, i) => { if (st.mode === 'next') { if (st.cur[i] !== src) st.next[i] = src; } else apply(i, src); });
+      if (st.mode === 'next') say(`“${LOOKS[k].n}” lined up: press TAKE`);
+      render();
+    };
+    const lit = (k) => LOOKS[k].set.every((s, i) => st.cur[i] === s);
+    const render = () => {
+      const q = Object.keys(st.next).length;
+      const tgt = st.tg.size ? 'Target ' + [...st.tg].sort().map((i) => 'Monitor ' + (i + 1)).join(', ') : 'Tap a monitor to target it';
+      box.innerHTML = win('Showcaller Screens', `<div class="sc" style="position:relative">
+        <div class="sctop"><div class="scbrand"><span class="sq"></span>Showcaller <small>SCREENS</small></div><span class="chip on">Connected</span><span class="kindb">MONITORS</span><span style="flex:1"></span>
+          <button class="scb" data-x="check">Check</button><button class="scb" data-x="ident">Identify</button><button class="scb blk${st.black ? ' on' : ''}" data-x="black">${st.black ? 'Restore' : 'Blackout'}</button></div>
+        <div class="scmain"><div class="scleft">
+          <div class="schead"><b>Monitors</b><span>${tgt}</span><span class="sp"></span>
+            <button class="scb${st.mode === 'next' ? ' on' : ''}" data-x="mode">${st.mode === 'next' ? 'Up next, then Take' : 'Straight to set'}</button>
+            ${st.mode === 'next' ? `<span>${q ? q + ' monitor' + (q > 1 ? 's' : '') + ' queued' : 'Nothing queued'}</span><button class="take${q ? ' live' : ''}" data-x="take"${q ? '' : ' disabled'}>TAKE</button>` : ''}</div>
+          <div class="mons">${MONS.map((n, i) => `<button class="mon${st.tg.has(i) ? ' tg' : ''}" data-m="${i}"><div class="pic" style="background-image:url(${CAMS[st.cur[i]]})">${st.next[i] ? `<span class="nx" style="background-image:url(${CAMS[st.next[i]]})"></span>` : ''}${st.black ? '<span class="bo">BLACKOUT</span>' : ''}</div>
+            <div class="strip"><b>${i + 1} ${esc(n)}</b><span>${esc(SRC[st.cur[i]].n)}</span></div></button>`).join('')}</div>
+          <div class="lkbar"><div class="seg"><button data-sp="looks" class="${st.strip === 'looks' ? 'on' : ''}">Looks</button><button data-sp="cues" class="${st.strip === 'cues' ? 'on' : ''}">Cues</button></div>
+            ${st.strip === 'looks' ? `<div class="looks">${LOOKS.map((l, k) => `<button class="look${lit(k) ? ' on' : ''}" data-l="${k}">${esc(l.n)}</button>`).join('')}</div>`
+            : `<div class="gorow"><button class="go" data-x="go"${st.cue >= CUES.length ? ' disabled' : ''}>GO</button><span style="color:var(--muted)">${st.cue < CUES.length ? 'Next: ' + esc(LOOKS[CUES[st.cue].l].n) + '. ' + esc(CUES[st.cue].note) : 'End of the running order.'}</span>${st.cue ? '<button class="scb" data-x="back">Back</button>' : ''}</div>
+              <div class="cues">${CUES.map((c, k) => `<div class="cue${k === st.cue ? ' nxt' : k < st.cue ? ' done' : ''}"><b>${k + 1}</b><span>${esc(LOOKS[c.l].n)} · ${esc(c.note)}</span></div>`).join('')}</div>`}</div>
+        </div>
+        <div class="lib"><div class="seg">${['media', 'inputs', 'graphics'].map((t) => `<button data-t="${t}" class="${st.tab === t ? 'on' : ''}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div>
+          <div class="libgrid">${Object.entries(SRC).filter(([, v]) => v.t === st.tab).map(([k, v]) => { const on = st.cur.map((c, i) => c === k ? i + 1 : 0).filter(Boolean); return `<button class="src" data-s="${k}"><div class="th" style="background-image:url(${CAMS[k]})">${on.length ? `<i>${on.join(' ')}</i>` : ''}</div><span>${esc(v.n)}</span></button>`; }).join('')}</div></div></div>
+        ${st.toast ? `<div class="toast">${esc(st.toast)}</div>` : ''}</div>`);
+      box.querySelectorAll('[data-m]').forEach((b) => { b.onclick = () => { const i = +b.dataset.m; st.tg.has(i) ? st.tg.delete(i) : st.tg.add(i); render(); }; });
+      box.querySelectorAll('[data-s]').forEach((b) => { b.onclick = () => pick(b.dataset.s); });
+      box.querySelectorAll('[data-t]').forEach((b) => { b.onclick = () => { st.tab = b.dataset.t; render(); }; });
+      box.querySelectorAll('[data-sp]').forEach((b) => { b.onclick = () => { st.strip = b.dataset.sp; render(); }; });
+      box.querySelectorAll('[data-l]').forEach((b) => { b.onclick = () => look(+b.dataset.l); });
+      box.querySelectorAll('[data-x]').forEach((b) => { b.onclick = () => {
+        const x = b.dataset.x;
+        if (x === 'take') { Object.entries(st.next).forEach(([i, s]) => apply(+i, s)); }
+        if (x === 'mode') { st.mode = st.mode === 'next' ? 'straight' : 'next'; st.next = {}; }
+        if (x === 'black') st.black = !st.black;
+        if (x === 'ident') say('Each set screen shows its number and name');
+        if (x === 'check') say('Pre-show check: everything ready');
+        if (x === 'go' && st.cue < CUES.length) { LOOKS[CUES[st.cue].l].set.forEach((s, i) => apply(i, s)); st.cue++; }
+        if (x === 'back' && st.cue) { st.cue--; if (st.cue) LOOKS[CUES[st.cue - 1].l].set.forEach((s, i) => apply(i, s)); }
+        render();
+      }; });
+    };
+    render();
+  }
   const cam = (id) => CAMLIST.find((c) => c.id === id);
 
   // ---------- small building blocks ----------
@@ -384,11 +535,16 @@ details .in b { color: var(--fg); }
     { id: 'install', t: 'Install Multiview' },
     { id: 'license', t: 'Add a license (if sent)' },
     { id: 'join', t: 'Join the studio' },
-    { id: 'tiles', grp: 'Watching', t: 'Layouts and tiles' },
+    { id: 'tiles', grp: 'Watching cameras (Multiview)', t: 'Layouts and tiles' },
     { id: 'quality', t: 'Picture quality' },
     { id: 'tally', t: 'Tally and the ATEM bar' },
     { id: 'ptz', t: 'Moving a camera (PTZ)' },
     { id: 'phone', t: 'Watch on your phone' },
+    { id: 'screens', grp: 'Running Screens', t: 'What Screens does' },
+    { id: 'screens-setup', t: 'Install, update, open' },
+    { id: 'screens-send', t: 'Put something on a screen' },
+    { id: 'screens-looks', t: 'Looks, cues and Blackout' },
+    { id: 'screens-remote', t: 'From a phone or from home' },
     { id: 'status', grp: 'When something looks off', t: 'What the lights mean' },
     { id: 'help', t: 'Troubleshooting' },
   ];
@@ -398,24 +554,25 @@ details .in b { color: var(--fg); }
   R.start = () => ({
     eb: 'Welcome',
     h: 'Watch the studio cameras live, from home',
-    lede: 'Your production team uses <b>Showcaller Multiview</b> to let you see every camera in the studio on your own computer, with tally lights, and steer the robotic cameras if you are asked to. You install it once with <b>Showcaller Hub</b>, then click the invite link you are sent. It takes about ten minutes the first time.',
+    lede: 'This guide covers the two Showcaller apps you\'ll use. <b>Showcaller Multiview</b> shows every studio camera on your own computer, with tally lights, and lets you steer the robotic cameras when asked. <b>Showcaller Screens</b> runs the pictures on the set\'s screens: what\'s on each monitor or LED wall, the looks and cues of the show, and Blackout. You install both with <b>Showcaller Hub</b>. Setting up Multiview takes about ten minutes the first time.',
     body: `<div class="checks">
       <div class="check"><b>A Mac or Windows PC</b>A laptop is fine. macOS 12 or newer, or Windows 10 or 11.</div>
       <div class="check"><b>Home internet</b>Wired or good Wi-Fi. 5 Mbit/s down is plenty; the studio sizes the pictures to fit your connection.</div>
       <div class="check"><b>Your invite link</b>Sent to you privately by the studio. It works like a password, so please don't forward it.</div>
       <div class="check"><b>Nothing else</b>No VPN, no NDI software and no router settings. The connection to the studio is built in and encrypted.</div>
     </div>
-    <div class="note"><b>Already have Showcaller Hub or Multiview?</b> You might, from an earlier show. Please update both to the newest version before you join: <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later. Older versions may not connect to the studio. The <b>Already installed? Update</b> step shows how.</div>
+    <div class="note"><b>Already have Showcaller Hub or Multiview?</b> You might, from an earlier show. Please update both to the newest version before you join: <b>Hub 1.13</b> or later, <b>Multiview 2.8.2</b> or later, and on the set computer <b>Screens 7.7.3</b> or later. Older versions may not connect to the studio. The <b>Already installed? Update</b> step shows how.</div>
     <p class="howh" style="margin-top:24px">What you'll do</p>
     <ol class="how">
       <li><span><b>Get Showcaller Hub</b> from showcallerstudio.com/apps, or update it if you already have it.<small>About 3 minutes.</small></span></li>
       <li><span><b>Install or update Showcaller Multiview</b> from inside Hub.<small>About 2 minutes.</small></span></li>
       <li><span><b>Add a license key</b>, only if the studio sent you one.<small>30 seconds.</small></span></li>
       <li><span><b>Click your invite link</b> and press Join. The studio's cameras appear.<small>Under a minute.</small></span></li>
+      <li><span><b>Learn Screens</b>: targeting monitors, TAKE, looks, cues and Blackout. The mockups in this guide behave like the real control page, so you can practise here.<small>About 10 minutes.</small></span></li>
       <li><span><b>Do a quick check</b> before show day: pick Low, Auto or Full, find your tally, try a camera move if you'll be steering.<small>A few minutes. Best done the day before.</small></span></li>
     </ol>
     <div class="cols">
-      <div><h3>How it fits together</h3><p><b>Hub</b> installs and updates the Showcaller apps on your computer and holds your license. <b>Multiview</b> is the screen of camera tiles you watch. <b>Showcaller Link</b>, built into both, carries the pictures from the studio to you.</p></div>
+      <div><h3>How it fits together</h3><p><b>Hub</b> installs and updates the Showcaller apps on your computer and holds your license. <b>Multiview</b> is the screen of camera tiles you watch. <b>Screens</b> runs on the studio's set computer and drives the set screens; you control it from its window there, or from a browser or phone. <b>Showcaller Link</b>, built into Hub and Multiview, carries the camera pictures from the studio to you.</p></div>
       <div><h3>How to use this guide</h3><p>Work down the steps on the left. The app pictures on each page are live: click, double-click and right-click them to see what the real app does.</p></div>
     </div>`,
   });
@@ -448,7 +605,7 @@ details .in b { color: var(--fg); }
   R.update = () => ({
     eb: 'Set up · if you had Showcaller before',
     h: 'Already installed? Update to the newest version',
-    lede: 'If Showcaller Hub or Multiview is already on your computer from an earlier show, update both before you join. The studio uses the newest versions, and older ones may not connect, or may be missing the controls this guide shows. You need <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later.',
+    lede: 'If Showcaller Hub or Multiview is already on your computer from an earlier show, update both before you join. The studio uses the newest versions, and older ones may not connect, or may be missing the controls this guide shows. You need <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later. On the studio\'s set computer, Screens should be <b>7.7.3</b> or later (see <b>Install, update, open</b> under Running Screens).',
     steps: [
       'Open Hub. On a Mac, click the Hub icon in the <b>menu bar</b> at the top of the screen and choose <b>Open Showcaller Hub…</b>. On Windows, click the Hub icon in the <b>system tray</b> (bottom right; you may need the ^ arrow). Or open it from Applications or the Start menu.',
       'If there\'s a button at the bottom of Hub saying <b>Update Hub to 1.13.x</b>, click it first. Hub downloads the new version and restarts.<small>Your Hub version is shown at the bottom left of its window.</small>',
@@ -531,7 +688,7 @@ details .in b { color: var(--fg); }
       'The key appears in the list with what it unlocks (Multiview Pro). Multiview picks it up straight away, even if it\'s open.',
     ],
     h: 'Add a license key',
-    lede: 'Watching the cameras is <b>free</b>. A license is only needed if the studio wants you to use the <b>ATEM switcher controls</b>. If they sent you a key (it starts with <b>UPS2-</b>), add it once in Hub and every Showcaller app on your computer picks it up.',
+    lede: 'Watching the cameras is <b>free</b>. A license is needed for <b>Showcaller Screens</b> and for Multiview\'s <b>ATEM switcher controls</b>. One key covers both: a Screens key also unlocks Multiview Pro. If the studio sent you a key (it starts with <b>UPS2-</b>), add it once in Hub and every Showcaller app on that computer picks it up.',
     tryit: 'Click Add this key.',
     mock: win('Showcaller Hub', `<div class="hubbar"><div class="brand" style="font-size:14px"><span class="sq"></span>Showcaller <small>Hub</small></div>
         <div class="tabs"><button>Apps</button><button class="on">License</button><button>Studio link</button></div></div>
@@ -544,11 +701,11 @@ details .in b { color: var(--fg); }
     body: `<div class="cols">
       <div><h3>Paste the whole key</h3><p>Copy everything from <b>UPS2-</b> to the end. If it says the key isn't complete, copy it again from the email.</p></div>
       <div><h3>Already in Multiview?</h3><p>You can also paste it in Multiview under <b>Settings → License</b>. Either place works.</p></div>
-      <div><h3>No key?</h3><p>Skip this step. Everything else in this guide works without one, and the ATEM bar simply stays hidden.</p></div>
+      <div><h3>No key?</h3><p>Skip this step on your own computer: watching works without one, and the ATEM bar stays hidden. The studio\'s set computer usually has its Screens key already; Screens never stops a show over a license.</p></div>
     </div>`,
     on(root) {
       $('#keyUse', root).onclick = () => {
-        $('#keys', root).innerHTML = '<div class="keyrow"><b>UPS2-eyJ0byI6…k3Jx</b><span>Acme Productions · unlocks <b style="font-family:var(--body);color:var(--blue)">Multiview Pro</b>, Timer Pro</span></div>';
+        $('#keys', root).innerHTML = '<div class="keyrow"><b>UPS2-eyJ0byI6…k3Jx</b><span>Acme Productions · unlocks <b style="font-family:var(--body);color:var(--amber)">Screens</b>, <b style="font-family:var(--body);color:var(--blue)">Multiview Pro</b>, Timer Pro</span></div>';
         $('#keyMsg', root).textContent = 'Added. Every app on this computer uses it now.';
         $('#keyin', root).value = '';
       };
@@ -848,20 +1005,141 @@ details .in b { color: var(--fg); }
     },
   });
 
+  R.screens = () => ({
+    eb: 'Running Screens',
+    h: 'What Showcaller Screens does',
+    lede: 'Showcaller Screens runs on one computer at the studio, the <b>set computer</b>, and puts a full-screen picture on every set screen: TVs, LED walls, projectors and signs. You choose what each one shows from the <b>control page</b>, which is Screens’ own window on the set computer, or a web page on any laptop, tablet or phone on the studio network.',
+    tryit: 'Click the Doors, Show open and Interview looks, then TAKE.',
+    mock: '<div id="scIntro"></div>',
+    body: `<div class="cols">
+      <div><h3>Monitor</h3><p>One picture Screens puts out: a TV, a section of an LED wall, a projector or a sign. Each has a number and a name, like <b>2 Center left</b>.</p></div>
+      <div><h3>Source</h3><p>Anything you can put on a monitor: a video loop, a still, a live camera (NDI or capture card), a web page, a countdown, a playlist or plain black.</p></div>
+      <div><h3>Target</h3><p>The monitors you've tapped (amber outline). The next source you pick goes to every target.</p></div>
+      <div><h3>Up next and TAKE</h3><p>Picks wait in <b>Up next</b> with a green NEXT picture until you press <b>TAKE</b>, then switch together, like a vision mixer.</p></div>
+      <div><h3>Look</h3><p>A saved setup for the whole set, such as <b>Show open</b> or <b>Break</b>. One tap lines it all up.</p></div>
+      <div><h3>Cue</h3><p>A step in the show's running order, usually a look with a note. <b>GO</b> takes the next one.</p></div>
+    </div>
+    <div class="note" style="border-left-color:var(--ok)"><b>Nothing you do on the control page can stop the screens.</b> If the page closes or loses connection, every monitor keeps showing what it had. Screens also puts everything back after a restart.</div>`,
+    on(root) { screensMock($('#scIntro', root), { strip: 'looks' }); },
+  });
+
+  R['screens-setup'] = () => ({
+    eb: 'Running Screens',
+    h: 'Install, update and open Screens',
+    lede: 'Screens lives on the <b>set computer</b> at the studio, not on your laptop. It is usually installed already. Before a show, check it is up to date, the same way as Multiview: through <b>Showcaller Hub</b> on that computer.',
+    steps: [
+      'On the set computer, open <b>Showcaller Hub</b> from the menu bar or system tray.',
+      'Under <b>Screens and playback</b>, find <b>Showcaller Screens</b>. If it says <b>Update to 7.7.3</b> (or newer), click it. If it isn\'t installed yet, click <b>Install</b>.<small>Update between shows, not during one: Screens restarts, and the set screens go black for a few seconds.</small>',
+      'Open Screens. The set monitors fill their screens straight away, and the start screen asks what kind of show you\'re running. Pick <b>Monitors</b> for TVs and monitors (or <b>LED screens</b> for an LED wall). If nobody touches it, it carries on with last time\'s choice after 12 seconds.',
+      'The control page opens in its own window on the main display. The set screens are never used for it, so it stays free for you.',
+      'Closing the control page window doesn\'t stop anything. To bring it back, open Screens again or click its icon in the menu bar or tray, then <b>Open control page</b>.',
+    ],
+    body: `<div class="cols">
+      <div><h3>Quitting Screens</h3><p>Quitting asks first if anything is on the set, because every set screen goes black the moment Screens quits. Only quit when the show is over.</p></div>
+      <div><h3>Which version am I on?</h3><p>On the control page, open <b>Settings → Updates</b>. Hub also shows it on the Screens card.</p></div>
+      <div><h3>Wrong picture on a screen?</h3><p>Tap <b>Identify</b> in the top bar. Every set screen shows its monitor number and name for a few seconds, so you can see which is which.</p></div>
+    </div>
+    <div class="note"><b>Before every show, tap Check</b> in the top bar. The pre-show check lists anything that needs attention in red or amber (a missing video file, a camera with no signal, a screen that's off), with what to do. Green means ready.</div>`,
+  });
+
+  R['screens-send'] = () => ({
+    eb: 'Running Screens',
+    h: 'Put something on a screen',
+    lede: 'Choose the monitors first, then choose what they show. With <b>Up next, then Take</b> (the normal way) nothing changes on set until you press <b>TAKE</b>, so you can line up several screens and switch them together.',
+    steps: [
+      'Tap one or more <b>monitor cards</b>. They get an amber outline, and the header says which monitors are targeted. On a keyboard, <kbd>1</kbd>–<kbd>9</kbd> pick monitors, <kbd>A</kbd> picks them all, <kbd>Esc</kbd> clears.',
+      'Tap a source in the <b>library</b> on the right: <b>Media</b> for videos and stills, <b>Inputs</b> for cameras, <b>Graphics</b> for countdowns, colours and slates.',
+      'Each changed monitor shows a small green <b>NEXT</b> picture of what it will switch to.',
+      'Press <b>TAKE</b> (or <kbd>Enter</kbd>). Everything switches at the same moment.',
+      'Want every tap to go straight to air instead? Click the mode button to switch to <b>Straight to set</b> (or press <kbd>P</kbd>). Switch back when you\'re done.',
+    ],
+    tryit: 'Tap Center left and Center right, pick Cam 2 Host from Inputs, then TAKE.',
+    mock: '<div id="scSend"></div>',
+    body: `<div class="cols">
+      <div><h3>Red numbers in the library</h3><p>A small red number on a source shows which monitors it's on right now.</p></div>
+      <div><h3>Drag and drop</h3><p>On a laptop you can drag a source straight onto a monitor card. No need to target it first.</p></div>
+      <div><h3>Clear one monitor</h3><p>The clear button on a monitor's card fades just that one to black. <b>Clear</b> next to TAKE throws away what's queued.</p></div>
+    </div>`,
+    on(root) { screensMock($('#scSend', root), { strip: 'looks' }); },
+  });
+
+  R['screens-looks'] = () => ({
+    eb: 'Running Screens',
+    h: 'Looks, cues and Blackout',
+    lede: 'Most shows run from <b>looks</b> and <b>cues</b> the studio has already built. A look sets every screen at once. Cues are the running order: <b>GO</b> takes the next one, straight to the set.',
+    steps: [
+      '<b>Looks:</b> tap a look in the strip under the monitors. With Up next on, it lines up every screen; press <b>TAKE</b>. A look lights up amber while the set matches it.',
+      '<b>Cues:</b> click <b>Cues</b> to switch the strip to the running order. The next cue has a green outline and its note beside GO.',
+      'Press <b>GO</b> (or the <kbd>space bar</kbd>) to take the next cue. Cues always go straight to the set, even with Up next on. <b>Back</b> steps back one.',
+      '<b>Blackout</b> (or <kbd>B</kbd>) fades every screen to black but remembers what each was showing. The button then says <b>Restore</b>; press it (or <kbd>Shift</kbd>+<kbd>B</kbd>) to bring the pictures back.',
+    ],
+    tryit: 'Switch to Cues and press GO a few times. Then try Blackout and Restore.',
+    mock: '<div id="scLooks"></div>',
+    body: `<div class="cols">
+      <div><h3>Panic-proof Blackout</h3><p>A second press of Restore straight after blacking out is ignored, so a nervous double press can't bring the picture back by accident.</p></div>
+      <div><h3>Undo</h3><p>Changed something by mistake? <b>Undo</b> in the top bar steps back one change.</p></div>
+      <div><h3>Changing a look</h3><p>Looks and cues are set up by the studio. Ask before you save over one: right-click a look for <b>Update to current monitors</b>.</p></div>
+    </div>`,
+    on(root) { screensMock($('#scLooks', root), { strip: 'cues' }); },
+  });
+
+  R['screens-remote'] = () => ({
+    eb: 'Running Screens',
+    h: 'Run Screens from a phone, tablet or from home',
+    lede: 'The control page also opens in any web browser. On the studio network, nothing needs installing. From outside the studio it goes through <b>Tailscale</b>, set up by the studio. For the big moves only, there’s a one-page <b>phone remote</b>.',
+    steps: [
+      'Get the address: on the set computer, click the Screens icon in the menu bar or tray. It lists the address for phones and tablets, for example <b>http://192.168.60.20:8080</b>.',
+      'Open that address in Safari or Chrome on a phone, tablet or laptop that\'s on the <b>studio Wi-Fi</b>. If asked, type the <b>PIN</b> the studio gave you. You stay signed in.',
+      'For the <b>phone remote</b> (big buttons for looks, GO and Blackout), add <b>/remote</b> to the address, like http://192.168.60.20:8080/remote, or tap <b>More ⋯ → Phone remote</b>.',
+      'Tip: in Safari tap <b>Share → Add to Home Screen</b> (Chrome: menu → <b>Add to Home screen</b>) so it opens like an app.',
+      '<b>From home:</b> only if the studio has set it up. Install Tailscale on your laptop or phone, sign in with the account the studio gives you, and open the set computer\'s Tailscale address (it starts with 100.). The same PIN applies.',
+    ],
+    tryit: 'Tap GO and Blackout on the phone remote.',
+    mock: '<div class="phonepair" style="align-items:start"><div id="rmSide"></div><div class="phone"><span class="notch"></span><div class="scr" id="rmScr"></div></div></div>',
+    body: `<div class="cols">
+      <div><h3>Operator or admin?</h3><p>An <b>Operator</b> badge means your PIN runs the show (looks, cues, sources, Blackout) but can't change the setup in Settings. That's normal for a producer.</p></div>
+      <div><h3>View-only link</h3><p>The studio can send a link that shows every set screen live but can't change anything. Handy for a client who just wants to look.</p></div>
+      <div><h3>Keep it private</h3><p>Don't share the address and PIN outside the team. Lost a phone? Ask the studio to use <b>Sign out every other device</b>.</p></div>
+    </div>
+    <div class="note"><b>Screens and Multiview connect differently.</b> Multiview reaches the studio with its built-in Showcaller Link, from anywhere. The Screens control page needs the studio network or Tailscale. If Screens doesn't open from home, that's expected unless the studio set up Tailscale for you.</div>`,
+    on(root) {
+      const side = $('#rmSide', root), scr = $('#rmScr', root);
+      const CN = ['Doors', 'Show open', 'Interview', 'Break'];
+      let cue = 1, black = false;
+      side.innerHTML = win('Safari', `<div class="setpane"><h5>Phone remote</h5><p>One page of big buttons for a presenter, floor manager or producer who only needs the big moves. It uses the same PIN as the control page.</p>
+        <div class="st" style="display:grid;gap:4px"><span>Address</span><code>http://192.168.60.20:8080/remote</code></div><div class="st" style="display:grid;gap:4px"><span>From home, over Tailscale (if set up)</span><code>http://100.88.14.20:8080/remote</code></div></div>`);
+      const render = () => {
+        scr.innerHTML = `<div class="ph"><span>Showcaller Screens</span><span style="color:var(--ok)">● Studio</span></div>
+          <div class="rmt"><button class="big red${black ? ' on' : ''}" id="rmB">${black ? 'Blackout is on · tap to restore' : 'Blackout'}</button>
+          <div class="nt">${cue < CN.length ? 'Next cue ' + (cue + 1) + ': ' + CN[cue] : 'End of the running order'}</div>
+          <div class="two"><button class="big" id="rmBack">Back</button><button class="big green" id="rmGo"${cue >= CN.length ? ' disabled' : ''}>GO</button></div>
+          <div class="nt" style="margin-top:4px">Looks</div><div class="two">${CN.map((n) => `<button class="big" style="font-size:11px;padding:9px">${n}</button>`).join('')}</div></div>`;
+        $('#rmB', scr).onclick = () => { black = !black; render(); };
+        $('#rmGo', scr).onclick = () => { if (cue < CN.length) cue++; render(); };
+        $('#rmBack', scr).onclick = () => { if (cue > 0) cue--; render(); };
+      };
+      render();
+    },
+  });
+
   R.status = () => ({
     eb: 'When something looks off',
     h: 'What the lights and messages mean',
     lede: 'The coloured dots in Multiview\'s toolbar tell you how your connection to the studio is doing. Point at one in the app for more detail. <b>Green</b> is fine, <b>amber</b> is working but slow or still starting, <b>red</b> needs a look.',
     mock: '',
     body: `<div class="legend">
-      <div class="lgh">Toolbar</div>
+      <div class="lgh">Multiview toolbar</div>
       <div class="lg"><span class="chip on">Studio · 28 ms</span><p><b>Connected to the studio.</b> The number is how long a round trip takes. Under 100 ms is great; up to 250 ms is fine for watching.</p></div>
       <div class="lg"><span class="chip warn">Studio · 340 ms</span><p><b>Connected, but slow.</b> Pictures and camera moves will lag. Switch Quality to <b>Low</b>, and if you can, move closer to the router or plug in a cable.</p></div>
       <div class="lg"><span class="chip warn">Connecting to the studio…</span><p><b>Still reaching the studio.</b> This normally takes a few seconds. If it stays for more than a minute, see Troubleshooting.</p></div>
       <div class="lg"><span class="chip bad">Studio link down</span><p><b>Can't reach the studio.</b> Check your own internet first. If yours is fine, the studio's computer may be off or restarting: let them know.</p></div>
       <div class="lg"><span class="chip on">NDI</span><p><b>The camera system on your computer is working.</b> It's built into the app, so this should always be green.</p></div>
       <div class="lg"><span class="chip warn">Tailscale (relayed)</span><p><b>Only if the studio set you up with Tailscale.</b> Tailscale couldn't connect directly and is going through its relay, so pictures lag. A wired connection or a home network (not hotel, office or guest Wi-Fi) usually fixes it. Most producers won't see a Tailscale light at all.</p></div>
-      <div class="lgh">On a tile</div>
+      <div class="lgh">In Screens</div>
+      <div class="lg"><span class="chip on">Connected</span><p><b>The control page is talking to Screens</b> and every monitor is running. Amber or red means the page lost its connection: the set screens carry on regardless. Reload the page.</p></div>
+      <div class="lg"><span class="tmsg">OFFLINE</span><p><b>On a monitor card: that monitor's output isn't running</b>, often because its screen is off or unplugged. Turn the screen on; Screens puts the picture back when it returns.</p></div>
+      <div class="lg"><span class="tmsg lagc">Check ●</span><p><b>A dot on the Check button</b> means the pre-show check found something new. Tap Check to see what and how to fix it.</p></div>
+      <div class="lgh">On a Multiview tile</div>
       <div class="lg"><span class="tmsg">Connecting to the studio through Showcaller Link…</span><p><b>The camera is starting.</b> The first picture can take 5 to 10 seconds. Give it a moment before pressing Refresh.</p></div>
       <div class="lg"><span class="tmsg lagc">1.4 s behind</span><p><b>The picture is arriving late</b> because the internet can't keep up. Multiview catches up by itself; switching to <b>Low</b> helps it stay caught up.</p></div>
       <div class="lg"><span class="tmsg">The studio stopped sending this camera</span><p><b>The camera went away at the studio end</b>, for example it was unplugged or renamed. It comes back on its own when the studio fixes it.</p></div>
@@ -880,6 +1158,8 @@ details .in b { color: var(--fg); }
         <li><span>Open Multiview. The toolbar should show the studio in <b>green</b> with a number under 250 ms.</span></li>
         <li><span>Every tile shows a picture. If one is black, right-click it and pick the camera again.</span></li>
         <li><span>Pick <b>Auto</b> quality. If anything shows "behind", try <b>Low</b>.</span></li>
+        <li><span>On the Screens control page, tap <b>Check</b> and fix anything red. Tap <b>Identify</b> and make sure every set screen shows the right number.</span></li>
+        <li><span>Click through the Screens <b>looks</b> or <b>cues</b> once, then go back to the first one, so you know the running order.</span></li>
         <li><span>If you'll steer cameras, try a small PTZ move on a camera that isn't on air, and ask the studio which presets to use.</span></li>
         <li><span>Plug in your laptop's charger, close video downloads and cloud backups, and sit near the router or use a cable.</span></li>
       </ol>
@@ -912,7 +1192,22 @@ details .in b { color: var(--fg); }
         <li>The switcher controls need a license key: see <a href="#license" style="color:var(--blue)">Add a license</a>.</li>
         <li>Check <b>View → ATEM switcher bar</b> is ticked.</li>
         <li>Tally only shows on tiles the studio has linked to a switcher input.</li></ul></div></details>
-      <details><summary>The app wants an update</summary><div class="in"><p style="margin:0">Click <b>Update available</b> in Multiview's toolbar, or <b>Update</b> on its card in Hub. It takes under a minute. Avoid updating in the middle of a show.</p></div></details>`,
+      <details><summary>Screens: a set screen is black or shows the computer's desktop</summary><div class="in"><ol>
+        <li>Make sure the TV or wall is on and on the right input.</li>
+        <li>On the control page, tap <b>Identify</b> to see which monitor number is on which screen.</li>
+        <li>If a monitor card says <b>OFFLINE</b>, its screen isn't connected; once it's back, Screens refills it.</li>
+        <li>Still wrong? Click the Screens icon in the menu bar or tray and choose <b>Re-place windows on displays</b>.</li>
+        <li>If Blackout is on, the button says <b>Restore</b>: press it.</li></ol></div></details>
+      <details><summary>Screens: I can't open the control page on my phone or laptop</summary><div class="in"><ul>
+        <li>Your device must be on the <b>studio Wi-Fi</b> (or on Tailscale, if the studio set that up). Mobile data won't reach it.</li>
+        <li>Check the address in the Screens menu on the set computer; it includes <b>:8080</b>.</li>
+        <li>Asked for a PIN you don't have? Ask the studio. The set computer itself never asks.</li>
+        <li>Windows set computer, reaching it over Tailscale: someone at the studio taps <b>Allow Showcaller Screens on all networks</b> in Settings → System once.</li></ul></div></details>
+      <details><summary>Screens: a video or camera won't play</summary><div class="in"><ul>
+        <li>A red message under the monitor card says what failed; the monitor keeps showing what it had.</li>
+        <li>For a camera, check it's on at the studio and tap <b>Rescan</b> in the Inputs tab.</li>
+        <li>Run <b>Check</b>: it lists missing files and inputs with no signal.</li></ul></div></details>
+      <details><summary>The app wants an update</summary><div class="in"><p style="margin:0">Open Hub and click <b>Update</b> on the app's card (Multiview on your computer, Screens on the set computer). It takes a minute or two. Never update in the middle of a show: the app restarts, and for Screens the set screens go black briefly.</p></div></details>`,
   });
 
   // ---------- routing ----------
