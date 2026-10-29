@@ -1,5 +1,5 @@
 {
- "written": "2026-10-29T13:44:09.125Z",
+ "written": "2026-10-29T14:50:10.236Z",
  "apps": {
   "testkit": {
    "version": "1.1.0",
@@ -49,6 +49,40 @@
      "sha256": "325f6c46a6d9d99e84a3b62892e613d2f7d80351acfe9cbf7e6e3c3c4f0437fc",
      "size": 117807580,
      "version": "7.7.2"
+    }
+   }
+  },
+  "multiview": {
+   "version": "2.7.6",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.6/Showcaller-Multiview-2.7.6-mac-arm64.zip",
+     "sha256": "c5186602f16338fe07b106182c526f62a42124b8debed8b5bc176d1b35237946",
+     "size": 164584061,
+     "version": "2.7.6"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.6/Showcaller-Multiview-2.7.6-win-x64.exe",
+     "sha256": "3faddec1c257515712cc98b55431302785bc213f7bee3464f6a4a7511472830f",
+     "size": 151627435,
+     "version": "2.7.6"
+    }
+   }
+  },
+  "hub": {
+   "version": "1.12.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.12.0/Showcaller-Hub-1.12.0-mac-arm64.zip",
+     "sha256": "98357b826444af1e1d8ae0243637d43dedf4a9c9d4c95e94ac11c940e6765d66",
+     "size": 157920016,
+     "version": "1.12.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.12.0/Showcaller-Hub-1.12.0-win-x64.exe",
+     "sha256": "2134926929fd2f56de66c414945e400ca6f949a0610e9ce21cc93bbcd7cb3b59",
+     "size": 146593957,
+     "version": "1.12.0"
     }
    }
   },
@@ -131,23 +165,6 @@
     }
    }
   },
-  "multiview": {
-   "version": "2.7.5",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.5/Showcaller-Multiview-2.7.5-mac-arm64.zip",
-     "sha256": "904476e23503ba5747a7e7422311b67411b0e85e7af089f2ec0f6f30d9c176bb",
-     "size": 164583213,
-     "version": "2.7.5"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.7.4/Showcaller-Multiview-2.7.4-win-x64.exe",
-     "sha256": "067c264d16336f0b86ceed83da95c4e037550967b888d2f5bc44f848aac193f2",
-     "size": 139796070,
-     "version": "2.7.4"
-    }
-   }
-  },
   "link": {
    "version": "1.2.5",
    "builds": {
@@ -217,23 +234,6 @@
      "sha256": "c11319400872b34e90e6f431b0075cc8bb4ed53cf720cccb9013817615b17d63",
      "size": 130394046,
      "version": "3.15.1"
-    }
-   }
-  },
-  "hub": {
-   "version": "1.11.0",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.11.0/Showcaller-Hub-1.11.0-mac-arm64.zip",
-     "sha256": "06bc9e4956fafa08861792fca76e786b30ed141938eb83e2e0060757ff11b9ac",
-     "size": 157918522,
-     "version": "1.11.0"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.11.0/Showcaller-Hub-1.11.0-win-x64.exe",
-     "sha256": "0888e2d67e61ccc9e6f157bcebf944755bfca61cc2f8f3562b2f5340de4bfcc1",
-     "size": 146592064,
-     "version": "1.11.0"
     }
    }
   },
