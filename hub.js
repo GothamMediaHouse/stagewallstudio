@@ -85,6 +85,8 @@ export async function hubCatalog(request, env) {
     // A release wins over builds written into the file by hand, unless that one is newer
     if (got && (!VERSION.test(a.buildVersion || '') || !newer(a.buildVersion, got.version))) { a.buildVersion = got.version; a.builds = got.builds; }
   }
+  // The Hub's own full downloads, so it can update itself (Hub 1.12 and later)
+  if (rel.hub) cat.hub = rel.hub;
   return new Response(JSON.stringify(cat), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' } });
 }
 
