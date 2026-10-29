@@ -26,3 +26,8 @@
 
 /hub/releases.json
   Cache-Control: public, max-age=300
+
+/guides/*
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
