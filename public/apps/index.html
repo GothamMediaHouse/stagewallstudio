@@ -337,9 +337,9 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       document.getElementById('dl').hidden = false; document.getElementById('soon').hidden = true;
     });
 
-  // The download asks for an email first (remembered on this browser for next time)
+  // The download asks for an email first. It isn't kept: the box empties once the download starts
   const dl = document.getElementById('dl');
-  try { dl.email.value = localStorage.getItem('sc-email') || ''; } catch {}
+  try { localStorage.removeItem('sc-email'); } catch {}
   dl.onsubmit = async (e) => {
     e.preventDefault();
     const b = e.submitter && e.submitter.dataset.p ? e.submitter : btns.find((x) => !x.hidden);
@@ -351,7 +351,7 @@ footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 8px 24p
       const r = await fetch('/api/hub-download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, p: b.dataset.p, website: dl.website.value, ms: Date.now() - started }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.url) throw new Error(j.error || 'It didn’t start.');
-      try { localStorage.setItem('sc-email', email); } catch {}
+      dl.email.value = '';
       location.href = j.url;
       msg.textContent = '';
       const a = document.createElement('a'); a.href = j.url; a.textContent = 'click here';
