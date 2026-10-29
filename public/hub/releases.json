@@ -1,5 +1,5 @@
 {
- "written": "2026-10-29T17:35:41.891Z",
+ "written": "2026-10-29T17:38:11.112Z",
  "apps": {
   "testkit": {
    "version": "1.2.0",
@@ -133,17 +133,17 @@
   "hub": {
    "version": "1.13.1",
    "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.13.1/Showcaller-Hub-1.13.1-mac-arm64.zip",
+     "sha256": "d731cb4aec0b910335dd41129a6cfe69ce20d7cc81ee4e9563c822b10f6d4505",
+     "size": 157921388,
+     "version": "1.13.1"
+    },
     "win-x64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.13.1/Showcaller-Hub-1.13.1-win-x64.exe",
      "sha256": "2333a7bbd07d13dc9ff3cbc85c02ff1ae1f132fc61e26900d32fbf1db6cd08a5",
      "size": 146594424,
      "version": "1.13.1"
-    },
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.13.0/Showcaller-Hub-1.13.0-mac-arm64.zip",
-     "sha256": "6fcf19d31ce2853192f3dc8b28b6d8d6cfbbae4d815c2b184e8d009427132b60",
-     "size": 157921058,
-     "version": "1.13.0"
     }
    }
   },
