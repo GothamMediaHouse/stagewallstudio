@@ -343,7 +343,7 @@ details .in b { color: var(--fg); }
 
 <header class="top"><div class="top-in">
   <div class="brand"><span class="sq"></span>Showcaller <small>Studio</small></div>
-  <div class="meta">Producer guide · Hub 1.13 · Multiview 2.8 · Screens 7.7</div>
+  <div class="meta">Producer guide · Hub 1.13 · Multiview 2.8 · Screens 7.8</div>
 </div></header>
 
 <div class="wrap">
@@ -561,7 +561,7 @@ details .in b { color: var(--fg); }
       <div class="check"><b>Your invite link</b>Sent to you privately by the studio. It works like a password, so please don't forward it.</div>
       <div class="check"><b>Nothing else</b>No VPN, no NDI software and no router settings. The connection to the studio is built in and encrypted.</div>
     </div>
-    <div class="note"><b>Already have Showcaller Hub or Multiview?</b> You might, from an earlier show. Please update both to the newest version before you join: <b>Hub 1.13</b> or later, <b>Multiview 2.8.2</b> or later, and on the set computer <b>Screens 7.7.3</b> or later. Older versions may not connect to the studio. The <b>Already installed? Update</b> step shows how.</div>
+    <div class="note"><b>Already have Showcaller Hub or Multiview?</b> You might, from an earlier show. Please update both to the newest version before you join: <b>Hub 1.13</b> or later, <b>Multiview 2.8.2</b> or later, and on the set computer <b>Screens 7.8.0</b> or later (both the studio and your own copy, to use Showcaller Link). Older versions may not connect to the studio. The <b>Already installed? Update</b> step shows how.</div>
     <p class="howh" style="margin-top:24px">What you'll do</p>
     <ol class="how">
       <li><span><b>Get Showcaller Hub</b> from showcallerstudio.com/apps, or update it if you already have it.<small>About 3 minutes.</small></span></li>
@@ -605,7 +605,7 @@ details .in b { color: var(--fg); }
   R.update = () => ({
     eb: 'Set up · if you had Showcaller before',
     h: 'Already installed? Update to the newest version',
-    lede: 'If Showcaller Hub or Multiview is already on your computer from an earlier show, update both before you join. The studio uses the newest versions, and older ones may not connect, or may be missing the controls this guide shows. You need <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later. On the studio\'s set computer, Screens should be <b>7.7.3</b> or later (see <b>Install, update, open</b> under Running Screens).',
+    lede: 'If Showcaller Hub or Multiview is already on your computer from an earlier show, update both before you join. The studio uses the newest versions, and older ones may not connect, or may be missing the controls this guide shows. You need <b>Hub 1.13</b> or later and <b>Multiview 2.8.2</b> or later. On the studio\'s set computer, Screens should be <b>7.8.0</b> or later (see <b>Install, update, open</b> under Running Screens).',
     steps: [
       'Open Hub. On a Mac, click the Hub icon in the <b>menu bar</b> at the top of the screen and choose <b>Open Showcaller Hub…</b>. On Windows, click the Hub icon in the <b>system tray</b> (bottom right; you may need the ^ arrow). Or open it from Applications or the Start menu.',
       'If there\'s a button at the bottom of Hub saying <b>Update Hub to 1.13.x</b>, click it first. Hub downloads the new version and restarts.<small>Your Hub version is shown at the bottom left of its window.</small>',
@@ -1029,7 +1029,7 @@ details .in b { color: var(--fg); }
     lede: 'Screens lives on the <b>set computer</b> at the studio, not on your laptop. It is usually installed already. Before a show, check it is up to date, the same way as Multiview: through <b>Showcaller Hub</b> on that computer.',
     steps: [
       'On the set computer, open <b>Showcaller Hub</b> from the menu bar or system tray.',
-      'Under <b>Screens and playback</b>, find <b>Showcaller Screens</b>. If it says <b>Update to 7.7.3</b> (or newer), click it. If it isn\'t installed yet, click <b>Install</b>.<small>Update between shows, not during one: Screens restarts, and the set screens go black for a few seconds.</small>',
+      'Under <b>Screens and playback</b>, find <b>Showcaller Screens</b>. If it says <b>Update to 7.8.0</b> (or newer), click it. If it isn\'t installed yet, click <b>Install</b>.<small>Update between shows, not during one: Screens restarts, and the set screens go black for a few seconds.</small>',
       'Open Screens. The set monitors fill their screens straight away, and the start screen asks what kind of show you\'re running. Pick <b>Monitors</b> for TVs and monitors (or <b>LED screens</b> for an LED wall). If nobody touches it, it carries on with last time\'s choice after 12 seconds.',
       'The control page opens in its own window on the main display. The set screens are never used for it, so it stays free for you.',
       'Closing the control page window doesn\'t stop anything. To bring it back, open Screens again or click its icon in the menu bar or tray, then <b>Open control page</b>.',
@@ -1086,13 +1086,13 @@ details .in b { color: var(--fg); }
   R['screens-remote'] = () => ({
     eb: 'Running Screens',
     h: 'Run Screens from a phone, tablet or from home',
-    lede: 'The control page also opens in any web browser. On the studio network, nothing needs installing. From outside the studio it goes through <b>Tailscale</b>, set up by the studio. For the big moves only, there’s a one-page <b>phone remote</b>.',
+    lede: 'The control page also opens in any web browser. On the studio network, nothing needs installing. From home, Showcaller Screens on your Mac or PC reaches the studio with its built-in <b>Showcaller Link</b>, from an invite the studio sends you. For the big moves only, there’s a one-page <b>phone remote</b>.',
     steps: [
       'Get the address: on the set computer, click the Screens icon in the menu bar or tray. It lists the address for phones and tablets, for example <b>http://192.168.60.20:8080</b>.',
       'Open that address in Safari or Chrome on a phone, tablet or laptop that\'s on the <b>studio Wi-Fi</b>. If asked, type the <b>PIN</b> the studio gave you. You stay signed in.',
       'For the <b>phone remote</b> (big buttons for looks, GO and Blackout), add <b>/remote</b> to the address, like http://192.168.60.20:8080/remote, or tap <b>More ⋯ → Phone remote</b>.',
       'Tip: in Safari tap <b>Share → Add to Home Screen</b> (Chrome: menu → <b>Add to Home screen</b>) so it opens like an app.',
-      '<b>From home:</b> only if the studio has set it up. Install Tailscale on your laptop or phone, sign in with the account the studio gives you, and open the set computer\'s Tailscale address (it starts with 100.). The same PIN applies.',
+      '<b>From home:</b> ask the studio for a <b>Screens invite</b> (they make it in Settings → Access → From away). Open Showcaller Screens on your Mac or PC, choose <b>Control another Showcaller Screens</b> (in the Screens menu-bar or tray menu), paste the invite under <b>Somewhere else: paste an invite</b> and press <b>Join</b>. The window switches to the studio\'s controls, with its media library: play anything on any wall, or <b>Upload</b> files from your computer to the studio. The same PIN applies. Next time it\'s listed at the top of that window: press <b>Control</b>.',
     ],
     tryit: 'Tap GO and Blackout on the phone remote.',
     mock: '<div class="phonepair" style="align-items:start"><div id="rmSide"></div><div class="phone"><span class="notch"></span><div class="scr" id="rmScr"></div></div></div>',
@@ -1101,13 +1101,13 @@ details .in b { color: var(--fg); }
       <div><h3>View-only link</h3><p>The studio can send a link that shows every set screen live but can't change anything. Handy for a client who just wants to look.</p></div>
       <div><h3>Keep it private</h3><p>Don't share the address and PIN outside the team. Lost a phone? Ask the studio to use <b>Sign out every other device</b>.</p></div>
     </div>
-    <div class="note"><b>Screens and Multiview connect differently.</b> Multiview reaches the studio with its built-in Showcaller Link, from anywhere. The Screens control page needs the studio network or Tailscale. If Screens doesn't open from home, that's expected unless the studio set up Tailscale for you.</div>`,
+    <div class="note"><b>Screens and Multiview each need their own invite.</b> Both reach the studio with the built-in Showcaller Link, from anywhere, with nothing else to install. A Multiview invite won't open Screens: ask for one of each. From home, Screens runs in the Screens app (a web browser on its own only works on the studio Wi-Fi, or over Tailscale if the studio set that up). Your own screens at home don't change while you control the studio.</div>`,
     on(root) {
       const side = $('#rmSide', root), scr = $('#rmScr', root);
       const CN = ['Doors', 'Show open', 'Interview', 'Break'];
       let cue = 1, black = false;
       side.innerHTML = win('Safari', `<div class="setpane"><h5>Phone remote</h5><p>One page of big buttons for a presenter, floor manager or producer who only needs the big moves. It uses the same PIN as the control page.</p>
-        <div class="st" style="display:grid;gap:4px"><span>Address</span><code>http://192.168.60.20:8080/remote</code></div><div class="st" style="display:grid;gap:4px"><span>From home, over Tailscale (if set up)</span><code>http://100.88.14.20:8080/remote</code></div></div>`);
+        <div class="st" style="display:grid;gap:4px"><span>Address</span><code>http://192.168.60.20:8080/remote</code></div><div class="st" style="display:grid;gap:4px"><span>From home</span><code>Showcaller Screens → Control another → Paste an invite</code></div></div>`);
       const render = () => {
         scr.innerHTML = `<div class="ph"><span>Showcaller Screens</span><span style="color:var(--ok)">● Studio</span></div>
           <div class="rmt"><button class="big red${black ? ' on' : ''}" id="rmB">${black ? 'Blackout is on · tap to restore' : 'Blackout'}</button>
@@ -1199,7 +1199,8 @@ details .in b { color: var(--fg); }
         <li>Still wrong? Click the Screens icon in the menu bar or tray and choose <b>Re-place windows on displays</b>.</li>
         <li>If Blackout is on, the button says <b>Restore</b>: press it.</li></ol></div></details>
       <details><summary>Screens: I can't open the control page on my phone or laptop</summary><div class="in"><ul>
-        <li>Your device must be on the <b>studio Wi-Fi</b> (or on Tailscale, if the studio set that up). Mobile data won't reach it.</li>
+        <li>In a web browser, your device must be on the <b>studio Wi-Fi</b> (or on Tailscale, if the studio set that up). Mobile data won't reach it.</li>
+        <li>From home, use the Screens app with a <b>Screens invite</b> instead: Control another Showcaller Screens → paste an invite → Join. "Can't reach the studio yet" means Showcaller Hub or the Link app isn't running on the studio's computer.</li>
         <li>Check the address in the Screens menu on the set computer; it includes <b>:8080</b>.</li>
         <li>Asked for a PIN you don't have? Ask the studio. The set computer itself never asks.</li>
         <li>Windows set computer, reaching it over Tailscale: someone at the studio taps <b>Allow Showcaller Screens on all networks</b> in Settings → System once.</li></ul></div></details>
