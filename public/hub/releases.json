@@ -1,20 +1,31 @@
 {
- "written": "2026-11-02T16:18:05.004Z",
+ "written": "2026-11-03T03:26:49.794Z",
  "apps": {
   "switcher": {
-   "version": "2.1.1",
+   "version": "2.4.1",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.1.1/Showcaller-Switcher-2.1.1-mac-arm64.zip",
-     "sha256": "26710ac57b766e534c1f6ac5122bd115840c8cfb0d0ff4c75488f0396a3c2a26",
-     "size": 157592131,
-     "version": "2.1.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.1/Showcaller-Switcher-2.4.1-mac-arm64.zip",
+     "sha256": "bc88a729710c044a460cc0721e208e6bd3164a238b7a1375aca73328bc6f28cc",
+     "size": 157619488,
+     "version": "2.4.1"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.1.1/Showcaller-Switcher-2.1.1-win-x64.exe",
-     "sha256": "46b5ac9e336de669ae5a281ee986ca921c31de56f3b922ceeaad96e1b6a22071",
-     "size": 146387345,
-     "version": "2.1.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.1/Showcaller-Switcher-2.4.1-win-x64.exe",
+     "sha256": "8f0a5cae7bd25e28a73a43dfc109d820d55dfd2fbd85564493796dae1f960a4e",
+     "size": 146407520,
+     "version": "2.4.1"
+    }
+   }
+  },
+  "intercom": {
+   "version": "3.17.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.17.0/Showcaller-Helios-Remote-3.17.0-mac-arm64.zip",
+     "sha256": "198b34178af84c236ce5fe13defe73b865f5fd522f4dd11ed9c59d10978f2b84",
+     "size": 130395742,
+     "version": "3.17.0"
     }
    }
   },
@@ -153,14 +164,14 @@
    "builds": {
     "mac-arm64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/link-1.2.9/Showcaller-Link-1.2.9-mac-arm64.zip",
-     "sha256": "88a1d61fd459537471e4348f4e680bcc0cb226d1c7fd43aad66adf3fd991ea47",
-     "size": 158816058,
+     "sha256": "bd2d8905dbc0305365fc8edb692f7e95eee4955c9867bbd016c2814a6b13a107",
+     "size": 158817712,
      "version": "1.2.9"
     },
     "win-x64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/link-1.2.9/Showcaller-Link-1.2.9-win-x64.exe",
-     "sha256": "b0338c9083aadc3e8e10c4839b5917a11b1c64b6ee0cd78ff4c2b5813d8960f6",
-     "size": 156613628,
+     "sha256": "6a51bc10f501750357c893fd97028fee0e9d3ea8ee97bf2affa3897730698af3",
+     "size": 156568285,
      "version": "1.2.9"
     }
    }
@@ -240,17 +251,6 @@
      "sha256": "371a504f6461cb44b72986dc5d41659d0473578cbf93833b44e0511c48240ba0",
      "size": 157607239,
      "version": "0.4.2"
-    }
-   }
-  },
-  "intercom": {
-   "version": "3.16.0",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.16.0/Showcaller-Helios-Remote-3.16.0-mac-arm64.zip",
-     "sha256": "43a708523a00d2023eb2c583c2de8aae9947926cc3b769988ce85b46fc890cb2",
-     "size": 130217924,
-     "version": "3.16.0"
     }
    }
   },
