@@ -1,20 +1,20 @@
 {
- "written": "2026-11-03T15:28:53.960Z",
+ "written": "2026-11-04T17:13:30.268Z",
  "apps": {
   "switcher": {
-   "version": "2.4.5",
+   "version": "2.4.21",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.5/Showcaller-Switcher-2.4.5-mac-arm64.zip",
-     "sha256": "b19e01eb802566688fe41032f155c945b9e1797a1fd573d757347a4e194e5006",
-     "size": 157622882,
-     "version": "2.4.5"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.21/Showcaller-Switcher-2.4.21-mac-arm64.zip",
+     "sha256": "ce88cf988f4463187d04ffcbae81279606e27994fc3b27fe184764c3833f93ad",
+     "size": 157642383,
+     "version": "2.4.21"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.5/Showcaller-Switcher-2.4.5-win-x64.exe",
-     "sha256": "859cca1ac973bb910d717ba5b606d0fef3e0f07c8a34674d452a17f7af27b799",
-     "size": 146409801,
-     "version": "2.4.5"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.21/Showcaller-Switcher-2.4.21-win-x64.exe",
+     "sha256": "7c6e37f96f0bdda9d6a50ba46bb16f3cab254e631fc3d0d68a0ff74859bfc122",
+     "size": 146425233,
+     "version": "2.4.21"
     }
    }
   },
