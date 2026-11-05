@@ -1,20 +1,37 @@
 {
- "written": "2026-11-04T17:13:30.268Z",
+ "written": "2026-11-05T13:45:45.677Z",
  "apps": {
   "switcher": {
-   "version": "2.4.21",
+   "version": "2.4.28",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.21/Showcaller-Switcher-2.4.21-mac-arm64.zip",
-     "sha256": "ce88cf988f4463187d04ffcbae81279606e27994fc3b27fe184764c3833f93ad",
-     "size": 157642383,
-     "version": "2.4.21"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.28/Showcaller-Switcher-2.4.28-mac-arm64.zip",
+     "sha256": "1e2ae8c3c26edcf73c6f19ae96e1bfa09a5eda1ea6a57919fa799a22e697a9ea",
+     "size": 157650722,
+     "version": "2.4.28"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.21/Showcaller-Switcher-2.4.21-win-x64.exe",
-     "sha256": "7c6e37f96f0bdda9d6a50ba46bb16f3cab254e631fc3d0d68a0ff74859bfc122",
-     "size": 146425233,
-     "version": "2.4.21"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.28/Showcaller-Switcher-2.4.28-win-x64.exe",
+     "sha256": "c78de5a44d7cf297f14464d13ab20fb6b054706d4db82a986ff3d61ef834d613",
+     "size": 146432201,
+     "version": "2.4.28"
+    }
+   }
+  },
+  "ndiwebcam": {
+   "version": "1.2.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.2.0/Showcaller-Webcam-1.2.0-mac-arm64.zip",
+     "sha256": "3598df9f6f0370953d9656b2aec4babc40871569166272a5764459c749fb8a31",
+     "size": 129461317,
+     "version": "1.2.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.2.0/Showcaller-Webcam-1.2.0-win-x64.exe",
+     "sha256": "e53dbcdbd479b3b96e86603fcd245bd7ca4081922484c066699139a6e29f10ad",
+     "size": 112397502,
+     "version": "1.2.0"
     }
    }
   },
@@ -122,23 +139,6 @@
      "sha256": "0c1bd990077f67e71bc4448f5def5c989098af22ce4f068f59f265d106a9739a",
      "size": 146293250,
      "version": "0.3.3"
-    }
-   }
-  },
-  "ndiwebcam": {
-   "version": "1.1.5",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.1.5/Showcaller-Webcam-1.1.5-mac-arm64.zip",
-     "sha256": "d0faec894b4ce90b26bf0dc8995bc0d9bca10b16df660e6fa232fb089d423cba",
-     "size": 129456280,
-     "version": "1.1.5"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.1.5/Showcaller-Webcam-1.1.5-win-x64.exe",
-     "sha256": "35d421f7956a99f378dcd7a5ecf773cfaa64fd03d8ad4606279448a2e12df1e1",
-     "size": 112449899,
-     "version": "1.1.5"
     }
    }
   },
