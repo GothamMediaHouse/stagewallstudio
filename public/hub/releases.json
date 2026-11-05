@@ -1,19 +1,19 @@
 {
- "written": "2026-11-05T13:56:48.682Z",
+ "written": "2026-11-05T14:32:04.593Z",
  "apps": {
   "ndiwebcam": {
-   "version": "1.2.1",
+   "version": "1.3.0",
    "builds": {
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.3.0/Showcaller-Webcam-1.3.0-win-x64.exe",
+     "sha256": "25bc42885fa6441fcd16cbe4362529f72f4b99fc411c4d6a66b450b6cbc9f828",
+     "size": 112399910,
+     "version": "1.3.0"
+    },
     "mac-arm64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.2.1/Showcaller-Webcam-1.2.1-mac-arm64.zip",
      "sha256": "e39eb035a50933b0c633724824cd0342aecef31fcb7e8fb0f48d49c1a5caaff5",
      "size": 134071775,
-     "version": "1.2.1"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/ndiwebcam-1.2.1/Showcaller-Webcam-1.2.1-win-x64.exe",
-     "sha256": "6b86a66a0e95985e1db9d13aa84c3fb02028cbff7da69bc771f59e4b95ca8046",
-     "size": 112398021,
      "version": "1.2.1"
     }
    }
