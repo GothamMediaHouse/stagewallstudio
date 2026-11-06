@@ -1,6 +1,23 @@
 {
- "written": "2026-11-05T15:20:58.156Z",
+ "written": "2026-11-06T02:25:09.265Z",
  "apps": {
+  "switcher": {
+   "version": "2.5.2",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.5.2/Showcaller-Switcher-2.5.2-mac-arm64.zip",
+     "sha256": "81cd81d9cff11f6c5d9d8750150aa7f501f8325138fc461d42da18a75bd34b0d",
+     "size": 157661758,
+     "version": "2.5.2"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.5.2/Showcaller-Switcher-2.5.2-win-x64.exe",
+     "sha256": "785325ddd8ace46037488c17b9f9c27cbfafc673f22b03cfb317b8a378eaee64",
+     "size": 146441046,
+     "version": "2.5.2"
+    }
+   }
+  },
   "ndiwebcam": {
    "version": "1.4.2",
    "builds": {
@@ -18,20 +35,20 @@
     }
    }
   },
-  "switcher": {
-   "version": "2.4.28",
+  "multiview": {
+   "version": "2.11.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.28/Showcaller-Switcher-2.4.28-mac-arm64.zip",
-     "sha256": "1e2ae8c3c26edcf73c6f19ae96e1bfa09a5eda1ea6a57919fa799a22e697a9ea",
-     "size": 157650722,
-     "version": "2.4.28"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.11.0/Showcaller-Multiview-2.11.0-mac-arm64.zip",
+     "sha256": "c727b1ef2a7f6c159571b10072c316bb163c5569c9625453920629297518520e",
+     "size": 164618603,
+     "version": "2.11.0"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.4.28/Showcaller-Switcher-2.4.28-win-x64.exe",
-     "sha256": "c78de5a44d7cf297f14464d13ab20fb6b054706d4db82a986ff3d61ef834d613",
-     "size": 146432201,
-     "version": "2.4.28"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.11.0/Showcaller-Multiview-2.11.0-win-x64.exe",
+     "sha256": "61e5620f177f618956c8a9e2ffc5910ca3881381877a3c42ec3ce0d6a7bf778d",
+     "size": 151599033,
+     "version": "2.11.0"
     }
    }
   },
@@ -139,23 +156,6 @@
      "sha256": "0c1bd990077f67e71bc4448f5def5c989098af22ce4f068f59f265d106a9739a",
      "size": 146293250,
      "version": "0.3.3"
-    }
-   }
-  },
-  "multiview": {
-   "version": "2.10.3",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.10.3/Showcaller-Multiview-2.10.3-mac-arm64.zip",
-     "sha256": "533825c69ff85bae123a0aa0ef6f77bc9a80751887e11c59e1b6dd1080a567f8",
-     "size": 164610923,
-     "version": "2.10.3"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/multiview-2.10.3/Showcaller-Multiview-2.10.3-win-x64.exe",
-     "sha256": "fa2faf198b3695cfa6bfe09b7184e1d8bf1d936a2f8db5c7674fb5f44db55063",
-     "size": 151592861,
-     "version": "2.10.3"
     }
    }
   },
