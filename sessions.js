@@ -5,7 +5,7 @@
 // for editing. Nothing here is a live show: there is no mix, only one clean file per person.
 //
 //   wss://…/sessions/host?r=R&secret=S&name=N        the Sessions app (the first computer to use a room owns it)
-//   wss://…/sessions/ws?r=R&pid=P&name=N             a guest page
+//   wss://…/sessions/ws?r=R&pid=P&name=N             a guest page (…&prod=K: a producer, who runs the room but isn't recorded)
 //   PUT  …/sessions/up?r&pid&tok&take&kind&seq       one recorded piece (kind v video, a sound, m the person's notes)
 //   GET  …/sessions/api/list|get|takes, POST …/del   the app's downloads (header X-Session-Secret)
 //   https://…/s/R                                    the guest page (public/sessions/guest/)
@@ -13,9 +13,12 @@
 // Cloud keys: r/<room>/<take>/<pid>/<v|a|m>/<000001>. A page that reloads mid-take records a new part: its pieces
 // start at part × 100000, and its notes (m) are 2 × part (start) and 2 × part + 1 (finished). The guest page keeps its own copy
 // of every piece until this site says it arrived with the same SHA-256, so a dropped connection or a closed tab loses nothing.
+// A person's shared screen is its own track: pid + 's', uploaded with that person's key.
+// The producer key is made from the room's owner hash (the app works it out from its secret), so nothing extra is stored.
 import { DurableObject } from 'cloudflare:workers';
 
-const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, TAKE = /^t\d{2,4}$/;
+const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
+export const producerKey = async (ownerHash) => (await sha(`showcaller-sessions-producer:${ownerHash}`)).slice(0, 32);
 const MAX_PIECE = 64 * 1024 * 1024;
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 const sha = async (s) => hex(await crypto.subtle.digest('SHA-256', typeof s === 'string' ? new TextEncoder().encode(s) : s));
@@ -45,7 +48,7 @@ async function upload(request, env, url, r) {
   if (request.method !== 'PUT') return j({ error: 'Use PUT' }, 405);
   const q = (k) => url.searchParams.get(k) || '';
   const pid = q('pid'), tok = q('tok'), take = q('take'), kind = q('kind'), seq = Number(q('seq'));
-  if (!PID.test(pid) || !TAKE.test(take) || !/^[vam]$/.test(kind) || !(Number.isInteger(seq) && seq >= 0 && seq < 1e6) || tok.length < 20) return j({ error: 'Bad piece' }, 400);
+  if (!UPID.test(pid) || !TAKE.test(take) || !/^[vam]$/.test(kind) || !(Number.isInteger(seq) && seq >= 0 && seq < 1e6) || tok.length < 20) return j({ error: 'Bad piece' }, 400);
   const ck = `${r}|${pid}|${tok}|${take}`;
   if (!cached(ck)) {
     const res = await room(env, r).fetch(new Request(`https://room/check?pid=${pid}&tok=${encodeURIComponent(tok)}&take=${take}`));
@@ -77,7 +80,7 @@ async function api(request, env, url, r) {
   }
   const op = url.pathname.slice('/sessions/api/'.length), base = `r/${r}/`;
   const rel = (k) => String(k || '').replace(/^\/+/, '');
-  const safe = (k) => /^t\d{2,4}\/[a-z0-9]{8,16}\/[vam]\/\d{6}$/.test(k);
+  const safe = (k) => /^t\d{2,4}\/[a-z0-9]{8,17}\/[vam]\/\d{6}$/.test(k);
   if (op === 'list' && request.method === 'GET') {
     const prefix = rel(url.searchParams.get('prefix'));
     if (prefix && !/^[a-z0-9/]{1,60}$/.test(prefix)) return j({ error: 'Bad prefix' }, 400);
@@ -125,12 +128,14 @@ export class SessionRoom extends DurableObject {
   async save(...keys) { const s = await this.state(); const o = {}; for (const k of keys) o[k] = s[k]; await this.ctx.storage.put(o); }
   async isOwner(secret) { const s = await this.state(); return secret.length >= 20 && !!s.owner && s.owner === await sha(`showcaller-sessions:${secret}`); }
   peers() { return this.open('in').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name, role: a.role }; }); }
+  ctrls() { return [...this.open('host'), ...this.open('prod')]; }
   waiting() { return this.open('wait').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name }; }); }
 
   async fetch(request) {
     const url = new URL(request.url), s = await this.state();
     if (url.pathname === '/check') {
-      const pid = url.searchParams.get('pid'), a = s.admitted[pid];
+      // a shared screen (pid + 's') uploads with its person's key
+      const pid = url.searchParams.get('pid'), a = s.admitted[pid] || (/s$/.test(pid) ? s.admitted[pid.slice(0, -1)] : null);
       const ok = a && a.tok === url.searchParams.get('tok') && s.takes.some((t) => t.id === url.searchParams.get('take'));
       return new Response(ok ? 'ok' : 'no', { status: ok ? 200 : 403 });
     }
@@ -160,6 +165,15 @@ export class SessionRoom extends DurableObject {
     if (this.ctx.getWebSockets().length >= 40) { this.ctx.acceptWebSocket(server, ['x']); server.close(4002, 'This session is full'); return new Response(null, { status: 101, webSocket: client }); }
     for (const w of this.ctx.getWebSockets(`p:${pid}`)) { try { w.close(4000, 'Opened in another tab'); } catch {} }
     const ua = (request.headers.get('User-Agent') || '').slice(0, 200);
+    const prod = url.searchParams.get('prod') || '';
+    if (prod) {
+      if (!s.owner || prod !== await producerKey(s.owner)) { this.ctx.acceptWebSocket(server, ['x']); server.close(4001, 'This producer link isn’t right for this session. Ask the host for a new one.'); return new Response(null, { status: 101, webSocket: client }); }
+      this.ctx.acceptWebSocket(server, ['in', 'prod', `p:${pid}`]);
+      server.serializeAttachment({ pid, name, role: 'producer', ua });
+      this.hello(server, { pid, role: 'producer' });
+      this.each({ t: 'join', peer: { pid, name, role: 'producer' } }, (a) => a.pid !== pid);
+      return new Response(null, { status: 101, webSocket: client });
+    }
     if (s.admitted[pid] || !s.cfg.wait) {
       await this.admit(pid, name);
       this.ctx.acceptWebSocket(server, ['in', `p:${pid}`]);
@@ -170,7 +184,7 @@ export class SessionRoom extends DurableObject {
       this.ctx.acceptWebSocket(server, ['wait', `p:${pid}`]);
       server.serializeAttachment({ pid, name, role: 'guest', ua });
       this.send(server, { t: 'wait', now: Date.now(), name: s.cfg.name, host: this.open('host').length > 0 });
-      for (const w of this.open('host')) this.send(w, { t: 'knock', pid, name });
+      for (const w of this.ctrls()) this.send(w, { t: 'knock', pid, name });
     }
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -187,7 +201,7 @@ export class SessionRoom extends DurableObject {
   async hello(w, you) {
     const s = await this.state();
     const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: s.rec, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
-    if (you.role === 'host') { o.waiting = this.waiting(); o.takes = s.takes; }
+    if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; }
     else o.tok = s.admitted[you.pid]?.tok;
     this.send(w, o);
   }
@@ -198,7 +212,7 @@ export class SessionRoom extends DurableObject {
     const a = ws.deserializeAttachment(), tags = this.ctx.getTags(ws), s = await this.state();
     if (m.t === 'time') return this.send(ws, { t: 'time', c: m.c, s: Date.now() });
     if (!tags.includes('in')) return;
-    const isHost = tags.includes('host');
+    const isHost = tags.includes('host'), isProd = tags.includes('prod');
     if (m.t === 'sig' && typeof m.to === 'string') {
       for (const w of this.open(`p:${m.to}`)) if (this.ctx.getTags(w).includes('in')) this.send(w, { t: 'sig', from: a.pid, data: m.data });
       return;
@@ -212,8 +226,9 @@ export class SessionRoom extends DurableObject {
       if (s.admitted[a.pid]) { s.admitted[a.pid].name = a.name; await this.save('admitted'); }
       return this.each({ t: 'join', peer: { pid: a.pid, name: a.name, role: a.role } }, (b) => b.pid !== a.pid);
     }
-    if (!isHost) return;
+    if (!isHost && !isProd) return;
     if (m.t === 'admit') {
+      for (const w of this.ctrls()) if (w !== ws) this.send(w, { t: 'unknock', pid: m.pid });
       for (const w of this.open(`p:${m.pid}`)) {
         if (!this.ctx.getTags(w).includes('wait')) continue;
         const b = w.deserializeAttachment();
@@ -230,7 +245,7 @@ export class SessionRoom extends DurableObject {
       if (m.forget && s.admitted[m.pid]) { delete s.admitted[m.pid]; await this.save('admitted'); }
       return;
     }
-    if (m.t === 'cfg' && m.cfg && typeof m.cfg === 'object') {
+    if (m.t === 'cfg' && m.cfg && typeof m.cfg === 'object' && isHost) {
       s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait };
       await this.save('cfg');
       return this.each({ t: 'cfg', cfg: s.cfg });
@@ -241,10 +256,10 @@ export class SessionRoom extends DurableObject {
       if (m.on) {
         const n = (s.rec.n || 0) + 1, id = `t${String(n).padStart(2, '0')}`;
         s.rec = { on: true, n, take: id, at: now + 1500 };
-        s.takes.push({ id, n, at: s.rec.at, end: 0, quality: s.cfg.quality, people: Object.fromEntries(this.peers().map((p) => [p.pid, p.name])), marks: [] });
+        s.takes.push({ id, n, at: s.rec.at, end: 0, quality: s.cfg.quality, people: Object.fromEntries(this.peers().filter((p) => p.role !== 'producer').map((p) => [p.pid, p.name])), marks: [] });
         if (s.takes.length > 500) s.takes.shift();
       } else {
-        const t = s.takes.find((x) => x.id === s.rec.take); if (t) { t.end = now; for (const p of this.peers()) t.people[p.pid] = p.name; }
+        const t = s.takes.find((x) => x.id === s.rec.take); if (t) { t.end = now; for (const p of this.peers()) if (p.role !== 'producer') t.people[p.pid] = p.name; }
         s.rec = { on: false, n: s.rec.n, take: s.rec.take, at: s.rec.at, end: now };
       }
       await this.save('rec', 'takes');
@@ -254,7 +269,8 @@ export class SessionRoom extends DurableObject {
       const t = s.takes.find((x) => x.id === s.rec.take); if (!t) return;
       t.marks.push({ at: Date.now(), label: clean(m.label, 60) || `Mark ${t.marks.length + 1}` });
       await this.save('takes');
-      return this.send(ws, { t: 'marks', take: t.id, marks: t.marks });
+      for (const w of this.ctrls()) this.send(w, { t: 'marks', take: t.id, marks: t.marks });
+      return;
     }
   }
 
@@ -266,7 +282,7 @@ export class SessionRoom extends DurableObject {
       if (this.open(`p:${a.pid}`).some((w) => w !== ws)) return;
       this.each({ t: 'leave', pid: a.pid }, (b) => b.pid !== a.pid);
       if (tags.includes('host')) this.each({ t: 'host', online: false }, (b) => b.pid !== 'host');
-    } else if (tags.includes('wait') && !this.open(`p:${a.pid}`).some((w) => w !== ws)) for (const w of this.open('host')) this.send(w, { t: 'unknock', pid: a.pid });
+    } else if (tags.includes('wait') && !this.open(`p:${a.pid}`).some((w) => w !== ws)) for (const w of this.ctrls()) this.send(w, { t: 'unknock', pid: a.pid });
   }
 
   // relay servers for the call (as in Intercom): Cloudflare TURN when it's set up, else just STUN

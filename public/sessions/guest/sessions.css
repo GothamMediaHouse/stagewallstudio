@@ -209,3 +209,14 @@ input[type=range]{accent-color:var(--v);width:100%}
  .gjoin{padding:18px}
  .fs .fgrid,.fs .fgrid.c2,.fs .fgrid.c3,.fs .fgrid.c4{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:1fr}.fs .fup{display:none}
 }
+/* shared screens: the whole screen, not cropped; the share button lights while sharing */
+.tl.scr video,.fs .ft.scr video{object-fit:contain;background:#0d0d12}
+.rb.on{background:var(--v);color:#fff}
+/* phones: two tiles side by side when there are several people, the dock always reachable */
+@media (max-width:640px){
+ .tiles.c2,.tiles.c3,.tiles.c4{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tl .nm{font-size:12px}
+ .dockwrap{position:sticky;bottom:0;z-index:5;background:var(--ground);padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ .selfv{aspect-ratio:4/3;max-height:34vh;width:100%}
+ .gjoin{gap:16px}
+}

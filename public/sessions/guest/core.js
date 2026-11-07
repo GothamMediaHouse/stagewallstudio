@@ -27,7 +27,8 @@
     // opts: { server, room, role: 'host'|'guest', pid, name, secret (host), stream (MediaStream for the call) }
     constructor(opts) {
       super();
-      Object.assign(this, { server: opts.server.replace(/\/$/, ''), room: opts.room, role: opts.role, pid: opts.role === 'host' ? 'host' : opts.pid, name: opts.name, secret: opts.secret || '' });
+      Object.assign(this, { server: opts.server.replace(/\/$/, ''), room: opts.room, role: opts.role, pid: opts.role === 'host' ? 'host' : opts.pid, name: opts.name, secret: opts.secret || '', prod: opts.prod || '' });
+      this.screen = null; // a shared screen (its own MediaStream), sent in the call and recorded as its own track
       this.stream = opts.stream || null;
       this.peers = new Map(); // pid -> { pid, name, role, pc, stream, polite, making, ignore }
       this.offset = 0; this.rtt = Infinity; this.state = 'connecting'; this.cfg = {}; this.rec = { on: false }; this.ice = [];
@@ -39,6 +40,7 @@
       u.protocol = u.protocol === 'http:' ? 'ws:' : 'wss:';
       u.searchParams.set('r', this.room); u.searchParams.set('name', this.name);
       if (this.role === 'host') u.searchParams.set('secret', this.secret); else u.searchParams.set('pid', this.pid);
+      if (this.prod) u.searchParams.set('prod', this.prod);
       return u.toString();
     }
     connect() {
@@ -76,6 +78,7 @@
         case 'hello': {
           this.offset = m.now - Date.now(); this.rtt = Infinity; this.syncClock();
           this.ice = m.ice || []; this.cfg = m.cfg || {}; this.tok = m.tok; this.hostOnline = m.host;
+          if (m.you && m.you.role === 'producer') this.producer = true;
           if (m.takes) this.takes = m.takes;
           if (m.waiting) { this.waiting = new Map(m.waiting.map((w) => [w.pid, w])); this.emit('waiting', [...this.waiting.values()]); }
           for (const p of [...this.peers.keys()]) this.drop(p, true);
@@ -95,8 +98,8 @@
         case 'cfg': this.cfg = m.cfg; this.emit('cfg', m.cfg); break;
         case 'rec': {
           this.rec = m;
-          if (this.role === 'host' && m.on && !this.takes.some((t) => t.id === m.take)) this.takes.push({ id: m.take, n: m.n, at: m.at, end: 0, marks: [] });
-          if (this.role === 'host' && !m.on) { const t = this.takes.find((x) => x.id === m.take); if (t) t.end = m.end; }
+          if ((this.role === 'host' || this.producer) && m.on && !this.takes.some((t) => t.id === m.take)) this.takes.push({ id: m.take, n: m.n, at: m.at, end: 0, marks: [] });
+          if ((this.role === 'host' || this.producer) && !m.on) { const t = this.takes.find((x) => x.id === m.take); if (t) t.end = m.end; }
           this.emit('rec', m, false); break;
         }
         case 'marks': { const t = this.takes.find((x) => x.id === m.take); if (t) t.marks = m.marks; this.emit('marks', m); break; }
@@ -118,10 +121,21 @@
     // call: true when this side makes the offer (the person who just arrived); the other side answers with its tracks
     add(info, call) {
       if (info.pid === this.pid) return;
-      const p = { ...info, polite: this.pid > info.pid, making: false, ignore: false, stream: new MediaStream(), sent: false, early: [] };
+      const p = { ...info, polite: this.pid > info.pid, making: false, ignore: false, stream: new MediaStream(), screen: null, mainId: '', sent: false, early: [] };
       const pc = p.pc = new RTCPeerConnection({ iceServers: this.ice });
       this.peers.set(info.pid, p);
-      pc.ontrack = (e) => { if (!p.stream.getTracks().includes(e.track)) p.stream.addTrack(e.track); e.track.onunmute = () => this.emit('stream', p); this.emit('stream', p); };
+      // the first stream a person sends is their camera + mic; another one is their shared screen
+      pc.ontrack = (e) => {
+        const sid = e.streams[0] ? e.streams[0].id : '';
+        if (!p.mainId) p.mainId = sid;
+        if (sid && sid !== p.mainId) {
+          p.screen = e.streams[0];
+          p.screen.onremovetrack = () => { if (!p.screen.getTracks().length) { p.screen = null; this.emit('peers'); } };
+          e.track.onended = e.track.onmute = () => setTimeout(() => this.emit('peers'), 300);
+          this.emit('peers'); return;
+        }
+        if (!p.stream.getTracks().includes(e.track)) p.stream.addTrack(e.track); e.track.onunmute = () => this.emit('stream', p); this.emit('stream', p);
+      };
       pc.onicecandidate = (e) => { if (e.candidate) this.send({ t: 'sig', to: p.pid, data: { ice: e.candidate } }); };
       pc.onnegotiationneeded = async () => {
         try { p.making = true; await pc.setLocalDescription(); this.send({ t: 'sig', to: p.pid, data: { sdp: pc.localDescription } }); }
@@ -133,11 +147,29 @@
     addTracks(p) {
       if (p.sent) return; p.sent = true;
       if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t);
-      else { p.pc.addTransceiver('audio', { direction: 'recvonly' }); p.pc.addTransceiver('video', { direction: 'recvonly' }); }
+      if (this.screen) for (const t of this.screen.getTracks()) this.addScreenTrack(p, t);
+      if (!this.stream) { p.pc.addTransceiver('audio', { direction: 'recvonly' }); p.pc.addTransceiver('video', { direction: 'recvonly' }); }
     }
     addCallTrack(p, t) {
       const s = p.pc.addTrack(t, this.stream);
       if (t.kind === 'video') this.lowCall(s, t);
+    }
+    // a shared screen goes to everyone at a size you can read (about 720p), sharp rather than smooth
+    addScreenTrack(p, t) {
+      try { t.contentHint = 'detail'; } catch {}
+      const s = p.pc.addTrack(t, this.screen);
+      (async () => { try { const h = (t.getSettings && t.getSettings().height) || 1080; const prm = s.getParameters(); if (!prm.encodings || !prm.encodings.length) prm.encodings = [{}]; prm.encodings[0].maxBitrate = 2000000; prm.encodings[0].scaleResolutionDownBy = Math.max(1, h / 720); await s.setParameters(prm); } catch {} })();
+    }
+    shareScreen(stream) {
+      this.unshareScreen(); this.screen = stream;
+      for (const p of this.peers.values()) if (p.sent) for (const t of stream.getTracks()) this.addScreenTrack(p, t);
+      this.emit('peers');
+    }
+    unshareScreen() {
+      const sc = this.screen; if (!sc) return; this.screen = null;
+      const ids = new Set(sc.getTracks().map((t) => t.id));
+      for (const p of this.peers.values()) for (const s of p.pc.getSenders()) if (s.track && ids.has(s.track.id)) { try { p.pc.removeTrack(s); } catch {} }
+      this.emit('peers');
     }
     // the call only needs a small picture (the recording is the full one), about 360p at 900 kb/s
     async lowCall(sender, track) {
@@ -172,7 +204,7 @@
           await pc.setRemoteDescription(d.sdp);
           for (const c of p.early.splice(0)) { try { await pc.addIceCandidate(c); } catch {} }
           if (d.sdp.type === 'offer') {
-            if (!p.sent) { p.sent = true; if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t); }
+            if (!p.sent) { p.sent = true; if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t); if (this.screen) for (const t of this.screen.getTracks()) this.addScreenTrack(p, t); }
             await pc.setLocalDescription(); this.send({ t: 'sig', to: from, data: { sdp: pc.localDescription } });
           }
         } else if (d.ice) {
@@ -283,8 +315,9 @@ registerProcessor('sc-pcm',P)`;
 
   // ---------- guest uploads: keep every piece in this browser until the site confirms it ----------
   class CloudSink extends Emitter {
-    constructor({ server, room, pid, tok }) {
-      super(); Object.assign(this, { server: server.replace(/\/$/, ''), room, pid, tok });
+    // sub: a second track from the same person (their shared screen, '-s') keeps its own pieces apart
+    constructor({ server, room, pid, tok, sub = '' }) {
+      super(); Object.assign(this, { server: server.replace(/\/$/, ''), room, pid, tok, sub });
       this.q = []; this.busy = 0; this.sent = 0; this.sentBytes = 0; this.mem = new Map(); this.fail = 0; this.last = '';
     }
     async dir() {
@@ -292,7 +325,7 @@ registerProcessor('sc-pcm',P)`;
       try {
         const r = await navigator.storage.getDirectory();
         const a = await r.getDirectoryHandle('showcaller-sessions', { create: true });
-        this._dir = await a.getDirectoryHandle(this.room, { create: true });
+        this._dir = await a.getDirectoryHandle(this.room + this.sub, { create: true });
         try { await navigator.storage.persist(); } catch {}
       } catch { this._dir = null; }
       return this._dir;
@@ -360,6 +393,51 @@ registerProcessor('sc-pcm',P)`;
     }
   }
 
+  // ---------- a shared screen, recorded as its own track ----------
+  // opts: { session, quality, sink (where its pieces go), pid (the screen track's id), name, store (localStorage-like) }
+  class ScreenShare extends Emitter {
+    constructor(opts) { super(); Object.assign(this, opts); this.stream = null; this.rec = null; }
+    get active() { return !!this.stream; } // (not "on": that is the event method)
+    async start() {
+      if (this.stream) return;
+      if (!navigator.mediaDevices.getDisplayMedia) throw new Error('This browser can’t share a screen');
+      const st = await navigator.mediaDevices.getDisplayMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: false });
+      this.stream = st;
+      const vt = st.getVideoTracks()[0]; if (vt) vt.onended = () => this.stop();
+      this.session.shareScreen(st);
+      if (this.session.rec && this.session.rec.on && this.session.now() >= (this.session.rec.at || 0) - 2000) await this.record(this.session.rec.take, Math.max(this.session.now(), this.session.rec.at || 0));
+      this.emit('change', true);
+    }
+    // each share within a take is its own part (… screen, … screen (part 2)), placed where it happened in the timeline
+    part(take) {
+      const k = `sess-spart-${this.session.room}-${take}`; let n = 0;
+      try { const v = this.store.get(k); n = v === null ? 0 : Number(v) + 1; this.store.set(k, String(n)); } catch {}
+      return n;
+    }
+    async record(take, at) {
+      if (!this.stream || (this.rec && this.rec.running)) return;
+      this.rec = new Recorder({ session: this.session, stream: this.stream, quality: this.quality, sink: this.sink, pid: this.pid, name: this.name });
+      this.rec.on('error', (e) => this.emit('error', e));
+      await this.rec.start(take, at, this.part(take));
+      this.emit('change', true);
+    }
+    async stopRec() { if (this.rec && this.rec.running) { await this.rec.stop(); this.emit('change', !!this.stream); } }
+    // the room started or stopped recording
+    async onRec(r, fromHello) {
+      if (r.on && this.stream) await this.record(r.take, fromHello ? this.session.now() : r.at);
+      else if (!r.on) await this.stopRec();
+    }
+    async stop() {
+      const st = this.stream; if (!st) return;
+      this.stream = null;
+      this.session.unshareScreen();
+      await this.stopRec();
+      for (const t of st.getTracks()) t.stop();
+      this.emit('change', false);
+    }
+    get recording() { return !!(this.rec && this.rec.running); }
+  }
+
   async function freeSpace() {
     try { const e = await navigator.storage.estimate(); return { free: (e.quota || 0) - (e.usage || 0), quota: e.quota || 0 }; } catch { return null; }
   }
@@ -373,5 +451,5 @@ registerProcessor('sc-pcm',P)`;
   // GB an hour for one person at a quality (video + 48 kHz 24-bit WAV)
   const gbPerHour = (q) => ((QUALITY[q] || QUALITY['1080']).vbps + 256000 + RATE * 24) * 3600 / 8 / 1e9;
 
-  root.SessionsCore = { QUALITY, PIECE_MS, RATE, PART, Session, Recorder, CloudSink, freeSpace, openMedia, gbPerHour, rid, sha256, pickMime, Emitter };
+  root.SessionsCore = { QUALITY, PIECE_MS, RATE, PART, Session, Recorder, CloudSink, ScreenShare, freeSpace, openMedia, gbPerHour, rid, sha256, pickMime, Emitter };
 })(typeof window !== 'undefined' ? window : globalThis);
