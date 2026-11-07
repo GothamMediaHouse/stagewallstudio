@@ -236,15 +236,19 @@ registerProcessor('sc-pcm',P)`;
       if (this.ctx.state !== 'running') await this.ctx.resume().catch(() => {});
       }
       // camera + mic as a normal video file
+      // (a sound-only source, like a USB podcast mic, has no video file: just its WAV)
+      this.mr = null;
+      if (vt) {
       this.mr = new MediaRecorder(this.stream, { mimeType: mime || undefined, videoBitsPerSecond: q.vbps, audioBitsPerSecond: 256000, videoKeyFrameIntervalDuration: PIECE_MS });
       this.mr.ondataavailable = (e) => { if (e.data && e.data.size) { this.vBytes += e.data.size; this.put('v', this.vSeq++, e.data); } };
       this.mr.onstart = () => { this.meta.vStart = s.now(); };
+      }
       // start together at the time the room gave everyone
       const wait = Math.max(0, atServer - s.now());
       await sleep(wait);
       if (!this.running) return;
       this.meta.startedAt = s.now();
-      this.mr.start(PIECE_MS);
+      if (this.mr) this.mr.start(PIECE_MS);
       if (this.node) this.node.port.postMessage('start');
       this.t0 = performance.now();
       this.put('m', part * 2, new Blob([JSON.stringify(this.meta)], { type: 'application/json' }));

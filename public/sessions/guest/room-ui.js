@@ -72,7 +72,7 @@
         <aside class="drawer">
           ${h ? `<div class="dsec js-waitsec" hidden><span class="lbl">Waiting to come in</span><div class="dsec js-wait"></div></div>
           <div class="dsec"><span class="lbl">Invite</span><div class="invite"><code class="js-inv"></code><span class="muted" style="font-size:12px">Opens in Chrome, Edge or Safari on a computer. Nothing to install.</span><div class="row"><button class="btn soft js-copy">Copy link</button><label class="chk" style="font-size:12px;margin-left:auto"><input type="checkbox" class="js-wr"> Waiting room</label></div></div></div>` : ''}
-          ${h && this.onAddCamera ? `<div class="dsec"><span class="lbl">Studio cameras</span><button class="btn soft js-addcam" style="align-self:flex-start">${ico('plus')} Add a camera on this computer</button><span class="hint">Each camera or capture input here records as its own track, next to yours.</span></div>` : ''}
+          ${h && this.onAddCamera ? `<div class="dsec"><span class="lbl">Studio cameras and mics</span><button class="btn soft js-addcam" style="align-self:flex-start">${ico('plus')} Add a camera or mic on this computer</button><span class="hint">Each camera, capture input, NDI source or USB mic (a RØDE PodCaster, say) records as its own track, next to yours.</span></div>` : ''}
           <div class="dsec"><span class="lbl">${h ? 'Recording' : 'Your recording'}</span><div class="dsec js-trks"></div></div>
           ${h ? `<div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>` : ''}
           <div class="dsec"><span class="lbl">Chat</span><div class="chat js-chat"><div class="empty">No messages yet.</div></div>
@@ -233,7 +233,7 @@
       if (this.host) {
         const me = this.selfStatus ? this.selfStatus() : {};
         rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `Saves straight to this Mac`, 100, true));
-        for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `Studio camera${x.audio ? ' + sound' : ''} · saves straight to this Mac`, 100, true, false, true));
+        for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `${x.ndi ? `NDI · ${x.ndi}` : x.cam ? `Studio camera${x.audio ? ' + sound' : ''}` : 'Studio mic (sound only)'} · saves straight to this Mac`, 100, true, false, x.cam || x.ndi ? true : 'mic'));
         for (const p of s.peers.values()) {
           const st = this.status.get(p.pid) || {};
           const sub = st.err ? st.err : st.rec ? `Recording ${st.res || ''} · ${st.pending ? `${mb(st.bytes)} to upload` : 'uploaded so far'}` : st.pending ? `Uploading · ${mb(st.bytes)} left` : st.sent ? 'All uploaded' : on ? 'Not recording yet' : 'Ready';
@@ -263,7 +263,7 @@
       }
     }
     trackRow(pid, name, sub, pct, ok, kick, cam) {
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico('cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this camera" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this source" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);
