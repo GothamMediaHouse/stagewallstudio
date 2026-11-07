@@ -39,6 +39,7 @@
  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M12 13V8M9.5 10.5 12 8l2.5 2.5"/></symbol>
 <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+ <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></symbol>
  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
  <symbol id="i-spot" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
@@ -527,10 +528,11 @@
       }
       // only redrawn when something changed, so a button isn't swapped out under the pointer mid-click
       const html = rows.join('');
-      if (html !== this.trkHtml) { this.trkHtml = html; el.innerHTML = html; }
+      if (html !== this.trkHtml && !this.renaming) { this.trkHtml = html; el.innerHTML = html; }
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
       for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
       for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
+      for (const x of el.querySelectorAll('.js-ren')) x.onclick = () => this.startRename(x.closest('.trk'));
       for (const x of el.querySelectorAll('.js-pmute')) x.onclick = () => this.mutePeer(x.dataset.p, x.dataset.on === '1');
       for (const x of el.querySelectorAll('.js-ptalk')) x.onclick = () => this.startTalk(x.dataset.p);
       for (const x of el.querySelectorAll('.js-son')) x.onclick = () => this.studioToggle(x.dataset.p, x.dataset.on === '1');
@@ -556,9 +558,25 @@
       return (st.mic === false ? ib('js-pmute warn', 'micoff', 'Unmute them (asks them if they muted themselves)', pid, 'data-on="1"') : ib('js-pmute', 'mic', 'Mute them (their recording is silent too)', pid, 'data-on="0"'))
         + ib(`js-ptalk${talking ? ' on' : ''}`, 'headset', talking ? 'End the private talk' : 'Talk privately: nobody else hears you two', pid);
     }
+    // your own name, changed in place on your row: everyone sees it at once, the call keeps going
+    startRename(row) {
+      const s = this.session, b = row && $('.tinfo b', row); if (!b || this.renaming) return;
+      const inp = document.createElement('input');
+      inp.className = 'renin js-renin'; inp.maxLength = 40; inp.value = s.name; inp.setAttribute('aria-label', 'Your name');
+      this.renaming = true; b.replaceWith(inp); inp.focus(); inp.select();
+      let done = false;
+      const fin = (save) => {
+        if (done) return; done = true; this.renaming = false;
+        const v = inp.value.trim().slice(0, 40);
+        if (save && v && v !== s.name) { s.rename(v); if (this.onRename) this.onRename(v); }
+        this.trkHtml = ''; this.sync(); this.drawTracks(); this.drawTop();
+      };
+      inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); fin(true); } else if (e.key === 'Escape') fin(false); };
+      inp.onblur = () => fin(true);
+    }
     trackRow(pid, name, sub, pct, ok, kick, cam, change, acts) {
       const busy = this.session.rec && this.session.rec.on;
-      const btns = (acts || '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
+      const btns = (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
         + (kick ? ib('js-kick', 'x', 'Remove them from the session', pid) : '')
         + (cam && cam !== 'screen' && this.host && !busy ? ib('js-xrm', 'x', 'Remove this source', pid) : '');
       return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;

@@ -448,7 +448,8 @@ export class SessionRoom extends DurableObject {
     if (m.t === 'name') {
       a.name = clean(m.name) || a.name; ws.serializeAttachment(a);
       if (s.admitted[a.pid]) { s.admitted[a.pid].name = a.name; await this.save('admitted'); }
-      return this.each({ t: 'join', peer: { pid: a.pid, name: a.name, role: a.role } }, (b) => b.pid !== a.pid);
+      // just the new name: a 'join' would make everyone hang up and call them again
+      return this.each({ t: 'name', pid: a.pid, name: a.name }, (b) => b.pid !== a.pid);
     }
     // a guest recording on their own (the host away): a take of just them
     if (m.t === 'solo' && a.role === 'guest') {

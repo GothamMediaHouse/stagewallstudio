@@ -96,6 +96,7 @@
         }
         case 'join': this.drop(m.peer.pid, true); this.add(m.peer, false); this.emit('peers'); break;
         case 'leave': this.drop(m.pid); this.emit('peers'); break;
+        case 'name': { const p = this.peers.get(m.pid); if (p) { p.name = m.name; this.emit('peers'); } break; } // a new name, same call
         case 'host': this.hostOnline = m.online; this.emit('host', m.online); break;
         case 'knock': this.waiting.set(m.pid, m); this.emit('waiting', [...this.waiting.values()]); break;
         case 'unknock': this.waiting.delete(m.pid); this.emit('waiting', [...this.waiting.values()]); break;
@@ -122,7 +123,7 @@
     record(on) { this.send({ t: 'rec', on }); }
     mark(label) { this.send({ t: 'mark', label }); }
     chat(text) { this.send({ t: 'chat', text }); }
-    rename(name) { this.name = name; this.send({ t: 'name', name }); }
+    rename(name) { name = String(name || '').trim().slice(0, 40); if (!name) return; this.name = name; this.send({ t: 'name', name }); this.emit('peers'); }
     // the countdown and notes the host and producers share (part of it: { notes } or { cd })
     setBoard(part) { this.send({ t: 'board', board: part }); }
     setPrompt(part) { this.send({ t: 'prompt', prompt: part }); }
