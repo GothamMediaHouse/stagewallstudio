@@ -1,5 +1,5 @@
 {
-  "note": "Showcaller Hub's list of apps, in the order it shows them (Hub 2.0+ shows the apps in coloured sections by their section: screens, cameras, record, timing, remote; apps with a group get a section of their own after them); served as /hub/catalog.json by hub.js, which fills buildVersion and builds from the newest GitHub release tagged <id>-<version>. Updates come from /api/<id>/latest.",
+  "note": "Showcaller Hub's list of apps, in the order it shows them (Hub 2.0+ shows the apps in coloured sections by their section: screens, cameras, record, timing, remote; apps with a group get a section of their own after them). Apps in the beta list are only shown by Hub 1.14+ and only for license keys that include them (or 'beta'); older Hubs don't read that list; served as /hub/catalog.json by hub.js, which fills buildVersion and builds from the newest GitHub release tagged <id>-<version>. Updates come from /api/<id>/latest.",
   "apps": [
     { "id": "studio", "section": "screens", "name": "Showcaller Screens", "pkg": "upstage", "kind": "paid", "blurb": "Show control for the stage: video walls, cues, graphics and outputs.", "page": "https://showcallerstudio.com/screens/", "buildVersion": null, "builds": {} },
     { "id": "multiview", "section": "cameras", "name": "Showcaller Multiview", "pkg": "showcaller-multiview", "kind": "free", "blurb": "Watch NDI cameras from anywhere, with tally and ATEM control (paid).", "page": "https://showcallerstudio.com/multiview/", "buildVersion": null, "builds": {} },
@@ -18,5 +18,8 @@
     { "id": "intercom-panel", "group": "intercom", "name": "Showcaller Helios Panel", "was": ["Showcaller Intercom Panel"], "pkg": "showcaller-intercom-panel", "kind": "paid", "blurb": "A key panel for a control-room position (Director, Producer, A1…) on a Frame.", "page": "https://showcallerstudio.com/intercom/#panels", "buildVersion": null, "builds": {} },
     { "id": "intercom-comms", "group": "intercom", "name": "Showcaller Helios Comms", "was": ["Showcaller Intercom Comms"], "pkg": "showcaller-intercom-comms", "kind": "paid", "blurb": "The comms engineer’s position: see and hear everyone on the Frame, cut, mute, listen as anyone and set each position.", "page": "https://showcallerstudio.com/intercom/#comms", "buildVersion": null, "builds": {} },
     { "id": "helios-hub", "group": "intercom", "name": "Showcaller Helios Hub", "pkg": "showcaller-helios-hub", "kind": "free", "blurb": "Installs and updates the Helios apps, keeps the Helio beltpacks on the network up to date, and shows their battery and signal.", "page": "https://showcallerstudio.com/intercom/", "buildVersion": null, "builds": {} }
+  ],
+  "beta": [
+    { "id": "sessions", "section": "record", "name": "Showcaller Sessions", "pkg": "showcaller-sessions", "kind": "free", "blurb": "Remote recording for the edit: guests join from a link and each one is recorded on their own computer, then the files come to this one.", "page": "https://showcallerstudio.com/sessions/account/", "buildVersion": null, "builds": {} }
   ]
 }

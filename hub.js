@@ -80,7 +80,7 @@ export async function hubCatalog(request, env) {
   if (!r.ok) return r;
   const cat = await r.json();
   const rel = await releases(env);
-  for (const a of cat.apps || []) {
+  for (const a of [...(cat.apps || []), ...(cat.beta || [])]) {
     const got = rel[a.id];
     // A release wins over builds written into the file by hand, unless that one is newer
     if (got && (!VERSION.test(a.buildVersion || '') || !newer(a.buildVersion, got.version))) { a.buildVersion = got.version; a.builds = got.builds; }
