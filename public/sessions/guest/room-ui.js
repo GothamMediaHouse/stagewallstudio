@@ -39,6 +39,7 @@
  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M12 13V8M9.5 10.5 12 8l2.5 2.5"/></symbol>
 <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+ <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></symbol>
  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
  <symbol id="i-spot" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
@@ -70,10 +71,11 @@
           if (!d) return;
           if (d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); }
           if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
-          if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
+          if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; const k = d.studio.map((x) => `${x.pid}:${x.sid}:${x.off}:${x.name}`).join(); if (k !== this.studioKey) { this.studioKey = k; this.sync(); } else this.drawTracks(); }
         })
         .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan()).on('prompt', () => this.drawPrompt())
         .on('host', () => { this.drawTop(); this.drawDock(); }).on('notice', (t) => toast(t, 5000));
+      if (this.host) this.sendStudio();
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
       this.raf = () => { this.meters(); this.rafId = requestAnimationFrame(this.raf); }; this.rafId = requestAnimationFrame(this.raf);
@@ -304,7 +306,7 @@
     }
     askBar(text, btn, go) {
       const el = $('.js-talkbar', this.el); this.asking = { text, btn, go };
-      el.hidden = false; el.innerHTML = `<span>${esc(text)}</span><button class="btn sm js-ask">${esc(btn)}</button><button class="muted js-askno" style="font-size:12px">Not now</button>`;
+      el.hidden = false; requestAnimationFrame(() => this.fit()); el.innerHTML = `<span>${esc(text)}</span><button class="btn sm js-ask">${esc(btn)}</button><button class="muted js-askno" style="font-size:12px">Not now</button>`;
       $('.js-ask', el).onclick = () => { this.asking = null; go(); this.applyTalk(); };
       $('.js-askno', el).onclick = () => { this.asking = null; this.applyTalk(); };
     }
@@ -327,7 +329,7 @@
         v.muted = hush; tile.el.classList.toggle('pvt', !!(t && (pid === t.a || pid === t.b)));
       }
       if (this.asking) return;
-      el.hidden = !t;
+      if (el.hidden !== !t) { el.hidden = !t; requestAnimationFrame(() => this.fit()); }
       if (!t) { el.innerHTML = ''; this.drawTracks(); return; }
       const other = t.a === me ? t.b : t.a;
       el.innerHTML = inIt
@@ -339,19 +341,24 @@
     mutePeer(pid, on) { this.session.tell(pid, { ctl: 'mute', on }); toast(on ? 'Unmute sent' : 'Muted', 2000); }
     studioToggle(pid, on) { if (this.host && this.onStudioToggle) this.onStudioToggle(pid, on); else this.session.tell('host', { ctl: 'studio', pid, on }); }
 
+    sendStudio() { if (this.host && this.session.setStudio) this.session.setStudio(this.extras.filter((x) => !x.off).map((x) => ({ key: x.pid, stream: x.stream }))); }
+
     // ---- tiles ----
     people() {
       const s = this.session, list = [{ pid: s.pid, name: s.name, role: s.role, self: true }];
       if (s.screen) list.push({ pid: `${s.pid}~s`, name: `${s.name} · screen`, role: 'screen', stream: s.screen, local: true, screen: true });
       for (const x of this.extras) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: x.stream, local: true });
+      const live = (st) => st && st.getVideoTracks().some((t) => t.readyState === 'live');
       for (const p of s.peers.values()) {
         list.push({ pid: p.pid, name: p.name, role: p.role, stream: p.stream });
-        if (p.screen && p.screen.getVideoTracks().some((t) => t.readyState === 'live')) list.push({ pid: `${p.pid}~s`, name: `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
+        if (live(p.screen)) list.push({ pid: `${p.pid}~s`, name: `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
+        // a producer sees the host's studio cameras too
+        if (p.pid === 'host' && !this.host) for (const x of this.studio) { const st = !x.off && x.sid && p.xs && p.xs.get(x.sid); if (live(st)) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: st }); }
       }
       return list;
     }
     // the host's extra studio cameras (each its own recorded track): [{ pid, name, stream, rec, res }]
-    setExtras(list) { this.extras = list; this.sync();
+    setExtras(list) { this.extras = list; this.sendStudio(); this.sync();
     }
     sync() {
       const list = this.people(), grid = $('.js-tiles', this.el);
@@ -419,10 +426,32 @@
         l.an.getFloatTimeDomainData(l.buf); let p = 0; for (let i = 0; i < l.buf.length; i++) p = Math.max(p, Math.abs(l.buf[i]));
         l.lv = Math.max(p, l.lv * 0.85);
         const t = this.tiles.get(pid); if (!t) continue;
-        const on = l.track.enabled !== false;
-        $('.nm i', t.el).style.height = `${on ? Math.round(6 + Math.min(1, l.lv * 3) * 12) : 6}px`;
+        const on = l.track.enabled !== false, db = l.lv > 0 ? 20 * Math.log10(l.lv) : -90, bar = $('.nm i', t.el);
+        bar.style.height = `${on ? Math.round(6 + Math.max(0, Math.min(1, (db + 50) / 50)) * 12) : 6}px`;
+        bar.style.background = !on ? '' : db > -3 ? 'var(--red)' : db > -12 ? 'var(--amber)' : '';
         const talk = on && l.lv > 0.06;
         t.el.classList.toggle('talk', talk); t.fs.classList.toggle('talk', talk);
+      }
+      this.rowMeters();
+    }
+    // a level meter on each row in People: green to -12 dB, amber to -3, red above; a red end when it clips
+    rowMeters() {
+      const box = $('.js-trks', this.el); if (!box) return;
+      if (!this.pk) this.pk = new Map();
+      const now = performance.now();
+      for (const m of box.querySelectorAll('.js-mtr')) {
+        const pid = m.dataset.p, l = this.levels.get(pid);
+        let v = this.levelOf ? this.levelOf(pid) : null;
+        if (v == null && l) v = l.track.enabled === false ? 0 : l.lv;
+        if (v == null) { m.hidden = true; continue; }
+        m.hidden = false;
+        const db = v > 0 ? 20 * Math.log10(v) : -90, w = Math.max(0, Math.min(1, (db + 60) / 60));
+        let k = this.pk.get(pid); if (!k) this.pk.set(pid, k = { w: 0, at: 0, clip: 0 });
+        if (w >= k.w || now - k.at > 1500) { k.w = w; k.at = now; }
+        if (v >= 0.985) k.clip = now;
+        $('i', m).style.width = `${(1 - w) * 100}%`;
+        $('b', m).style.left = `calc(${k.w * 100}% - 2px)`;
+        m.classList.toggle('clip', now - k.clip < 2000);
       }
     }
 
@@ -527,10 +556,11 @@
       }
       // only redrawn when something changed, so a button isn't swapped out under the pointer mid-click
       const html = rows.join('');
-      if (html !== this.trkHtml) { this.trkHtml = html; el.innerHTML = html; }
+      if (html !== this.trkHtml && !this.renaming) { this.trkHtml = html; el.innerHTML = html; }
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
       for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
       for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
+      for (const x of el.querySelectorAll('.js-ren')) x.onclick = () => this.startRename(x.closest('.trk'));
       for (const x of el.querySelectorAll('.js-pmute')) x.onclick = () => this.mutePeer(x.dataset.p, x.dataset.on === '1');
       for (const x of el.querySelectorAll('.js-ptalk')) x.onclick = () => this.startTalk(x.dataset.p);
       for (const x of el.querySelectorAll('.js-son')) x.onclick = () => this.studioToggle(x.dataset.p, x.dataset.on === '1');
@@ -556,12 +586,28 @@
       return (st.mic === false ? ib('js-pmute warn', 'micoff', 'Unmute them (asks them if they muted themselves)', pid, 'data-on="1"') : ib('js-pmute', 'mic', 'Mute them (their recording is silent too)', pid, 'data-on="0"'))
         + ib(`js-ptalk${talking ? ' on' : ''}`, 'headset', talking ? 'End the private talk' : 'Talk privately: nobody else hears you two', pid);
     }
+    // your own name, changed in place on your row: everyone sees it at once, the call keeps going
+    startRename(row) {
+      const s = this.session, b = row && $('.tinfo b', row); if (!b || this.renaming) return;
+      const inp = document.createElement('input');
+      inp.className = 'renin js-renin'; inp.maxLength = 40; inp.value = s.name; inp.setAttribute('aria-label', 'Your name');
+      this.renaming = true; b.replaceWith(inp); inp.focus(); inp.select();
+      let done = false;
+      const fin = (save) => {
+        if (done) return; done = true; this.renaming = false;
+        const v = inp.value.trim().slice(0, 40);
+        if (save && v && v !== s.name) { s.rename(v); if (this.onRename) this.onRename(v); }
+        this.trkHtml = ''; this.sync(); this.drawTracks(); this.drawTop();
+      };
+      inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); fin(true); } else if (e.key === 'Escape') fin(false); };
+      inp.onblur = () => fin(true);
+    }
     trackRow(pid, name, sub, pct, ok, kick, cam, change, acts) {
       const busy = this.session.rec && this.session.rec.on;
-      const btns = (acts || '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
+      const btns = (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
         + (kick ? ib('js-kick', 'x', 'Remove them from the session', pid) : '')
         + (cam && cam !== 'screen' && this.host && !busy ? ib('js-xrm', 'x', 'Remove this source', pid) : '');
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);

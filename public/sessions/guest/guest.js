@@ -179,7 +179,7 @@
           }
         } else { sink.tok = session.tok; sink.pump(); if (share) { share.sink.tok = session.tok; share.sink.pump(); } }
       }
-      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status, onSelfChange: tellStatus }); }
+      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status, onSelfChange: tellStatus, onRename: (n) => store.set('sess-name', n) }); }
       $('#sessname').textContent = session.cfg.name || 'Remote recording';
     } else if (s === 'reconnecting') U.toast('Connection lost. Reconnecting… (your recording carries on)', 4000);
     else if (s === 'closed') {
