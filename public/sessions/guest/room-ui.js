@@ -72,7 +72,7 @@
           if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
           if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
         })
-        .on('board', () => this.drawBoard())
+        .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan())
         .on('host', () => this.drawTop());
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
@@ -109,6 +109,7 @@
               ${h && this.onAddCamera ? `<button class="btn soft sm js-addcam" style="align-self:flex-start">${ico('plus')} Add a studio camera or mic</button>` : ''}
             </div>
             ${this.ctrl ? `<div class="dpane" data-t="show">
+              <div class="dsec js-rosec" hidden><span class="lbl">Running order <span class="js-rotot" style="letter-spacing:0;text-transform:none;font-weight:500"></span></span><div class="rolist js-ro"></div></div>
               <div class="dsec"><span class="lbl">Countdown</span>
                 <div class="board">
                   <div class="row"><span class="num cdbig js-cdt">00:00</span><input type="text" class="js-cdl" placeholder="What for (Break, Wrap…)" maxlength="60" aria-label="Countdown label"></div>
@@ -193,6 +194,21 @@
       let h = 0; q('.js-notes').oninput = () => { clearTimeout(h); h = setTimeout(() => s.setBoard({ notes: q('.js-notes').value }), 500); };
       q('.js-notes').onblur = () => { clearTimeout(h); if (q('.js-notes').value !== (s.board.notes || '')) s.setBoard({ notes: q('.js-notes').value }); };
     }
+    // the show's running order from the plan: press a segment to start its countdown
+    drawPlan() {
+      if (!this.ctrl) return;
+      const p = this.session.plan, ro = (p && p.rundown) || [], sec = $('.js-rosec', this.el); if (!sec) return;
+      sec.hidden = !ro.length; if (!ro.length) return;
+      const cur = this.session.board && this.session.board.cd && this.session.board.cd.label;
+      const tot = ro.reduce((t, x) => t + (x.min || 0), 0);
+      $('.js-rotot', this.el).textContent = tot ? `· ${tot} min` : '';
+      const html = ro.map((x, i) => `<button class="ro${cur && x.t && cur === x.t ? ' on' : ''}" data-i="${i}"><span class="rn">${i + 1}</span><span class="rt">${esc(x.t || `Segment ${i + 1}`)}</span><span class="rm">${x.min ? `${x.min}m` : ''}</span></button>`).join('');
+      const el = $('.js-ro', this.el); if (el.innerHTML === html) return; el.innerHTML = html;
+      for (const b of el.querySelectorAll('.ro')) b.onclick = () => {
+        const x = ro[b.dataset.i], ms = (x.min || 0) * 60000, s = this.session;
+        s.setBoard({ cd: { label: x.t || `Segment ${Number(b.dataset.i) + 1}`, dur: ms, end: ms ? s.now() + ms : 0, left: ms } });
+      };
+    }
     drawBoard() {
       if (!this.ctrl) return;
       const q = (c) => $(c, this.el), b = this.session.board || {}, c = b.cd;
@@ -200,7 +216,7 @@
       const l = q('.js-cdl'); if (document.activeElement !== l) l.value = (c && c.label) || '';
       q('.js-nby').textContent = b.by && b.at ? `Last change by ${b.by}, ${new Date(b.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
       q('.js-cdgo').textContent = c && c.end ? 'Pause' : c && c.left !== c.dur ? 'Carry on' : 'Start';
-      this.drawCountdown();
+      this.drawPlan(); this.drawCountdown();
     }
     drawCountdown() {
       if (!this.ctrl) return;

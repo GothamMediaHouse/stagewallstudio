@@ -32,7 +32,7 @@
       this.stream = opts.stream || null;
       this.peers = new Map(); // pid -> { pid, name, role, pc, stream, polite, making, ignore }
       this.offset = 0; this.rtt = Infinity; this.state = 'connecting'; this.cfg = {}; this.rec = { on: false }; this.ice = [];
-      this.waiting = new Map(); this.takes = []; this.closed = false; this.tries = 0; this.board = { notes: '', cd: null };
+      this.waiting = new Map(); this.takes = []; this.closed = false; this.tries = 0; this.board = { notes: '', cd: null }; this.plan = null;
     }
     now() { return Date.now() + this.offset; }
     wsUrl() {
@@ -81,6 +81,7 @@
           if (m.you && m.you.role === 'producer') this.producer = true;
           if (m.takes) this.takes = m.takes;
           if (m.board) { this.board = m.board; this.emit('board', m.board); }
+          if (m.plan) { this.plan = m.plan; this.emit('plan', m.plan); }
           if (m.waiting) { this.waiting = new Map(m.waiting.map((w) => [w.pid, w])); this.emit('waiting', [...this.waiting.values()]); }
           for (const p of [...this.peers.keys()]) this.drop(p, true);
           for (const p of m.peers) this.add(p, true); // the newcomer calls everyone (no glare)
@@ -106,6 +107,7 @@
         case 'marks': { const t = this.takes.find((x) => x.id === m.take); if (t) t.marks = m.marks; this.emit('marks', m); break; }
         case 'chat': this.emit('chat', m); break;
         case 'board': this.board = m.board; this.emit('board', m.board); break;
+        case 'plan': this.plan = m.plan; this.emit('plan', m.plan); break;
         case 'sig': this.onsig(m.from, m.data); break;
       }
     }

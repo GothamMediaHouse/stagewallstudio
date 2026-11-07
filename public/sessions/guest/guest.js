@@ -22,6 +22,19 @@
   }
   if (phone) $('#jhint').textContent = 'On a phone: keep this page open and the screen on while you record. Switching to another app pauses the camera.';
   $('#name').value = store.get('sess-name') || '';
+  // an invite link (…?g=<id>) knows who it's for; the page shows when the show is, before the day
+  const gid = (/[?&]g=([a-z0-9]{10})/.exec(location.search) || [])[1] || '';
+  fetch(`/sessions/info?r=${room}${gid ? `&g=${gid}` : ''}`).then((r) => r.ok ? r.json() : null).then((i) => {
+    if (!i) return;
+    if (i.quality && C.QUALITY[i.quality]) quality = i.quality;
+    if (i.guest && i.guest.name && !$('#name').value) { $('#name').value = i.guest.name; $('#pvav').textContent = U.initials(i.guest.name); }
+    if (i.at) {
+      const d = new Date(i.at), soon = i.at - Date.now();
+      const w = d.toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+      $('#jwhen').hidden = false;
+      $('#jwhen').innerHTML = `<svg class="ico"><use href="#i-timer"/></svg><div><b>${U.esc(i.name)}</b><span>${U.esc(w)}${i.mins ? ` · about ${i.mins} min` : ''}</span>${soon > 3600e3 && !i.host ? '<small>It isn’t on yet. Do a tech check now so the host knows you’re ready.</small>' : ''}</div>`;
+    }
+  }).catch(() => {});
 
   // ---------- pre-join checks ----------
   const ok = (el, txt, good = true) => { el.innerHTML = `<svg class="ico ${good ? 'ok' : 'wa'}"><use href="#i-check"/></svg><span>${U.esc(txt)}</span>`; };
@@ -47,7 +60,7 @@
     if (v) { const s = v.getSettings(); ok($('#ck-cam'), `Camera ${s.width}×${s.height}${s.frameRate ? ` at ${Math.round(s.frameRate)} fps` : ''}`, (s.height || 0) >= 720); recRes = `${s.height >= 2000 ? '4K' : `${s.height}p`}`; }
     await listDevices();
     meter();
-    $('#join').disabled = !okBrowser;
+    $('#join').disabled = !okBrowser; $('#tcheck').disabled = false;
     return stream;
   }
   async function listDevices() {
@@ -64,6 +77,7 @@
     } catch {}
   }
   const togglePv = (kind, btn) => { const t = stream && (kind === 'a' ? stream.getAudioTracks()[0] : stream.getVideoTracks()[0]); if (!t) return; t.enabled = !t.enabled; btn.classList.toggle('off', !t.enabled); if (kind === 'v') $('#pvoff').hidden = t.enabled; };
+  addEventListener('pointerdown', () => { try { if (mac && mac.state === 'suspended') mac.resume(); } catch {} }, true);
   $('#pvmic').onclick = () => togglePv('a', $('#pvmic')); $('#pvcam').onclick = () => togglePv('v', $('#pvcam'));
   $('#cam').onchange = $('#mic').onchange = $('#speakers').onchange = () => openPreview();
   $('#name').oninput = () => { $('#pvav').textContent = U.initials($('#name').value); };
@@ -80,6 +94,60 @@
   })();
 
   openPreview();
+
+  // ---------- tech check: camera, mic, connection and space, a few seconds of yourself to play back; the host sees the result ----------
+  async function timed(fn) { const t = performance.now(); await fn(); return (performance.now() - t) / 1000; }
+  async function speedTest() {
+    const N = 4e6;
+    let down = 0, up = 0;
+    try { const s = await timed(async () => { const r = await fetch(`/sessions/speed?r=${room}&n=${N}&x=${Date.now()}`, { cache: 'no-store' }); await r.arrayBuffer(); }); down = (N * 8) / s / 1e6; } catch {}
+    try { const body = new Uint8Array(N); crypto.getRandomValues(body.subarray(0, 65536)); const s = await timed(() => fetch(`/sessions/speed?r=${room}`, { method: 'POST', body })); up = (N * 8) / s / 1e6; } catch {}
+    return { down, up };
+  }
+  function recordBack(secs) {
+    return new Promise((res) => {
+      try {
+        const mime = C.pickMime(), mr = new MediaRecorder(stream, mime ? { mimeType: mime } : {}), parts = [];
+        mr.ondataavailable = (e) => e.data.size && parts.push(e.data);
+        mr.onstop = () => res(new Blob(parts, { type: mr.mimeType }));
+        mr.start(); setTimeout(() => mr.state !== 'inactive' && mr.stop(), secs * 1000);
+      } catch { res(null); }
+    });
+  }
+  let peak = 0; // loudest the mic got during the check
+  $('#tcheck').onclick = async () => {
+    const box = $('#tcres'), btn = $('#tcheck'); btn.disabled = true; box.hidden = false;
+    const step = (t) => { box.innerHTML = `<div class="row"><div class="spin sm"></div><span>${U.esc(t)}</span></div>`; };
+    step('Say a few words: recording 5 seconds of you…');
+    try { if (mac && mac.state === 'suspended') await mac.resume(); } catch {}
+    peak = 0; let an = null, ab = null;
+    try { const at = stream && stream.getAudioTracks()[0]; if (mac && at) { an = mac.createAnalyser(); an.fftSize = 2048; ab = new Float32Array(2048); mac.createMediaStreamSource(new MediaStream([at])).connect(an); } } catch {}
+    const watch = setInterval(() => { if (an) { an.getFloatTimeDomainData(ab); for (const x of ab) peak = Math.max(peak, Math.abs(x)); } }, 40);
+    const clip = await recordBack(5); clearInterval(watch);
+    step('Testing your connection…');
+    const sp = await speedTest();
+    const f = await C.freeSpace().catch(() => null);
+    const v = stream && stream.getVideoTracks()[0], vs = v ? v.getSettings() : {}, a = stream && stream.getAudioTracks()[0];
+    const need = { '720': 3, '1080': 6, '4k': 15 }[quality] || 6, hours = f ? f.free / (C.gbPerHour(quality) * 1e9) : 0;
+    const items = [
+      [!!v && (vs.height || 0) >= 720, v ? `Camera ${vs.width}×${vs.height}${(vs.height || 0) < 720 ? ': lower than the show’s quality' : ''}` : 'No camera'],
+      [!!a && peak > 0.01, a ? (peak > 0.01 ? `Mic works (${(a.label || 'mic').slice(0, 40)})` : 'We didn’t hear you. Check the mic choice above.') : 'No mic'],
+      [sp.up >= need, sp.up ? `Upload ${sp.up.toFixed(1)} Mbps${sp.up < need ? `: fine to talk, but your recording finishes uploading after the show (best is ${need}+)` : ''}` : 'Couldn’t test the connection'],
+      [sp.down >= 2, sp.down ? `Download ${sp.down.toFixed(1)} Mbps` : ''],
+      [hours >= 2, f ? (hours >= 2 ? `Space for ${hours > 20 ? '20+' : hours.toFixed(0)} h at ${C.QUALITY[quality].label}` : `Space for only about ${Math.round(hours * 60)} min. Free up some room before the day.`) : 'Couldn’t check free space'],
+      [okBrowser, okBrowser ? 'This browser can record' : 'This browser can’t record. Use Chrome, Edge or Safari.'],
+    ].filter((x) => x[1]);
+    const good = items.every((x) => x[0]) || (items[0][0] && items[1][0] && okBrowser && hours >= 1);
+    const url = clip ? URL.createObjectURL(clip) : '';
+    box.innerHTML = `<div class="row"><svg class="ico ${good ? 'ok' : 'wa'}" style="width:22px;height:22px"><use href="#i-check"/></svg><b>${good ? 'You’re ready' : 'Nearly ready'}</b><span class="muted sp">The host can see this.</span></div>
+      <div class="tclist">${items.map(([g, t]) => `<div class="row"><svg class="ico ${g ? 'ok' : 'wa'}"><use href="#i-check"/></svg><span>${U.esc(t)}</span></div>`).join('')}</div>
+      ${url ? `<div class="tcplay"><span class="lbl">Hear yourself</span><video src="${url}" controls playsinline></video></div>` : ''}`;
+    btn.disabled = false; btn.lastChild.textContent = 'Check again';
+    const notes = items.filter((x) => !x[0]).map((x) => x[1]);
+    fetch(`/sessions/techcheck?r=${room}${gid ? `&g=${gid}` : ''}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      name: $('#name').value.trim() || 'Someone', ok: good, cam: v ? `${vs.width}×${vs.height}` : 'none', mic: a ? (a.label || 'mic') : 'none', res: recRes, up: Math.round(sp.up * 10), down: Math.round(sp.down * 10), free: f ? Math.round(f.free / 1e6) : 0, browser: (navigator.userAgent.match(/(Edg|Chrome|Firefox|Version)\/[\d]+/) || [''])[0].replace('Version', 'Safari'), notes,
+    }) }).catch(() => {});
+  };
 
   // ---------- joining ----------
   $('#join').onclick = () => {
