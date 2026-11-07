@@ -147,8 +147,8 @@ export class SessionRoom extends DurableObject {
   each(o, filter = () => true) { const s = JSON.stringify(o); for (const w of this.open('in')) if (filter(w.deserializeAttachment())) this.send(w, s); }
   async state() {
     if (!this.st) {
-      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan', 'prompt']);
-      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan(), prompt: m.get('prompt') || { script: '', to: 'off', run: false, speed: 1.2, pos: 0, at: 0 } };
+      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan', 'prompt', 'solo']);
+      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan(), prompt: m.get('prompt') || { script: '', to: 'off', run: false, speed: 1.2, pos: 0, at: 0 }, solo: m.get('solo') || {} };
     }
     return this.st;
   }
@@ -189,7 +189,7 @@ export class SessionRoom extends DurableObject {
       let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad plan' }, 400); }
       if (url.pathname === '/plan') {
         s.plan = cleanPlan(b.plan || {}, s.plan);
-        if (b.name !== undefined) { s.cfg.name = clean(b.name, 60) || s.cfg.name; await this.save('cfg'); }
+        if (b.name !== undefined || b.solo !== undefined || b.quality !== undefined) { if (b.name !== undefined) s.cfg.name = clean(b.name, 60) || s.cfg.name; if (b.solo !== undefined) s.cfg.solo = !!b.solo; if (['720', '1080', '4k'].includes(b.quality)) s.cfg.quality = b.quality; await this.save('cfg'); this.each({ t: 'cfg', cfg: s.cfg }); }
         if (typeof b.script === 'string' && b.script !== s.prompt.script) { s.prompt = { ...s.prompt, script: b.script.replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 20000), at: Date.now() }; await this.save('prompt'); this.each({ t: 'prompt', prompt: s.prompt }); }
         await this.save('plan');
         for (const w of this.ctrls()) this.send(w, { t: 'plan', plan: s.plan });
@@ -245,7 +245,9 @@ export class SessionRoom extends DurableObject {
       this.each({ t: 'join', peer: { pid, name, role: 'producer' } }, (a) => a.pid !== pid);
       return new Response(null, { status: 101, webSocket: client });
     }
-    if (s.admitted[pid] || !s.cfg.wait) {
+    // an invited guest (their own link) can come in while the host is away when the room lets guests record on their own
+    const invited = s.cfg.solo && !this.open('host').length && s.plan.guests.some((x) => x.id === url.searchParams.get('g') && x.role === 'guest');
+    if (s.admitted[pid] || !s.cfg.wait || invited) {
       await this.admit(pid, name);
       this.ctx.acceptWebSocket(server, ['in', `p:${pid}`]);
       server.serializeAttachment({ pid, name, role: 'guest', ua });
@@ -258,6 +260,17 @@ export class SessionRoom extends DurableObject {
       for (const w of this.ctrls()) this.send(w, { t: 'knock', pid, name });
     }
     return new Response(null, { status: 101, webSocket: client });
+  }
+
+  soloTell(pid, t, on) {
+    for (const w of this.open(`p:${pid}`)) this.send(w, { t: 'rec', on, n: t.n, take: t.id, at: t.at, end: t.end || 0, solo: true, now: Date.now() });
+    for (const w of this.ctrls()) this.send(w, { t: 'solo', pid, take: t.id, on });
+  }
+  async soloEnd(pid) {
+    const s = await this.state(), t = s.takes.find((x) => x.id === s.solo[pid]);
+    delete s.solo[pid];
+    if (t && !t.end) { t.end = Date.now(); this.soloTell(pid, t, false); }
+    await this.save('takes', 'solo');
   }
 
   async guestLink(origin, g, room) {
@@ -276,7 +289,8 @@ export class SessionRoom extends DurableObject {
 
   async hello(w, you) {
     const s = await this.state();
-    const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: s.rec, prompt: s.prompt, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
+    const solo = s.solo[you.pid] && s.takes.find((t) => t.id === s.solo[you.pid] && !t.end);
+    const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: solo ? { on: true, n: solo.n, take: solo.id, at: solo.at, solo: true } : s.rec, prompt: s.prompt, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
     if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; o.board = s.board; o.plan = s.plan; }
     else o.tok = s.admitted[you.pid]?.tok;
     this.send(w, o);
@@ -302,6 +316,22 @@ export class SessionRoom extends DurableObject {
       if (s.admitted[a.pid]) { s.admitted[a.pid].name = a.name; await this.save('admitted'); }
       return this.each({ t: 'join', peer: { pid: a.pid, name: a.name, role: a.role } }, (b) => b.pid !== a.pid);
     }
+    // a guest recording on their own (the host away): a take of just them
+    if (m.t === 'solo' && a.role === 'guest') {
+      const mine = s.solo[a.pid] && s.takes.find((t) => t.id === s.solo[a.pid] && !t.end);
+      if (m.on) {
+        if (!s.cfg.solo) return this.send(ws, { t: 'error', error: 'The host hasn’t turned on recording on your own for this session' });
+        if (s.rec.on) return this.send(ws, { t: 'error', error: 'The host is already recording' });
+        if (mine) return this.soloTell(a.pid, mine, true);
+        const now = Date.now(), n = (s.rec.n || 0) + 1, id = `t${String(n).padStart(2, '0')}`;
+        const t = { id, n, at: now + 1500, end: 0, quality: s.cfg.quality, people: { [a.pid]: a.name }, marks: [], solo: a.pid };
+        s.rec = { ...s.rec, n }; s.takes.push(t); if (s.takes.length > 500) s.takes.shift(); s.solo[a.pid] = id;
+        await this.save('rec', 'takes', 'solo');
+        return this.soloTell(a.pid, t, true);
+      }
+      if (mine) { await this.soloEnd(a.pid); }
+      return;
+    }
     if (!isHost && !isProd) return;
     if (m.t === 'admit') {
       for (const w of this.ctrls()) if (w !== ws) this.send(w, { t: 'unknock', pid: m.pid });
@@ -322,7 +352,7 @@ export class SessionRoom extends DurableObject {
       return;
     }
     if (m.t === 'cfg' && m.cfg && typeof m.cfg === 'object' && isHost) {
-      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait };
+      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait, solo: m.cfg.solo === undefined ? !!s.cfg.solo : !!m.cfg.solo };
       await this.save('cfg');
       return this.each({ t: 'cfg', cfg: s.cfg });
     }
@@ -330,6 +360,7 @@ export class SessionRoom extends DurableObject {
       if (!!m.on === s.rec.on) return this.send(ws, { t: 'rec', ...s.rec });
       const now = Date.now();
       if (m.on) {
+        for (const pid of Object.keys(s.solo)) await this.soloEnd(pid);
         const n = (s.rec.n || 0) + 1, id = `t${String(n).padStart(2, '0')}`;
         s.rec = { on: true, n, take: id, at: now + 1500 };
         s.takes.push({ id, n, at: s.rec.at, end: 0, quality: s.cfg.quality, people: Object.fromEntries(this.peers().filter((p) => p.role !== 'producer').map((p) => [p.pid, p.name])), marks: [] });

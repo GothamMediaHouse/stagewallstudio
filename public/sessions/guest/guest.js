@@ -26,7 +26,7 @@
   const gid = (/[?&]g=([a-z0-9]{10})/.exec(location.search) || [])[1] || '';
   fetch(`/sessions/info?r=${room}${gid ? `&g=${gid}` : ''}`).then((r) => r.ok ? r.json() : null).then((i) => {
     if (!i) return;
-    if (i.quality && C.QUALITY[i.quality]) quality = i.quality;
+    if (i.quality && C.QUALITY[i.quality] && i.quality !== quality) { quality = i.quality; const v = stream && stream.getVideoTracks()[0], q = C.QUALITY[quality]; if (v) v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {}); }
     if (i.guest && i.guest.name && !$('#name').value) { $('#name').value = i.guest.name; $('#pvav').textContent = U.initials(i.guest.name); }
     if (i.at) {
       const d = new Date(i.at), soon = i.at - Date.now();
@@ -47,6 +47,7 @@
   });
 
   async function openPreview() {
+    const q0 = quality;
     const cam = $('#cam').value || undefined, mic = $('#mic').value || undefined;
     if (stream) for (const t of stream.getTracks()) t.stop();
     try {
@@ -57,6 +58,8 @@
     }
     $('#pv').srcObject = stream;
     const v = stream.getVideoTracks()[0];
+    // the session's quality arrived while the camera was opening
+    if (v && q0 !== quality) { const q = C.QUALITY[quality]; try { await v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }); } catch {} }
     if (v) { const s = v.getSettings(); ok($('#ck-cam'), `Camera ${s.width}×${s.height}${s.frameRate ? ` at ${Math.round(s.frameRate)} fps` : ''}`, (s.height || 0) >= 720); recRes = `${s.height >= 2000 ? '4K' : `${s.height}p`}`; }
     await listDevices();
     meter();
@@ -155,7 +158,7 @@
     if (!name) { $('#name').focus(); $('#jerr').hidden = false; $('#jerr').textContent = 'Type your name so the host knows who you are.'; return; }
     store.set('sess-name', name); $('#jerr').hidden = true;
     try { mac && mac.close(); } catch {}
-    session = new C.Session({ server: location.origin, room, role: 'guest', pid, name, stream, prod });
+    session = new C.Session({ server: location.origin, room, role: 'guest', pid, name, stream, prod, g: gid });
     session.on('state', onState).on('cfg', onCfg).on('rec', onRec);
     keepAwake();
     session.connect();

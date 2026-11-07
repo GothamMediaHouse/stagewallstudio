@@ -65,7 +65,7 @@
       this.render();
       const s = this.session;
       s.on('peers', () => { this.sync(); this.talkCheck(); this.drawPrompt(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
-        .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => this.drawTop()).on('rec', () => { this.drawTop(); this.drawDock(); })
+        .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => { this.drawTop(); this.drawDock(); }).on('rec', () => { this.drawTop(); this.drawDock(); })
         .on('data', (from, d) => {
           if (!d) return;
           if (d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); }
@@ -73,7 +73,7 @@
           if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
         })
         .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan()).on('prompt', () => this.drawPrompt())
-        .on('host', () => this.drawTop());
+        .on('host', () => { this.drawTop(); this.drawDock(); }).on('notice', (t) => toast(t, 5000));
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
       this.raf = () => { this.meters(); this.rafId = requestAnimationFrame(this.raf); }; this.rafId = requestAnimationFrame(this.raf);
@@ -433,7 +433,7 @@
       const name = s.cfg.name || 'Session';
       q('.js-name').textContent = name;
       q('.js-sub').textContent = this.ctrl ? `${this.producer ? 'Producing · ' : ''}${n} ${n === 1 ? 'track' : 'tracks'} · ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} · ${this.producer ? 'you aren’t recorded' : 'each person records on their own computer'}`
-        : s.hostOnline === false ? 'The host is offline. You can stay here; recording starts when they’re back.' : `Recording in ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} on this computer`;
+        : s.rec && s.rec.on && s.rec.solo ? 'Recording on your own. It uploads to the host like any take.' : s.hostOnline === false ? (s.cfg.solo ? 'The host isn’t here. Press “Record on my own” to record yourself now.' : 'The host is offline. You can stay here; recording starts when they’re back.') : `Recording in ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} on this computer`;
       q('.js-people').innerHTML = this.people().filter((p) => !p.screen).slice(0, 6).map((p) => `<span style="${avStyle(p.pid)}" title="${esc(p.name)}">${esc(initials(p.name))}</span>`).join('');
       $('.js-fttl', this.fsEl).innerHTML = `${esc(name)}<span>${n} ${n === 1 ? 'person' : 'people'}</span>`;
       if (this.host) q('.js-wr').checked = s.cfg.wait !== false;
@@ -459,6 +459,7 @@
       const html = `<button class="rb js-mic ${micOn ? '' : 'off'}" aria-label="${micOn ? 'Mute your mic' : 'Unmute your mic'}" title="${micOn ? 'Mute (recorded silence)' : 'Unmute'}">${ico(micOn ? 'mic' : 'micoff')}</button>
         <button class="rb js-cam ${camOn ? '' : 'off'}" aria-label="${camOn ? 'Turn your camera off' : 'Turn your camera on'}" title="${camOn ? 'Camera off' : 'Camera on'}">${ico(camOn ? 'cam' : 'camoff')}</button>
         ${this.share ? `<button class="rb js-share ${this.share.active ? 'on' : ''}" aria-label="${this.share.active ? 'Stop sharing your screen' : 'Share your screen'}" title="${this.share.active ? 'Stop sharing' : 'Share your screen (recorded as its own track)'}">${ico('screen')}</button>` : ''}
+        ${!this.ctrl && s.cfg && s.cfg.solo && (on ? s.rec.solo : !s.hostOnline) ? `<button class="recb ${on ? '' : 'stopped'} js-solo" title="${on ? 'Stop recording' : 'Record yourself now. The host gets it like any other take.'}"><i></i>${on ? 'Stop' : 'Record on my own'}</button>` : ''}
         ${this.ctrl ? `<button class="recb ${on ? '' : 'stopped'} js-rec"><i></i>${on ? 'Stop' : 'Record'}</button>
         <button class="rb js-mark" aria-label="Add a mark" title="Mark this moment for the edit" ${on ? '' : 'disabled style="opacity:.45"'}>${ico('flag')}</button>` : ''}`;
       d.innerHTML = html;
@@ -470,6 +471,7 @@
         $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); } };
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
+        const so = $('.js-solo', root); if (so) so.onclick = () => s.solo(!on);
         if (this.ctrl) {
           $('.js-rec', root).onclick = () => this.onRecord ? this.onRecord(!on) : s.record(!on);
           $('.js-mark', root).onclick = () => { s.mark(''); toast('Mark added'); };
