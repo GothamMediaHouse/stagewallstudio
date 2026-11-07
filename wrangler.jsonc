@@ -10,6 +10,10 @@
   // Showcaller Intercom: one room per director's computer, so crew can join from anywhere (intercom.js)
   // Showcaller Hub: which apps each computer has installed, read by the Admin app (installs.js)
   // Showcaller Link: one relay per studio, so clients get in without a port opened at the studio (link-relay.js)
-  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }, { "name": "HUB_INSTALLS", "class_name": "HubInstalls" }, { "name": "LINK_RELAY", "class_name": "LinkRelay" }] },
-  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }, { "tag": "hub-installs-v1", "new_sqlite_classes": ["HubInstalls"] }, { "tag": "link-relay-v1", "new_sqlite_classes": ["LinkRelay"] }]
+  // Showcaller Sessions: one room per recording session, guests join at /s/<room> (sessions.js)
+  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }, { "name": "HUB_INSTALLS", "class_name": "HubInstalls" }, { "name": "LINK_RELAY", "class_name": "LinkRelay" }, { "name": "SESSIONS_ROOM", "class_name": "SessionRoom" }] },
+  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }, { "tag": "hub-installs-v1", "new_sqlite_classes": ["HubInstalls"] }, { "tag": "link-relay-v1", "new_sqlite_classes": ["LinkRelay"] }, { "tag": "sessions-v1", "new_sqlite_classes": ["SessionRoom"] }],
+  // Showcaller Sessions: each guest's recording, uploaded in pieces until the studio Mac downloads it (sessions.js).
+  // Create the bucket first (Cloudflare dashboard → R2 → Create bucket "showcaller-sessions"), or deploys fail.
+  "r2_buckets": [{ "binding": "SESSIONS", "bucket_name": "showcaller-sessions" }]
 }

@@ -81,3 +81,19 @@ computer still checks every key. Sound goes direct where it can and through Clou
 TURN setup (optional but recommended, without it only STUN is used): Cloudflare dashboard → Realtime → TURN Server →
 create a key, then set the Worker secrets `TURN_KEY_ID` and `TURN_KEY_API_TOKEN`
 (`npx wrangler secret put TURN_KEY_ID`, same for the token).
+
+## Showcaller Sessions (remote recording, beta)
+
+Riverside-style remote recording for editing (`sessions.js`, Durable Object class `SessionRoom`, R2 binding `SESSIONS`).
+Guests open `https://showcallerstudio.com/s/<room>` (the page in `public/sessions/guest/`); the Showcaller Sessions app
+on the studio computer hosts the room at `/sessions/host` (the first computer to use a room owns it, by its secret).
+Everyone sees and hears each other through a small WebRTC call (TURN as for Intercom, when set up), and each guest's
+browser records its own camera and mic in full quality, in 2-second pieces, uploaded with `PUT /sessions/up` and kept
+in the browser until this site confirms each piece's SHA-256. The app lists, downloads and deletes pieces through
+`/sessions/api/*` (header `X-Session-Secret`). The page's `core.js`, `room-ui.js` and `sessions.css` are shared with
+the app (`renderer/` in the Showcaller Sessions folder); keep the copies identical.
+
+**Setup before this deploys** (the deploy fails without the bucket): Cloudflare dashboard → R2 → Create bucket
+`showcaller-sessions` (location automatic). Optional: R2 → the bucket → Settings → Object lifecycle rules → delete
+objects after 90 days, as a safety net for sessions nobody downloads (the app deletes its own takes once they're down).
+Pieces live at `r/<room>/<take>/<pid>/<v|a|m>/<000000>`.
