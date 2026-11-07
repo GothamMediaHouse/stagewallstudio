@@ -25,7 +25,7 @@
 // The producer key is made from the room's owner hash (the app works it out from its secret), so nothing extra is stored.
 import { DurableObject } from 'cloudflare:workers';
 import { pickClips } from './sessions-ai.js';
-import { accounts } from './sessions-accounts.js';
+import { accounts, SessionsAccount } from './sessions-accounts.js';
 
 const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
 export const producerKey = async (ownerHash) => (await sha(`showcaller-sessions-producer:${ownerHash}`)).slice(0, 32);
@@ -239,6 +239,8 @@ export class SessionRoom extends DurableObject {
   waiting() { return this.open('wait').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name }; }); }
 
   async fetch(request) {
+    // an account (sessions-accounts.js), kept in an object of this class so the site needs no extra Durable Object class
+    if (request.url.startsWith('https://acct.sessions/')) return (this.account ??= new SessionsAccount(this.ctx, this.env)).fetch(request);
     const url = new URL(request.url), s = await this.state();
     if (url.pathname === '/check') {
       // a shared screen (pid + 's') uploads with its person's key

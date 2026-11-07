@@ -1,6 +1,7 @@
 // Showcaller Sessions accounts: sign in with an emailed link (no passwords). An account holds its sessions (rooms), so
 // they work on any Mac the owner signs in on, and the dashboard at /sessions/account/ lists each session's plan, takes
-// and edit links, and invites editors by email. One Durable Object per account, named by a hash of the email.
+// and edit links, and invites editors by email. Each account lives in its own SessionRoom object named 'acct:<id>' (a hash
+// of the email): Cloudflare's free plan limits how many Durable Object classes a site has, so accounts don't get their own.
 //
 //   POST …/sessions/auth/start {email, device?}   emails a sign-in link (device: the app's own code, to collect its key)
 //   GET  …/sessions/auth/verify?a&t               a page with a Sign in button (email scanners open links; only the POST signs in)
@@ -17,7 +18,6 @@
 //        on their own dashboard: plan, links, takes and edit links, never the room's key or the owner's other sessions
 // Signed in = header "Authorization: Bearer <account>.<key>" (the app) or the cookie sss=<account>.<key> (the dashboard).
 // Tests: with SESSIONS_AUTH_FAKE set and no RESEND_API_KEY, emails aren't sent and their links come back in the answer.
-import { DurableObject } from 'cloudflare:workers';
 import { editKey, producerKey } from './sessions.js';
 
 const ACCT = /^[a-f0-9]{32}$/, ROOM = /^[a-z0-9]{8,24}$/, TAKE = /^t\d{2,4}$/;
@@ -30,7 +30,7 @@ const clean = (s, n = 60) => String(s || '').replace(/[\u0000-\u001f<>]/g, '').t
 const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DAY = 86400e3, WEB_DAYS = 30, APP_DAYS = 365, LINK_MIN = 15;
 export const accountId = async (email) => (await sha(`showcaller-sessions-account:${email}`)).slice(0, 32);
-const acct = (env, a) => env.SESSIONS_ACCOUNT.get(env.SESSIONS_ACCOUNT.idFromName(a));
+const acct = (env, a) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(`acct:${a}`));
 const roomDO = (env, r) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(r));
 const cookieOf = (request) => (/(?:^|;\s*)sss=([a-f0-9]{32}\.[A-Za-z0-9_-]{20,80})/.exec(request.headers.get('Cookie') || '') || [])[1] || '';
 const setCookie = (v, days) => `sss=${v}; Path=/sessions; HttpOnly; Secure; SameSite=Lax; Max-Age=${Math.round(days * 86400)}`;
@@ -49,7 +49,6 @@ const wrap = (body) => `<div style="font:15px/1.55 system-ui,-apple-system,sans-
 
 export async function accounts(request, env) {
   const url = new URL(request.url), p = url.pathname;
-  if (!env.SESSIONS_ACCOUNT) return j({ error: 'Accounts aren’t set up on this site yet' }, 503);
   const post = request.method === 'POST';
   // the dashboard signs in with a cookie, so its POSTs must come from this site
   const sameSite = !post || !request.headers.get('Origin') || request.headers.get('Origin') === url.origin;
@@ -60,7 +59,7 @@ export async function accounts(request, env) {
     if (!EMAIL.test(email)) return j({ error: 'That email doesn’t look right' }, 400);
     const device = /^[A-Za-z0-9_-]{20,80}$/.test(b.device || '') ? b.device : '';
     const a = await accountId(email);
-    return acct(env, a).fetch(new Request(`https://acct/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device }) }));
+    return acct(env, a).fetch(new Request(`https://acct.sessions/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device }) }));
   }
   if (p === '/sessions/auth/verify') {
     const a = url.searchParams.get('a') || '', t = url.searchParams.get('t') || '';
@@ -68,7 +67,7 @@ export async function accounts(request, env) {
     if (!post || !sameSite) return j({ error: 'Use the button in the email' }, 405);
     const f = await request.formData().catch(() => null), fa = String(f?.get('a') || ''), ft = String(f?.get('t') || '');
     if (!ACCT.test(fa)) return verifyPage('', '', 'This sign-in link isn’t right. Ask for a new one.');
-    const res = await acct(env, fa).fetch(new Request('https://acct/verify', { method: 'POST', body: JSON.stringify({ t: ft }) }));
+    const res = await acct(env, fa).fetch(new Request('https://acct.sessions/verify', { method: 'POST', body: JSON.stringify({ t: ft }) }));
     const o = await res.json();
     if (!res.ok) return verifyPage('', '', o.error || 'That didn’t work. Ask for a new link.');
     return new Response(null, { status: 303, headers: { Location: `/sessions/account/${o.app ? '?app=1' : ''}`, 'Set-Cookie': setCookie(`${fa}.${o.token}`, WEB_DAYS), 'Cache-Control': 'no-store' } });
@@ -76,21 +75,21 @@ export async function accounts(request, env) {
   if (p === '/sessions/auth/poll' && request.method === 'GET') {
     const a = url.searchParams.get('a') || '', d = url.searchParams.get('d') || '';
     if (!ACCT.test(a) || !/^[A-Za-z0-9_-]{20,80}$/.test(d)) return j({ error: 'Bad request' }, 400);
-    return acct(env, a).fetch(new Request(`https://acct/poll?d=${encodeURIComponent(d)}`));
+    return acct(env, a).fetch(new Request(`https://acct.sessions/poll?d=${encodeURIComponent(d)}`));
   }
   // everything else needs a sign-in
   const bearer = (/^Bearer\s+([a-f0-9]{32}\.[A-Za-z0-9_-]{20,80})$/.exec(request.headers.get('Authorization') || '') || [])[1] || '';
   const tok = bearer || cookieOf(request);
   if (!bearer && !sameSite) return j({ error: 'Not from this site' }, 403);
   if (p === '/sessions/auth/logout' && post) {
-    if (tok) await acct(env, tok.slice(0, 32)).fetch(new Request('https://acct/logout', { method: 'POST', headers: { 'X-Tok': tok.slice(33) } }));
+    if (tok) await acct(env, tok.slice(0, 32)).fetch(new Request('https://acct.sessions/logout', { method: 'POST', headers: { 'X-Tok': tok.slice(33) } }));
     return j({ ok: true }, 200, bearer ? {} : { 'Set-Cookie': setCookie('', 0) });
   }
   if (!tok) return j({ error: 'Sign in first', signin: true }, 401);
   const op = p.slice('/sessions/acct/'.length);
   if (!['me', 'rooms', 'rooms/remove', 'rooms/keys', 'room', 'invite', 'members'].includes(op)) return j({ error: 'Unknown' }, 404);
   const body = post ? await request.text() : undefined; if (body && body.length > 200000) return j({ error: 'Too big' }, 413);
-  return acct(env, tok.slice(0, 32)).fetch(new Request(`https://acct/${op}?${url.searchParams}&origin=${encodeURIComponent(url.origin)}`, { method: request.method, headers: { 'X-Tok': tok.slice(33) }, body }));
+  return acct(env, tok.slice(0, 32)).fetch(new Request(`https://acct.sessions/${op}?${url.searchParams}&origin=${encodeURIComponent(url.origin)}`, { method: request.method, headers: { 'X-Tok': tok.slice(33) }, body }));
 }
 
 function verifyPage(a, t, error) {
@@ -104,7 +103,9 @@ function verifyPage(a, t, error) {
   return new Response(html, { status: ok ? 200 : 400, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin' } });
 }
 
-export class SessionsAccount extends DurableObject {
+// runs inside the account's SessionRoom object (sessions.js hands it requests for https://acct.sessions/…)
+export class SessionsAccount {
+  constructor(ctx, env) { this.ctx = ctx; this.env = env; }
   async get(k, d) { return (await this.ctx.storage.get(k)) ?? d; }
 
   async fetch(request) {
@@ -189,7 +190,7 @@ export class SessionsAccount extends DurableObject {
         if (!r) {
           const sh = (await this.get('shared', [])).find((x) => x.id === url.searchParams.get('id'));
           if (!sh) return j({ error: 'That session isn’t in your account' }, 404);
-          const res = await acct(this.env, sh.owner).fetch(new Request(`https://acct/sharedview?room=${sh.id}&m=${await this.get('a')}&origin=${encodeURIComponent(origin)}`));
+          const res = await acct(this.env, sh.owner).fetch(new Request(`https://acct.sessions/sharedview?room=${sh.id}&m=${await this.get('a')}&origin=${encodeURIComponent(origin)}`));
           return new Response(res.body, res);
         }
         return j(await this.roomView(r, origin));
@@ -202,7 +203,7 @@ export class SessionsAccount extends DurableObject {
         const ma = await accountId(to), members = (rr.members || []).filter((m) => m.a !== ma);
         if (!b.remove) { if (members.length >= 10) return j({ error: 'That’s 10 people on this session already' }, 400); members.push({ email: to, a: ma, at: now }); }
         rr.members = members; await this.ctx.storage.put('rooms', rooms);
-        await acct(this.env, ma).fetch(new Request('https://acct/share', { method: 'POST', body: JSON.stringify({ owner: await this.get('a'), room: rr.id, name: rr.name, by: email, remove: !!b.remove, email: to, a: ma }) }));
+        await acct(this.env, ma).fetch(new Request('https://acct.sessions/share', { method: 'POST', body: JSON.stringify({ owner: await this.get('a'), room: rr.id, name: rr.name, by: email, remove: !!b.remove, email: to, a: ma }) }));
         let m = {};
         if (!b.remove) {
           const link = `${origin}/sessions/account/?s=${rr.id}`;
