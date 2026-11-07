@@ -6,12 +6,21 @@
   U.injectIcons(); U.theme($('#themeb'));
   const m = /^\/s\/([a-z0-9]{8,24})\/?$/.exec(location.pathname) || /[?&]r=([a-z0-9]{8,24})/.exec(location.search);
   const room = m && m[1];
+  // a producer's link (…/s/<room>?producer=<key>): runs the room with the host, isn't recorded, skips the waiting room
+  const prod = (/[?&]producer=([a-f0-9]{32})/.exec(location.search) || [])[1] || '';
+  const phone = /iPhone|iPad|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
   const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
   const show = (id) => { for (const v of ['join', 'wait', 'room', 'done']) $(`#v-${v}`).hidden = v !== id; };
   if (!room) { show('done'); $('#donep').innerHTML = '<h2 class="h2">This link isn’t complete</h2><p class="muted">Ask the host to send it again.</p>'; return; }
 
   let pid = store.get(`sess-pid-${room}`); if (!/^[a-z0-9]{8,16}$/.test(pid || '')) { pid = C.rid(12); store.set(`sess-pid-${room}`, pid); }
-  let stream = null, quality = '1080', session = null, ui = null, rec = null, sink = null, recRes = '', recErr = '';
+  let stream = null, quality = '1080', session = null, ui = null, rec = null, sink = null, recRes = '', recErr = '', share = null, wake = null;
+  if (prod) {
+    $('#jtitle').textContent = 'You’re producing this session';
+    $('#jsub').textContent = 'You’ll see and hear everyone, let guests in, start and stop the recording and add marks. You aren’t recorded, so the camera is up to you.';
+    $('#join').textContent = 'Join as producer';
+  }
+  if (phone) $('#jhint').textContent = 'On a phone: keep this page open and the screen on while you record. Switching to another app pauses the camera.';
   $('#name').value = store.get('sess-name') || '';
 
   // ---------- pre-join checks ----------
@@ -78,8 +87,9 @@
     if (!name) { $('#name').focus(); $('#jerr').hidden = false; $('#jerr').textContent = 'Type your name so the host knows who you are.'; return; }
     store.set('sess-name', name); $('#jerr').hidden = true;
     try { mac && mac.close(); } catch {}
-    session = new C.Session({ server: location.origin, room, role: 'guest', pid, name, stream });
+    session = new C.Session({ server: location.origin, room, role: 'guest', pid, name, stream, prod });
     session.on('state', onState).on('cfg', onCfg).on('rec', onRec);
+    keepAwake();
     session.connect();
     show('wait'); $('#waittxt').textContent = 'Connecting…';
   };
@@ -87,13 +97,23 @@
   function onState(s, why, x) {
     if (s === 'waiting') { show('wait'); $('#waittxt').textContent = x ? 'They’ve been told you’re here.' : 'The host isn’t in the room yet. You’ll be let in when they arrive.'; $('#sessname').textContent = session.cfg.name || 'Remote recording'; }
     else if (s === 'in') {
-      if (!sink) { sink = new C.CloudSink({ server: location.origin, room, pid, tok: session.tok }); sink.on('stat', () => ui && ui.drawUploads()); sink.resume(); }
-      else { sink.tok = session.tok; sink.pump(); }
-      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, self: { stream }, onLeave: leave, selfStatus: status }); }
+      if (!session.producer) {
+        if (!sink) {
+          sink = new C.CloudSink({ server: location.origin, room, pid, tok: session.tok }); sink.on('stat', () => ui && ui.drawUploads()); sink.resume();
+          // a shared screen is its own track (pid + 's'), with its own pieces kept here until they're up
+          if (navigator.mediaDevices.getDisplayMedia && !phone) {
+            const ssink = new C.CloudSink({ server: location.origin, room, pid: `${pid}s`, tok: session.tok, sub: '-s' }); ssink.on('stat', () => ui && ui.drawUploads()); ssink.resume();
+            share = new C.ScreenShare({ session, quality, sink: ssink, pid: `${pid}s`, name: `${name()} · screen`, store });
+            share.sink2 = ssink;
+          }
+        } else { sink.tok = session.tok; sink.pump(); if (share) { share.sink.tok = session.tok; share.sink.pump(); } }
+      }
+      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status }); }
       $('#sessname').textContent = session.cfg.name || 'Remote recording';
     } else if (s === 'reconnecting') U.toast('Connection lost. Reconnecting… (your recording carries on)', 4000);
     else if (s === 'closed') {
       if (rec && rec.running) rec.stop();
+      if (share) share.stop();
       done(why || 'You’ve left the session');
     }
   }
@@ -105,7 +125,10 @@
     }
     $('#sessname').textContent = cfg.name || 'Remote recording';
   }
+  const name = () => (session && session.name) || $('#name').value.trim() || 'Guest';
   async function onRec(r, fromHello) {
+    if (session.producer) return; // a producer isn't recorded
+    if (share) share.onRec(r, fromHello).catch((e) => console.error(e));
     if (r.on && !(rec && rec.running)) {
       if (fromHello && r.take && rec && rec.take === r.take) return;
       rec = new C.Recorder({ session, stream, quality, sink });
@@ -120,13 +143,26 @@
     }
   }
   function status() {
-    const st = sink ? { pending: sink.q.length, bytes: sink.pendingBytes(), sent: sink.sent, sentBytes: sink.sentBytes } : { pending: 0, bytes: 0, sent: 0, sentBytes: 0 };
-    return { ...st, rec: !!(rec && rec.running), res: recRes, err: recErr || (sink && sink.fail > 3 ? 'Upload trouble, retrying' : '') };
+    const sinks = [sink, share && share.sink].filter(Boolean);
+    const st = { pending: 0, bytes: 0, sent: 0, sentBytes: 0 };
+    for (const k of sinks) { st.pending += k.q.length; st.bytes += k.pendingBytes(); st.sent += k.sent; st.sentBytes += k.sentBytes; }
+    return { ...st, rec: !!(rec && rec.running), scr: !!(share && share.recording), res: recRes, err: recErr || (sink && sink.fail > 3 ? 'Upload trouble, retrying' : '') };
   }
-  setInterval(() => { if (session && session.state === 'in') session.tell('host', { st: status() }); }, 2000);
+  setInterval(() => {
+    if (!session || session.state !== 'in' || session.producer) return;
+    const st = status();
+    session.tell('host', { st });
+    for (const p of session.peers.values()) if (p.role === 'producer') session.tell(p.pid, { st });
+  }, 2000);
+  // keep a phone's screen on while in the room (the camera stops if it locks)
+  async function keepAwake() { try { if (navigator.wakeLock && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch {} }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { if (session && !session.closed) keepAwake(); if (rec && rec.running && phone) U.toast('Welcome back. Keep this page in front while recording: the camera pauses in other apps.', 5000); }
+  });
 
   async function leave() {
     if (rec && rec.running) { if (!confirm('The recording is still running. Leave anyway? What you’ve recorded so far is kept and uploaded.')) return; await rec.stop(); }
+    if (share) await share.stop();
     session.leave(); done('You’ve left the session');
   }
   function done(title) {
@@ -142,5 +178,5 @@
     draw();
     if (stream && !(sink && sink.q.length)) for (const t of stream.getTracks()) t.stop();
   }
-  addEventListener('beforeunload', (e) => { if ((rec && rec.running) || (sink && sink.q.length)) { e.preventDefault(); e.returnValue = ''; } });
+  addEventListener('beforeunload', (e) => { if ((rec && rec.running) || (sink && sink.q.length) || (share && share.sink.q.length)) { e.preventDefault(); e.returnValue = ''; } });
 })();
