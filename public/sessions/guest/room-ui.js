@@ -35,6 +35,7 @@
  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9.7 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M12 13V8M9.5 10.5 12 8l2.5 2.5"/></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></symbol>
  <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/><path d="M19.5 19c0 1.5-2 2.5-5 2.5"/></symbol>
 </svg>`;
   const injectIcons = () => { if (!document.getElementById('i-mic')) document.body.insertAdjacentHTML('afterbegin', ICONS); };
@@ -47,12 +48,21 @@
       this.ctrl = !!(opts.host || opts.producer); // can let people in, record and mark
       if (this.share) this.share.on('change', () => { this.drawDock(); this.sync(); });
       injectIcons();
-      this.tiles = new Map(); this.levels = new Map(); this.status = new Map(); this.drawerOpen = !!opts.host; this.extras = opts.extras || [];
+      this.tiles = new Map(); this.levels = new Map(); this.status = new Map(); this.drawerOpen = !!(opts.host || opts.producer); this.extras = opts.extras || [];
+      this.talk = null; // a private talk: { a (who started it), b } — nobody else hears those two while it lasts
+      this.studio = []; // the host's studio cameras and mics, as the host app tells producers: [{ pid, name, kind, off, rec, res }]
+      this.mutedBy = ''; // a host or producer muted this person's mic (so they can turn it back on without asking)
       this.render();
       const s = this.session;
-      s.on('peers', () => this.sync()).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
+      s.on('peers', () => { this.sync(); this.talkCheck(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
         .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => this.drawTop()).on('rec', () => { this.drawTop(); this.drawDock(); })
-        .on('data', (from, d) => { if (d && d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); } })
+        .on('data', (from, d) => {
+          if (!d) return;
+          if (d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); }
+          if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
+          if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
+        })
+        .on('board', () => this.drawBoard())
         .on('host', () => this.drawTop());
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
@@ -69,6 +79,7 @@
           <div class="ttl"><b class="js-name"></b><span class="js-sub"></span></div>
           <div class="sp"></div>
           <div class="people js-people"></div>
+          ${this.ctrl ? `<div class="recp cdp js-cdp" hidden title="Countdown (only the host and producers see it)">${ico('timer')}<span class="num js-cdpt"></span><span class="cdl js-cdpl"></span></div>` : ''}
           <div class="recp idle js-recp"><span class="dot red"></span><span class="num js-clock">Not recording</span></div>
           <button class="iconb js-drawer" aria-label="${h ? 'People, uploads and chat' : 'Chat and your recording'}" title="${h ? 'People, uploads and chat' : 'Chat and your recording'}">${ico(h ? 'people' : 'chat')}<span class="badge js-badge" hidden></span></button>
           <button class="iconb js-full" aria-label="Full screen" title="Full screen">${ico('full')}</button>
@@ -80,11 +91,20 @@
           ${this.producerUrl ? `<div class="dsec"><span class="lbl">Producer</span><div class="invite"><span class="muted" style="font-size:12px">A producer sees and hears everyone, talks, lets people in, starts and stops the recording and adds marks. They aren’t recorded.</span><div class="row"><button class="btn soft js-pcopy">${ico('headset')} Copy producer link</button></div></div></div>` : ''}` : ''}
           ${h && this.onAddCamera ? `<div class="dsec"><span class="lbl">Studio cameras and mics</span><button class="btn soft js-addcam" style="align-self:flex-start">${ico('plus')} Add a camera or mic on this computer</button><span class="hint">Each camera, capture input, NDI source, USB mic or sound interface input (every mic on a RØDECaster, say) records as its own track, next to yours.</span></div>` : ''}
           <div class="dsec"><span class="lbl">${h ? 'Recording' : 'Your recording'}</span><div class="dsec js-trks"></div></div>
-          ${this.ctrl ? `<div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>` : ''}
+          ${this.ctrl ? `<div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>
+          <div class="dsec"><span class="lbl">Countdown and notes</span>
+            <div class="board">
+              <div class="row"><span class="num cdbig js-cdt">00:00</span><input type="text" class="js-cdl" placeholder="What for (Break, Wrap…)" maxlength="60" aria-label="Countdown label"></div>
+              <div class="row cdset">${[1, 5, 10, 15, 30].map((m) => `<button class="btn soft sm js-cdm" data-m="${m}">${m}m</button>`).join('')}</div>
+              <div class="row"><input type="text" class="js-cdc" placeholder="mm:ss" aria-label="Countdown length (minutes, or mm:ss)" style="width:72px;flex:none;padding:6px 9px"><button class="btn sm js-cdgo">Start</button><button class="btn soft sm js-cdrs">Reset</button><span class="hint js-cdby" style="margin-left:auto"></span></div>
+              <textarea class="js-notes" rows="4" maxlength="5000" placeholder="Notes for the host and producers (guests don’t see these)"></textarea>
+              <span class="hint js-nby"></span>
+            </div></div>` : ''}
           <div class="dsec"><span class="lbl">Chat</span><div class="chat js-chat"><div class="empty">No messages yet.</div></div>
             <form class="chatin js-chatf"><input type="text" class="js-chatin" placeholder="Message everyone" aria-label="Chat message" maxlength="500"><button class="btn">Send</button></form></div>
         </aside>
         <div class="dockwrap">
+          <div class="talkbar js-talkbar" hidden></div>
           <div class="uploads js-uploads"></div>
           <div class="dock js-dock" role="toolbar" aria-label="Controls"></div>
           <div class="endw"><button class="btn soft js-leave">${ico('leave')} ${h ? 'Close room' : 'Leave'}</button></div>
@@ -107,8 +127,100 @@
         if (q('.js-addcam')) q('.js-addcam').onclick = () => this.onAddCamera();
         if (q('.js-pcopy')) q('.js-pcopy').onclick = () => { navigator.clipboard.writeText(this.producerUrl).then(() => toast('Producer link copied. Only send it to someone you trust to run the room.', 3500)); };
       }
-      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads();
+      if (this.ctrl) this.wireBoard();
+      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads(); this.drawBoard();
     }
+
+    // ---- countdown and notes (host and producers; the website keeps them for the session) ----
+    cdLeft() { const c = this.session.board && this.session.board.cd; if (!c) return null; return c.end ? c.end - this.session.now() : c.left; }
+    wireBoard() {
+      const q = (c) => $(c, this.el), s = this.session;
+      const cd = () => s.board.cd || { label: '', dur: 0, end: 0, left: 0 };
+      const set = (ms) => { s.setBoard({ cd: { label: q('.js-cdl').value, dur: ms, end: 0, left: ms } }); };
+      for (const b of this.el.querySelectorAll('.js-cdm')) b.onclick = () => set(Number(b.dataset.m) * 60000);
+      // 5 = five minutes, 4:30, 1:00:00
+      q('.js-cdc').onchange = () => { const p = q('.js-cdc').value.trim().split(':').map(Number); if (!p.length || p.length > 3 || p.some((x) => !Number.isFinite(x) || x < 0)) return toast('Type a time like 4:30'); const sec = p.length === 1 ? p[0] * 60 : p.reduce((a, x) => a * 60 + x, 0); if (sec > 0) set(sec * 1000); q('.js-cdc').value = ''; };
+      q('.js-cdgo').onclick = () => {
+        const c = cd(); if (!c.dur && !c.end) return toast('Pick a length first');
+        if (c.end) s.setBoard({ cd: { ...c, end: 0, left: Math.max(-36e5, c.end - s.now()) } });
+        else s.setBoard({ cd: { ...c, label: q('.js-cdl').value, end: s.now() + c.left } });
+      };
+      q('.js-cdrs').onclick = () => { const c = cd(); s.setBoard({ cd: c.dur ? { ...c, end: 0, left: c.dur } : null }); };
+      q('.js-cdl').onchange = () => { const c = s.board.cd; if (c) s.setBoard({ cd: { ...c, label: q('.js-cdl').value } }); };
+      let h = 0; q('.js-notes').oninput = () => { clearTimeout(h); h = setTimeout(() => s.setBoard({ notes: q('.js-notes').value }), 500); };
+      q('.js-notes').onblur = () => { clearTimeout(h); if (q('.js-notes').value !== (s.board.notes || '')) s.setBoard({ notes: q('.js-notes').value }); };
+    }
+    drawBoard() {
+      if (!this.ctrl) return;
+      const q = (c) => $(c, this.el), b = this.session.board || {}, c = b.cd;
+      const n = q('.js-notes'); if (document.activeElement !== n && n.value !== (b.notes || '')) n.value = b.notes || '';
+      const l = q('.js-cdl'); if (document.activeElement !== l) l.value = (c && c.label) || '';
+      q('.js-nby').textContent = b.by && b.at ? `Last change by ${b.by}, ${new Date(b.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
+      q('.js-cdgo').textContent = c && c.end ? 'Pause' : c && c.left !== c.dur ? 'Carry on' : 'Start';
+      this.drawCountdown();
+    }
+    drawCountdown() {
+      if (!this.ctrl) return;
+      const q = (c) => $(c, this.el), c = this.session.board && this.session.board.cd, left = this.cdLeft();
+      const f = (ms) => { const neg = ms < 0, t = Math.abs(ms), sec = neg ? Math.floor(t / 1000) : Math.ceil(t / 1000), h = Math.floor(sec / 3600); return `${neg ? '−' : ''}${h ? `${h}:` : ''}${String(Math.floor(sec / 60) % 60).padStart(h ? 2 : 2, '0')}:${String(sec % 60).padStart(2, '0')}`; };
+      const txt = left === null ? '00:00' : f(left);
+      q('.js-cdt').textContent = txt; q('.js-cdt').classList.toggle('over', left !== null && left < 0); q('.js-cdt').classList.toggle('soon', left !== null && left >= 0 && left < 30000 && !!(c && c.end));
+      const p = q('.js-cdp'); p.hidden = !(c && (c.end || c.left !== c.dur));
+      q('.js-cdpt').textContent = txt; q('.js-cdpl').textContent = (c && c.label) || '';
+      p.classList.toggle('over', left !== null && left < 0); p.classList.toggle('paused', !!(c && !c.end));
+    }
+
+    // ---- what a host or producer asks of this person: mute, private talk, studio cameras ----
+    onCtl(from, d) {
+      const s = this.session, who = from === 'host' ? 'The host' : (s.peers.get(from) || {}).name || 'The producer';
+      const a = this.self.stream && this.self.stream.getAudioTracks()[0];
+      if (d.ctl === 'mute' && a) {
+        if (d.on === false) { if (a.enabled) { a.enabled = false; this.mutedBy = who; toast(`${who} muted your mic`, 3500); } }
+        else if (!a.enabled) {
+          if (this.mutedBy) { a.enabled = true; this.mutedBy = ''; toast(`${who} turned your mic back on`, 3500); }
+          else this.askBar(`${who} asks you to turn your mic on`, 'Turn mic on', () => { a.enabled = true; this.drawDock(); });
+        }
+        this.drawDock(); this.onSelfChange && this.onSelfChange();
+      }
+      if (d.ctl === 'talk') { this.talk = d.talk && d.talk.a && d.talk.b ? { a: d.talk.a, b: d.talk.b } : null; this.applyTalk(); }
+      if (d.ctl === 'studio' && this.host && this.onStudioToggle) this.onStudioToggle(d.pid, !!d.on);
+    }
+    askBar(text, btn, go) {
+      const el = $('.js-talkbar', this.el); this.asking = { text, btn, go };
+      el.hidden = false; el.innerHTML = `<span>${esc(text)}</span><button class="btn sm js-ask">${esc(btn)}</button><button class="muted js-askno" style="font-size:12px">Not now</button>`;
+      $('.js-ask', el).onclick = () => { this.asking = null; go(); this.applyTalk(); };
+      $('.js-askno', el).onclick = () => { this.asking = null; this.applyTalk(); };
+    }
+    // tell everyone about the private talk (or that it's over); late arrivals are told again when they join
+    sendTalk() { for (const p of this.session.peers.values()) this.session.tell(p.pid, { ctl: 'talk', talk: this.talk }); }
+    startTalk(pid) { const me = this.session.pid; this.talk = this.talk && this.talk.a === me && this.talk.b === pid ? null : { a: me, b: pid }; this.sendTalk(); this.applyTalk(); }
+    endTalk() { this.talk = null; this.sendTalk(); this.applyTalk(); }
+    talkCheck() {
+      const s = this.session, t = this.talk; if (!t) return;
+      const here = (pid) => pid === s.pid || s.peers.has(pid);
+      if (!here(t.a) || !here(t.b)) { const mine = t.a === s.pid; this.talk = null; if (mine) this.sendTalk(); this.applyTalk(); return; }
+      if (t.a === s.pid) this.sendTalk();
+    }
+    applyTalk() {
+      const s = this.session, t = this.talk, me = s.pid, el = $('.js-talkbar', this.el);
+      const inIt = t && (t.a === me || t.b === me), nm = (pid) => pid === me ? 'you' : (s.peers.get(pid) || {}).name || 'someone';
+      for (const [pid, tile] of this.tiles) {
+        if (tile.el.classList.contains('local') || pid === me || pid.endsWith('~s')) continue;
+        const v = $('video', tile.el), hush = !!(t && !inIt && (pid === t.a || pid === t.b));
+        v.muted = hush; tile.el.classList.toggle('pvt', !!(t && (pid === t.a || pid === t.b)));
+      }
+      if (this.asking) return;
+      el.hidden = !t;
+      if (!t) { el.innerHTML = ''; this.drawTracks(); return; }
+      const other = t.a === me ? t.b : t.a;
+      el.innerHTML = inIt
+        ? `${ico('headset')}<span><b>Private talk with ${esc(nm(other))}</b> · nobody else hears you two${this.ctrl || this.producer ? '' : ' (your recording carries on)'}</span><button class="btn sm js-tend">End</button>`
+        : `${ico('headset')}<span>${esc(nm(t.a))} and ${esc(nm(t.b))} are talking privately</span>${this.ctrl ? '<button class="muted js-tend" style="font-size:12px">End it</button>' : ''}`;
+      const e = $('.js-tend', el); if (e) e.onclick = () => this.endTalk();
+      this.drawTracks();
+    }
+    mutePeer(pid, on) { this.session.tell(pid, { ctl: 'mute', on }); toast(on ? 'Unmute sent' : 'Muted', 2000); }
+    studioToggle(pid, on) { if (this.host && this.onStudioToggle) this.onStudioToggle(pid, on); else this.session.tell('host', { ctl: 'studio', pid, on }); }
 
     // ---- tiles ----
     people() {
@@ -132,7 +244,7 @@
         if (!t) {
           t = { el: document.createElement('div'), fs: document.createElement('div') };
           t.el.className = `tl${p.self ? ' self' : ''}`;
-          t.el.innerHTML = `<video autoplay playsinline ${p.self || p.local ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><span class="js-n"></span></span><span class="st" hidden></span>`;
+          t.el.innerHTML = `<video autoplay playsinline ${p.self || p.local ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><svg class="ico mi"><use href="#i-micoff"/></svg><span class="js-n"></span></span><span class="st" hidden></span>`;
           t.fs.className = `ft${p.self ? ' self' : ''}`;
           t.fs.innerHTML = `<video autoplay playsinline muted></video><div class="off" hidden><span class="av"></span></div><div class="fnm"><span class="js-n"></span><small></small></div>`;
           this.tiles.set(p.pid, t);
@@ -210,7 +322,7 @@
         const v = t.stream && t.stream.getVideoTracks()[0], off = !v || v.enabled === false || v.muted || v.readyState === 'ended';
         $('.off', t.el).hidden = !off; $('.off', t.fs).hidden = !off;
       }
-      this.drawTracks(); if (!this.host) this.drawUploads();
+      this.drawTracks(); this.drawCountdown(); if (!this.host) this.drawUploads();
       if (this.host) for (const [pid, st] of this.status) if (Date.now() - st.at > 15000 && !s.peers.has(pid)) this.status.delete(pid);
     }
     drawDock() {
@@ -224,7 +336,7 @@
         <button class="rb js-mark" aria-label="Add a mark" title="Mark this moment for the edit" ${on ? '' : 'disabled style="opacity:.45"'}>${ico('flag')}</button>` : ''}`;
       d.innerHTML = html; $('.js-fdock', this.fsEl).innerHTML = html + `<button class="rb js-exit" aria-label="Leave full screen" title="Leave full screen (Esc)">${ico('exit')}</button>`;
       for (const root of [d, $('.js-fdock', this.fsEl)]) {
-        $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.drawDock(); } };
+        $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); } };
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
         if (this.ctrl) {
@@ -249,17 +361,25 @@
       const scrRow = () => this.share && this.share.active ? this.trackRow(`${s.pid}~s`, `${s.name} · screen`, this.share.recording ? `Recording your screen ${this.host ? 'to this Mac' : 'here'}` : on ? 'Starting…' : 'Shared. Recorded when the recording starts.', 100, true, false, 'screen') : '';
       if (this.ctrl) {
         const me = this.selfStatus ? this.selfStatus() : {};
-        if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `${me.input ? `${me.input} · ` : ''}saves straight to this Mac`, 100, true, false, false, !!this.onChangeSelf));
+        if (this.host && me.producing) rows.push(this.trackRow(s.pid, `${s.name} (you)`, `Producer · not recorded${me.input ? ` · ${me.input}` : ''}`, 100, true, false, false, !!this.onChangeSelf));
+        else if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `${me.input ? `${me.input} · ` : ''}saves straight to this Mac`, 100, true, false, false, !!this.onChangeSelf));
         else rows.push(this.trackRow(s.pid, `${s.name} (you)`, 'Producer · not recorded', 100, true));
         rows.push(scrRow());
-        for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `${x.iface ? `${x.iface} · input ${x.ch + 1}` : x.ndi ? `NDI · ${x.ndi}` : x.cam ? `Studio camera${x.audio ? ' + sound' : ''}` : 'Studio mic (sound only)'} · saves straight to this Mac`, 100, true, false, x.cam || x.ndi ? true : 'mic'));
+        const onoff = (pid, off) => `<button class="tb js-son" data-p="${esc(pid)}" data-on="${off ? 1 : 0}" title="${off ? 'Turn it on: seen and recorded' : 'Turn it off: not shown or recorded'}">${off ? 'Turn on' : 'Turn off'}</button>`;
+        for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.off ? 'Off · not recorded' : x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `${x.iface ? `${x.iface} · input ${x.ch + 1}` : x.ndi ? `NDI · ${x.ndi}` : x.cam ? `Studio camera${x.audio ? ' + sound' : ''}` : 'Studio mic (sound only)'} · saves straight to this Mac`, x.off ? 0 : 100, true, false, x.cam || x.ndi ? true : 'mic', false, onoff(x.pid, x.off)));
+        // a producer sees the studio's own cameras and mics (from the host app) and can turn them on and off
+        if (!this.host) for (const x of this.studio) rows.push(this.trackRow(x.pid, x.name, x.off ? 'Off · not recorded' : x.rec ? `Recording ${x.res || ''} on the studio computer` : `${x.kind === 'mic' ? 'Studio mic' : 'Studio camera'} · on the studio computer`, x.off ? 0 : 100, true, false, x.kind === 'mic' ? 'mic' : true, false, onoff(x.pid, x.off)));
         for (const p of s.peers.values()) {
           const st = this.status.get(p.pid) || {};
-          if (p.role === 'producer' || p.role === 'host') { rows.push(this.trackRow(p.pid, p.name, p.role === 'producer' ? 'Producer · not recorded' : 'Host · records on the studio computer', 100, true)); continue; }
+          if (p.role === 'producer' || p.role === 'host') {
+            const hs = p.role === 'host' ? st : {};
+            const sub = p.role === 'producer' ? 'Producer · not recorded' : hs.producing ? 'Host computer · not recorded' : `Host · ${hs.rec ? 'recording' : 'records'} on the studio computer${hs.free ? ` · ${this.room(hs)}` : ''}`;
+            rows.push(this.trackRow(p.pid, p.name, sub, 100, !(hs.hours !== undefined && hs.hours < 1), false, false, false, this.acts(p.pid, st))); continue;
+          }
           if (p.screen) rows.push(this.trackRow(`${p.pid}~s`, `${p.name} · screen`, st.scr ? 'Recording their screen' : 'Sharing their screen', 100, true, false, 'screen'));
           const sub = st.err ? st.err : st.rec ? `Recording ${st.res || ''} · ${st.pending ? `${mb(st.bytes)} to upload` : 'uploaded so far'}` : st.pending ? `Uploading · ${mb(st.bytes)} left` : st.sent ? 'All uploaded' : on ? 'Not recording yet' : 'Ready';
           const pct = st.pending ? Math.round(100 * st.sentBytes / Math.max(1, st.sentBytes + st.bytes)) : 100;
-          rows.push(this.trackRow(p.pid, p.name, this.producer && !st.at ? (on ? 'Recording on their computer' : 'Ready') : sub, pct, !st.pending, true));
+          rows.push(this.trackRow(p.pid, p.name, `${!st.at ? (on ? 'Recording on their computer' : 'Ready') : sub}${st.free ? ` · ${this.room(st)}` : ''}`, pct, !st.pending, true, false, false, this.acts(p.pid, st)));
         }
         const t = s.takes.find((x) => x.id === s.rec.take), ms = $('.js-marksec', this.el);
         ms.hidden = !(on && t && t.marks && t.marks.length);
@@ -270,10 +390,15 @@
         rows.unshift(this.trackRow(s.pid, s.name, st.rec ? `Recording ${st.res || ''} here` : st.pending ? 'Uploading the last pieces…' : st.sent ? 'All uploaded. Safe to leave.' : 'Ready. The host starts the recording.', st.pending ? Math.round(100 * st.sentBytes / Math.max(1, st.sentBytes + st.bytes)) : 100, !st.pending));
         if (st.pending) rows.push(`<div class="hint">${st.pending} pieces (${mb(st.bytes)}) still to upload. Keep this tab open; if it closes, open the same link again and they carry on.</div>`);
       }
-      el.innerHTML = rows.join('');
+      // only redrawn when something changed, so a button isn't swapped out under the pointer mid-click
+      const html = rows.join('');
+      if (html !== this.trkHtml) { this.trkHtml = html; el.innerHTML = html; }
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
       for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
       for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
+      for (const x of el.querySelectorAll('.js-pmute')) x.onclick = () => this.mutePeer(x.dataset.p, x.dataset.on === '1');
+      for (const x of el.querySelectorAll('.js-ptalk')) x.onclick = () => this.startTalk(x.dataset.p);
+      for (const x of el.querySelectorAll('.js-son')) x.onclick = () => this.studioToggle(x.dataset.p, x.dataset.on === '1');
       // tile corner tag
       for (const [pid, t] of this.tiles) {
         const ex = this.extras.find((x) => x.pid === pid);
@@ -283,11 +408,21 @@
         const show = this.host && pid !== s.pid && !ex && !pid.endsWith('~s') && (st.pending || st.rec);
         stt.hidden = !show; if (show) stt.innerHTML = `${ico('up')}<b>${st.pending ? mb(st.bytes) : 'Up to date'}</b>`;
         $('small', t.fs).textContent = st.rec ? `${st.res || ''} REC` : '';
+        const mut = pid === s.pid ? !!(this.self.stream && this.self.stream.getAudioTracks()[0] && !this.self.stream.getAudioTracks()[0].enabled) : st.mic === false;
+        t.el.classList.toggle('mut', mut); t.el.classList.toggle('offair', !!(ex && ex.off));
       }
     }
-    trackRow(pid, name, sub, pct, ok, kick, cam, change) {
+    // a guest's free space: about how many hours more of recording fit
+    room(st) { return st.hours === undefined ? `${mb(st.free)} free` : st.hours < 1 ? `only ${Math.max(0, Math.round(st.hours * 60))} min of space left` : `${mb(st.free)} free (${st.hours >= 20 ? '20+' : Math.floor(st.hours)} h)`; }
+    // a host's or producer's buttons for someone in the room: mute or unmute, talk privately
+    acts(pid, st) {
+      if (!this.ctrl) return '';
+      const t = this.talk, me = this.session.pid, talking = t && t.a === me && t.b === pid;
+      return `${st.mic === false ? `<button class="tb js-pmute" data-p="${esc(pid)}" data-on="1" title="Turn their mic back on (asks them if they muted it themselves)">${ico('micoff')} Unmute</button>` : `<button class="tb js-pmute" data-p="${esc(pid)}" data-on="0" title="Mute their mic (their recording is silent too)">${ico('mic')} Mute</button>`}<button class="tb js-ptalk ${talking ? 'on' : ''}" data-p="${esc(pid)}" title="${talking ? 'End the private talk' : 'Talk to just this person: nobody else hears you two'}">${ico('headset')} ${talking ? 'End talk' : 'Talk privately'}</button>`;
+    }
+    trackRow(pid, name, sub, pct, ok, kick, cam, change, acts) {
       const busy = this.session.rec && this.session.rec.on;
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${change && !busy ? `<button class="muted js-chg" title="Change your camera or microphone" style="font-size:12px">Change</button>` : ''}${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && cam !== 'screen' && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this source" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+      return `<div class="trk${acts ? ' wa' : ''}"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${change && !busy ? `<button class="muted js-chg" title="Change your camera or microphone" style="font-size:12px">Change</button>` : ''}${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && cam !== 'screen' && this.host && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this source" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div>${acts ? `<div class="tacts">${acts}</div>` : ''}</div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);

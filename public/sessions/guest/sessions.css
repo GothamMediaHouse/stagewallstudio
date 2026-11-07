@@ -220,3 +220,31 @@ input[type=range]{accent-color:var(--v);width:100%}
  .selfv{aspect-ratio:4/3;max-height:34vh;width:100%}
  .gjoin{gap:16px}
 }
+/* 0.6: producer tools (mute, private talk, studio cameras on/off, countdown and notes) */
+.tl .nm .mi{display:none;width:14px;height:14px;color:var(--red)}
+.tl.mut .nm .mi{display:block}
+.tl.mut .nm i{display:none}
+.tl.offair{opacity:.42}
+.tl.offair::after{content:'Off';position:absolute;top:12px;left:12px;background:var(--chip);color:var(--chipfg);border-radius:8px;padding:3px 8px;font:600 11px var(--display);letter-spacing:.1em;text-transform:uppercase}
+.tl.pvt{box-shadow:0 0 0 3px var(--v)}
+.trk .tacts{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.trk .tb,.trk .tacts button{display:inline-flex;align-items:center;gap:5px;font:500 12px var(--body);color:var(--fg);background:var(--ground);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.trk .tb .ico{width:13px;height:13px}
+.trk .tb.on{background:var(--v);border-color:transparent;color:#fff}
+.trk .tb:hover{border-color:var(--line2)}
+.talkbar{flex-basis:100%;display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:14px;background:color-mix(in srgb,var(--v) 14%,var(--card));border:1px solid color-mix(in srgb,var(--v) 40%,var(--line));font-size:13px}
+.talkbar span{flex:1;min-width:0}
+.talkbar .ico{width:18px;height:18px;flex:none}
+.board{display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.board .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.board .cdbig{font:600 26px var(--mono);min-width:96px}
+.board .cdbig.soon{color:var(--amber)}
+.board .cdbig.over{color:var(--red)}
+.board input[type=text]{flex:1;min-width:0}
+.board .cdset input{flex:none}
+.board textarea{width:100%;resize:vertical;min-height:72px;font:inherit;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--ground);color:inherit;box-sizing:border-box}
+.recp.cdp .ico{width:16px;height:16px}
+.recp.cdp .cdl{font:500 12px var(--body);color:var(--mute);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recp.cdp.over{color:var(--red)}
+.recp.cdp.paused .num{opacity:.6}
+.board .btn.sm,.talkbar .btn.sm{height:30px;padding:0 11px;font-size:12px;border-radius:9px}

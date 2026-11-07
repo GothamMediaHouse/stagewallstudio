@@ -120,8 +120,8 @@ export class SessionRoom extends DurableObject {
   each(o, filter = () => true) { const s = JSON.stringify(o); for (const w of this.open('in')) if (filter(w.deserializeAttachment())) this.send(w, s); }
   async state() {
     if (!this.st) {
-      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes']);
-      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [] };
+      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board']);
+      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null } };
     }
     return this.st;
   }
@@ -201,7 +201,7 @@ export class SessionRoom extends DurableObject {
   async hello(w, you) {
     const s = await this.state();
     const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: s.rec, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
-    if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; }
+    if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; o.board = s.board; }
     else o.tok = s.admitted[you.pid]?.tok;
     this.send(w, o);
   }
@@ -264,6 +264,18 @@ export class SessionRoom extends DurableObject {
       }
       await this.save('rec', 'takes');
       return this.each({ t: 'rec', ...s.rec, now });
+    }
+    // the countdown and notes only the host and producers see: { notes, cd: { label, dur, end (running: when it reaches 0), left (paused) } }
+    if (m.t === 'board' && m.board && typeof m.board === 'object') {
+      const b = m.board, c = b.cd && typeof b.cd === 'object' ? b.cd : null, n = (v, max) => Math.max(0, Math.min(max, Math.round(Number(v) || 0)));
+      s.board = {
+        notes: b.notes === undefined ? s.board.notes : String(b.notes).replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 5000),
+        cd: b.cd === undefined ? s.board.cd : c ? { label: clean(c.label, 60), dur: n(c.dur, 864e5), end: n(c.end, 9e15), left: n(c.left, 864e5) } : null,
+        by: a.name, at: Date.now(),
+      };
+      await this.save('board');
+      for (const w of this.ctrls()) this.send(w, { t: 'board', board: s.board });
+      return;
     }
     if (m.t === 'mark' && s.rec.on) {
       const t = s.takes.find((x) => x.id === s.rec.take); if (!t) return;

@@ -32,7 +32,7 @@
       this.stream = opts.stream || null;
       this.peers = new Map(); // pid -> { pid, name, role, pc, stream, polite, making, ignore }
       this.offset = 0; this.rtt = Infinity; this.state = 'connecting'; this.cfg = {}; this.rec = { on: false }; this.ice = [];
-      this.waiting = new Map(); this.takes = []; this.closed = false; this.tries = 0;
+      this.waiting = new Map(); this.takes = []; this.closed = false; this.tries = 0; this.board = { notes: '', cd: null };
     }
     now() { return Date.now() + this.offset; }
     wsUrl() {
@@ -80,6 +80,7 @@
           this.ice = m.ice || []; this.cfg = m.cfg || {}; this.tok = m.tok; this.hostOnline = m.host;
           if (m.you && m.you.role === 'producer') this.producer = true;
           if (m.takes) this.takes = m.takes;
+          if (m.board) { this.board = m.board; this.emit('board', m.board); }
           if (m.waiting) { this.waiting = new Map(m.waiting.map((w) => [w.pid, w])); this.emit('waiting', [...this.waiting.values()]); }
           for (const p of [...this.peers.keys()]) this.drop(p, true);
           for (const p of m.peers) this.add(p, true); // the newcomer calls everyone (no glare)
@@ -104,6 +105,7 @@
         }
         case 'marks': { const t = this.takes.find((x) => x.id === m.take); if (t) t.marks = m.marks; this.emit('marks', m); break; }
         case 'chat': this.emit('chat', m); break;
+        case 'board': this.board = m.board; this.emit('board', m.board); break;
         case 'sig': this.onsig(m.from, m.data); break;
       }
     }
@@ -115,6 +117,10 @@
     mark(label) { this.send({ t: 'mark', label }); }
     chat(text) { this.send({ t: 'chat', text }); }
     rename(name) { this.name = name; this.send({ t: 'name', name }); }
+    // the countdown and notes the host and producers share (part of it: { notes } or { cd })
+    setBoard(part) { this.send({ t: 'board', board: part }); }
+    // a host or producer: the only people whose controls (mute, private talk, studio cameras) this side follows
+    isCtrl(pid) { if (pid === 'host') return true; const p = this.peers.get(pid); return !!(p && (p.role === 'producer' || p.role === 'host')); }
     tell(pid, data) { this.send({ t: 'sig', to: pid, data: { k: 'x', d: data } }); }
 
     // ---- the call: one small peer connection to each person (perfect negotiation) ----
