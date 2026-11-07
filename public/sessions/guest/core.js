@@ -206,19 +206,20 @@ registerProcessor('sc-pcm',P)`;
   }
 
   class Recorder extends Emitter {
-    // opts: { session, stream (full-quality camera + mic), quality, sink }
+    // opts: { session, stream (full-quality camera + mic), quality, sink, pid + name (an extra studio camera of the host) }
     constructor(opts) { super(); Object.assign(this, opts); this.running = false; }
     // part: 0 for a normal take; 1, 2… when this page rejoined a take that was already running (after a reload)
     async start(take, atServer, part = 0) {
       if (this.running) return;
-      this.running = true; this.take = take; this.part = part; this.vSeq = part * PART; this.aSeq = part * PART; this.vBytes = 0; this.aBytes = 0;
+      this.running = true; this.node = null; this.take = take; this.part = part; this.vSeq = part * PART; this.aSeq = part * PART; this.vBytes = 0; this.aBytes = 0;
       const q = QUALITY[this.quality] || QUALITY['1080'], s = this.session;
       const mime = pickMime(), vt = this.stream.getVideoTracks()[0], at = this.stream.getAudioTracks()[0];
       const set = vt ? vt.getSettings() : {};
-      this.meta = { v: 1, room: s.room, take, part, pid: s.pid, name: s.name, quality: this.quality, mime, ext: mime.includes('mp4') ? 'mp4' : 'webm',
+      this.meta = { v: 1, room: s.room, take, part, pid: this.pid || s.pid, name: this.name || s.name, quality: this.quality, mime, ext: mime.includes('mp4') ? 'mp4' : 'webm',
         width: set.width || 0, height: set.height || 0, fps: set.frameRate || 0, sampleRate: RATE, channels: 1, bits: 24,
         vStart: 0, aStart: 0, vCount: 0, aCount: 0, done: false, ua: navigator.userAgent, startedAt: 0 };
-      // the mic as 24-bit PCM, on its own audio clock
+      // the mic as 24-bit PCM, on its own audio clock (a studio camera with no sound has no WAV)
+      if (at) {
       this.ctx = new AudioContext({ sampleRate: RATE, latencyHint: 'interactive' });
       const url = URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' }));
       await this.ctx.audioWorklet.addModule(url); URL.revokeObjectURL(url);
@@ -233,6 +234,7 @@ registerProcessor('sc-pcm',P)`;
         if (d.end) { this.flushPcm(); this.aDone && this.aDone(); }
       };
       if (this.ctx.state !== 'running') await this.ctx.resume().catch(() => {});
+      }
       // camera + mic as a normal video file
       this.mr = new MediaRecorder(this.stream, { mimeType: mime || undefined, videoBitsPerSecond: q.vbps, audioBitsPerSecond: 256000, videoKeyFrameIntervalDuration: PIECE_MS });
       this.mr.ondataavailable = (e) => { if (e.data && e.data.size) { this.vBytes += e.data.size; this.put('v', this.vSeq++, e.data); } };
@@ -243,7 +245,7 @@ registerProcessor('sc-pcm',P)`;
       if (!this.running) return;
       this.meta.startedAt = s.now();
       this.mr.start(PIECE_MS);
-      this.node.port.postMessage('start');
+      if (this.node) this.node.port.postMessage('start');
       this.t0 = performance.now();
       this.put('m', part * 2, new Blob([JSON.stringify(this.meta)], { type: 'application/json' }));
       this.emit('started', this.meta);
@@ -265,9 +267,9 @@ registerProcessor('sc-pcm',P)`;
       const dur = this.elapsed();
       if (!this.running) return; this.running = false;
       const vDone = new Promise((r) => { if (!this.mr || this.mr.state === 'inactive') return r(); this.mr.onstop = () => setTimeout(r, 30); try { this.mr.stop(); } catch { r(); } });
-      const aDone = new Promise((r) => { this.aDone = r; try { this.node.port.postMessage('stop'); } catch { r(); } setTimeout(r, 1500); });
+      const aDone = new Promise((r) => { if (!this.node) return r(); this.aDone = r; try { this.node.port.postMessage('stop'); } catch { r(); } setTimeout(r, 1500); });
       await Promise.all([vDone, aDone]);
-      try { this.node.disconnect(); await this.ctx.close(); } catch {}
+      try { if (this.node) { this.node.disconnect(); await this.ctx.close(); } } catch {}
       Object.assign(this.meta, { vCount: this.vSeq - this.part * PART, aCount: this.aSeq - this.part * PART, vBytes: this.vBytes, aBytes: this.aBytes, done: true, dur: Math.round(dur), endedAt: this.session.now() });
       this.put('m', this.part * 2 + 1, new Blob([JSON.stringify(this.meta)], { type: 'application/json' }));
       this.emit('stopped', this.meta);

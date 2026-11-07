@@ -42,7 +42,7 @@
     constructor(opts) {
       Object.assign(this, opts);
       injectIcons();
-      this.tiles = new Map(); this.levels = new Map(); this.status = new Map(); this.drawerOpen = !!opts.host;
+      this.tiles = new Map(); this.levels = new Map(); this.status = new Map(); this.drawerOpen = !!opts.host; this.extras = opts.extras || [];
       this.render();
       const s = this.session;
       s.on('peers', () => this.sync()).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
@@ -72,6 +72,7 @@
         <aside class="drawer">
           ${h ? `<div class="dsec js-waitsec" hidden><span class="lbl">Waiting to come in</span><div class="dsec js-wait"></div></div>
           <div class="dsec"><span class="lbl">Invite</span><div class="invite"><code class="js-inv"></code><span class="muted" style="font-size:12px">Opens in Chrome, Edge or Safari on a computer. Nothing to install.</span><div class="row"><button class="btn soft js-copy">Copy link</button><label class="chk" style="font-size:12px;margin-left:auto"><input type="checkbox" class="js-wr"> Waiting room</label></div></div></div>` : ''}
+          ${h && this.onAddCamera ? `<div class="dsec"><span class="lbl">Studio cameras</span><button class="btn soft js-addcam" style="align-self:flex-start">${ico('plus')} Add a camera on this computer</button><span class="hint">Each camera or capture input here records as its own track, next to yours.</span></div>` : ''}
           <div class="dsec"><span class="lbl">${h ? 'Recording' : 'Your recording'}</span><div class="dsec js-trks"></div></div>
           ${h ? `<div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>` : ''}
           <div class="dsec"><span class="lbl">Chat</span><div class="chat js-chat"><div class="empty">No messages yet.</div></div>
@@ -97,6 +98,7 @@
         q('.js-inv').textContent = this.inviteUrl.replace(/^https?:\/\//, '');
         q('.js-copy').onclick = () => { navigator.clipboard.writeText(this.inviteUrl).then(() => toast('Invite link copied')); };
         q('.js-wr').onchange = (e) => this.session.setCfg({ wait: e.target.checked });
+        if (q('.js-addcam')) q('.js-addcam').onclick = () => this.onAddCamera();
       }
       this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads();
     }
@@ -104,8 +106,12 @@
     // ---- tiles ----
     people() {
       const s = this.session, list = [{ pid: s.pid, name: s.name, role: s.role, self: true }];
+      for (const x of this.extras) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: x.stream, local: true });
       for (const p of s.peers.values()) list.push({ pid: p.pid, name: p.name, role: p.role, stream: p.stream });
       return list;
+    }
+    // the host's extra studio cameras (each its own recorded track): [{ pid, name, stream, rec, res }]
+    setExtras(list) { this.extras = list; this.sync();
     }
     sync() {
       const list = this.people(), grid = $('.js-tiles', this.el);
@@ -115,11 +121,12 @@
         if (!t) {
           t = { el: document.createElement('div'), fs: document.createElement('div') };
           t.el.className = `tl${p.self ? ' self' : ''}`;
-          t.el.innerHTML = `<video autoplay playsinline ${p.self ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><span class="js-n"></span></span><span class="st" hidden></span>`;
+          t.el.innerHTML = `<video autoplay playsinline ${p.self || p.local ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><span class="js-n"></span></span><span class="st" hidden></span>`;
           t.fs.className = `ft${p.self ? ' self' : ''}`;
           t.fs.innerHTML = `<video autoplay playsinline muted></video><div class="off" hidden><span class="av"></span></div><div class="fnm"><span class="js-n"></span><small></small></div>`;
           this.tiles.set(p.pid, t);
-          if (p.self) grid.prepend(t.el); else grid.appendChild(t.el);
+          if (p.self) grid.prepend(t.el); else if (p.local) { const after = [...grid.children].filter((c) => c.classList.contains('self') || c.classList.contains('local')).pop(); after ? after.after(t.el) : grid.prepend(t.el); } else grid.appendChild(t.el);
+          if (p.local) t.el.classList.add('local');
           $('.js-fgrid', this.fsEl).appendChild(t.fs);
           if (p.self) this.attach(p.pid, this.self.stream);
         }
@@ -226,6 +233,7 @@
       if (this.host) {
         const me = this.selfStatus ? this.selfStatus() : {};
         rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `Saves straight to this Mac`, 100, true));
+        for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `Studio camera${x.audio ? ' + sound' : ''} · saves straight to this Mac`, 100, true, false, true));
         for (const p of s.peers.values()) {
           const st = this.status.get(p.pid) || {};
           const sub = st.err ? st.err : st.rec ? `Recording ${st.res || ''} · ${st.pending ? `${mb(st.bytes)} to upload` : 'uploaded so far'}` : st.pending ? `Uploading · ${mb(st.bytes)} left` : st.sent ? 'All uploaded' : on ? 'Not recording yet' : 'Ready';
@@ -242,18 +250,20 @@
       }
       el.innerHTML = rows.join('');
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
+      for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
       // tile corner tag
       for (const [pid, t] of this.tiles) {
-        const st = pid === s.pid ? (this.selfStatus ? this.selfStatus() : {}) : this.status.get(pid) || {};
+        const ex = this.extras.find((x) => x.pid === pid);
+        const st = pid === s.pid ? (this.selfStatus ? this.selfStatus() : {}) : ex || this.status.get(pid) || {};
         const tag = $('.rectag', t.el), stt = $('.st', t.el);
         tag.hidden = !st.rec; if (st.rec) tag.innerHTML = `<span class="dot red"></span>${esc(st.res || 'REC')}`;
-        const show = this.host && pid !== s.pid && (st.pending || st.rec);
+        const show = this.host && pid !== s.pid && !ex && (st.pending || st.rec);
         stt.hidden = !show; if (show) stt.innerHTML = `${ico('up')}<b>${st.pending ? mb(st.bytes) : 'Up to date'}</b>`;
         $('small', t.fs).textContent = st.rec ? `${st.res || ''} REC` : '';
       }
     }
-    trackRow(pid, name, sub, pct, ok, kick) {
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+    trackRow(pid, name, sub, pct, ok, kick, cam) {
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico('cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this camera" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);
