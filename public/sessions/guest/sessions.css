@@ -359,3 +359,37 @@ body > #v-room .win{max-width:1680px}
 .drawer.floating input,.drawer.floating textarea,.drawer.floating select{background:rgba(0,0,0,.3)}
 .fs{-webkit-user-select:none;user-select:none}
 body:has(.drawer.floating) .fs .fup{display:none}
+/* before the day: when the show is, and the tech check */
+.when{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r);background:var(--vsoft);color:var(--fg)}
+.when .ico{width:20px;height:20px;color:var(--vtext);flex:none;margin-top:1px}
+.when b{display:block;font-size:14px}.when span{display:block;color:var(--mute);font-size:13px}.when small{display:block;margin-top:4px;font-size:12px;color:var(--vtext)}
+.jbtns{display:flex;gap:8px;flex-wrap:wrap}.jbtns .btn{flex:1 1 180px}
+.tcres{padding:14px;display:flex;flex-direction:column;gap:10px}
+.tcres .row{display:flex;gap:9px;align-items:center}
+.tclist{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.tclist .ico{width:16px;height:16px;flex:none}
+.tcplay{display:flex;flex-direction:column;gap:6px}
+.tcplay video{width:100%;max-height:220px;border-radius:var(--r);background:#000}
+.spin.sm{width:16px;height:16px;border-width:2px;margin:0}
+/* the running order in the Show tab */
+.rolist{display:flex;flex-direction:column;gap:4px}
+.ro{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;padding:8px 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--fg);font-size:13px}
+.ro:hover{border-color:var(--line2)}
+.ro .rn{font:600 11px var(--mono);color:var(--dim)}.ro .rm{font:500 12px var(--mono);color:var(--mute)}
+.ro .rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ro.on{border-color:var(--v);background:var(--vsoft)}.ro.on .rn,.ro.on .rm{color:var(--vtext)}
+.btn:disabled{opacity:.45;cursor:default;filter:none}
+/* the teleprompter: near the top of the screen (close to the camera), the reading line a third of the way down */
+.prompter{position:fixed;z-index:70;top:72px;left:50%;transform:translateX(-50%);width:min(860px,calc(100vw - 32px));height:min(34vh,320px);border-radius:14px;background:rgba(6,7,10,.94);border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 60px -20px rgba(0,0,0,.9);overflow:hidden;color:#fff;--ps:30px}
+.prompter .pview{position:absolute;inset:0;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 78%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 78%,transparent 100%)}
+.prompter .ptext{position:absolute;left:0;right:0;top:33%;padding:0 48px 60vh;font:600 var(--ps)/1.45 var(--body);will-change:transform}
+.prompter .ptext p{margin:0 0 .8em}
+.prompter .pline{position:absolute;left:12px;right:12px;top:calc(33% + var(--ps) * .72);height:0;border-top:2px solid rgba(139,108,255,.55);pointer-events:none}
+.prompter .pline::before{content:"";position:absolute;left:-6px;top:-7px;border:6px solid transparent;border-left:9px solid #a48bff}
+.prompter .pctl{position:absolute;right:8px;top:8px;display:flex;gap:4px;opacity:.35;transition:opacity .15s}
+.prompter:hover .pctl{opacity:1}
+.prompter .pctl button{width:30px;height:28px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;font:700 11px var(--body);display:grid;place-items:center}
+.prompter .pctl .ico{width:14px;height:14px}
+.pset{display:flex;flex-direction:column;gap:8px}
+.pset select{height:30px;flex:1;min-width:0;padding:0 8px;font-size:12px}
+@media (max-width:640px){.prompter{top:8px;height:30vh}.prompter .ptext{padding:0 20px 60vh}}
