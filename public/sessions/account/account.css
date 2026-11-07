@@ -1,0 +1,37 @@
+/* Showcaller Sessions: your account (sign in, and every session with its plan, takes and edit links). Uses sessions.css. */
+.topnav .sp{flex:1}
+.acc-me{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.acc-center{min-height:calc(100dvh - 66px);display:grid;place-items:center;padding:24px 16px}
+.acc-box{width:min(420px,100%);padding:28px}
+.acc-box h1{margin:0 0 6px;font:600 22px var(--display)}.acc-box h2{margin:18px 0 6px;font:600 17px var(--display)}
+.acc-box p{color:var(--mute);margin:0 0 16px}
+.acc-box .btn{width:100%}
+.acc-err{color:var(--red)!important;font-size:13px}
+.acc{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;padding:16px;max-width:1200px;margin:0 auto}
+.acc-ok{grid-column:1/-1;padding:12px 16px;color:var(--green);background:var(--greensoft);border-color:transparent}
+.acc-list{display:flex;flex-direction:column;gap:6px}
+.acc-list .it{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--card)}
+.acc-list .it b{font-weight:600}.acc-list .it small{color:var(--mute);font-size:12px}
+.acc-list .it.on{border-color:var(--v);background:var(--vsoft)}
+.acc-list .none{color:var(--mute);padding:12px;font-size:13px}
+.acc-room{display:flex;flex-direction:column;gap:14px;min-width:0}
+.acc-room h1{margin:0;font:600 22px var(--display)}
+.acc-room .card{padding:16px}
+.acc-room h2{margin:0 0 10px}
+.acc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.acc-row+.acc-row{margin-top:8px}
+.acc-row .grow{flex:1;min-width:0}
+.acc-link{font:12px var(--mono);color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.acc-tbl{display:flex;flex-direction:column}
+.acc-tbl>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.acc-tbl>div:first-child{border-top:0;padding-top:0}
+.acc-tbl .grow{flex:1;min-width:160px}
+.acc-tbl small{display:block;color:var(--mute);font-size:12px}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--mute)}
+.tag.ok{background:var(--greensoft);color:var(--green)}.tag.warn{background:var(--ambersoft);color:var(--amber)}
+.acc-inv{display:flex;gap:6px;width:100%}
+.acc-inv input{flex:1;padding:6px 10px!important;font-size:13px}
+.acc-room .mute{color:var(--mute);font-size:13px;margin:0}
+.acc-run{margin:0;padding-left:18px;color:var(--mute);font-size:13px}
+.msg{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);padding:24px;max-width:420px}
+@media (max-width:760px){.acc{grid-template-columns:1fr}.acc-list{flex-direction:row;overflow-x:auto}.acc-list .it{min-width:180px}}

@@ -15,6 +15,7 @@
 //   POST …/sessions/api/share?take&op=start|part|done|data   the app puts the take's small preview video and transcript up
 //   GET  …/sessions/editmedia?r&take&k&f=proxy|data    the browser editor gets them (proxy supports Range)
 //   POST …/sessions/api/clips   AI-picked clips from a take's transcript (app only; sessions-ai.js, 20 a day per room)
+//   …/sessions/auth/*, …/sessions/acct/*   accounts: sign in by email, the dashboard at /sessions/account/ (sessions-accounts.js)
 //   GET …/sessions/info?r&g, POST …/sessions/techcheck?r&g, GET/POST …/sessions/speed   the guest page before the day
 //
 // Cloud keys: r/<room>/<take>/<pid>/<v|a|m>/<000001>. A page that reloads mid-take records a new part: its pieces
@@ -24,6 +25,7 @@
 // The producer key is made from the room's owner hash (the app works it out from its secret), so nothing extra is stored.
 import { DurableObject } from 'cloudflare:workers';
 import { pickClips } from './sessions-ai.js';
+import { accounts } from './sessions-accounts.js';
 
 const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
 export const producerKey = async (ownerHash) => (await sha(`showcaller-sessions-producer:${ownerHash}`)).slice(0, 32);
@@ -44,6 +46,9 @@ const room = (env, r) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(r));
 
 export async function sessions(request, env) {
   const url = new URL(request.url), p = url.pathname, r = url.searchParams.get('r') || '';
+  // accounts: emailed sign-in links and the dashboard's data (sessions-accounts.js)
+  if (p.startsWith('/sessions/auth/') || p.startsWith('/sessions/acct/')) return accounts(request, env);
+  if (p === '/sessions/' && request.method === 'GET') return Response.redirect(new URL('/sessions/account/', url), 302);
   if (!ROOM.test(r)) return j({ error: 'No such session' }, 404);
   if (p === '/sessions/host' || p === '/sessions/ws') {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Use a WebSocket', { status: 426 });
