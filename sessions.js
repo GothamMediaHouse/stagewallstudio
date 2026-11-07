@@ -147,8 +147,8 @@ export class SessionRoom extends DurableObject {
   each(o, filter = () => true) { const s = JSON.stringify(o); for (const w of this.open('in')) if (filter(w.deserializeAttachment())) this.send(w, s); }
   async state() {
     if (!this.st) {
-      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan']);
-      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan() };
+      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan', 'prompt']);
+      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan(), prompt: m.get('prompt') || { script: '', to: 'off', run: false, speed: 1.2, pos: 0, at: 0 } };
     }
     return this.st;
   }
@@ -185,11 +185,12 @@ export class SessionRoom extends DurableObject {
       const sec = request.headers.get('X-Session-Secret') || '';
       if (!s.owner && sec.length >= 20) { s.owner = await sha(`showcaller-sessions:${sec}`); await this.save('owner'); }
       if (!await this.isOwner(request.headers.get('X-Session-Secret') || '')) return j({ error: 'Wrong session key' }, 403);
-      if (url.pathname === '/plan' && request.method === 'GET') return j({ plan: s.plan, cfg: s.cfg });
+      if (url.pathname === '/plan' && request.method === 'GET') return j({ plan: s.plan, cfg: s.cfg, script: s.prompt.script });
       let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad plan' }, 400); }
       if (url.pathname === '/plan') {
         s.plan = cleanPlan(b.plan || {}, s.plan);
         if (b.name !== undefined) { s.cfg.name = clean(b.name, 60) || s.cfg.name; await this.save('cfg'); }
+        if (typeof b.script === 'string' && b.script !== s.prompt.script) { s.prompt = { ...s.prompt, script: b.script.replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 20000), at: Date.now() }; await this.save('prompt'); this.each({ t: 'prompt', prompt: s.prompt }); }
         await this.save('plan');
         for (const w of this.ctrls()) this.send(w, { t: 'plan', plan: s.plan });
         return j({ plan: s.plan });
@@ -275,7 +276,7 @@ export class SessionRoom extends DurableObject {
 
   async hello(w, you) {
     const s = await this.state();
-    const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: s.rec, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
+    const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: s.rec, prompt: s.prompt, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
     if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; o.board = s.board; o.plan = s.plan; }
     else o.tok = s.admitted[you.pid]?.tok;
     this.send(w, o);
@@ -351,6 +352,19 @@ export class SessionRoom extends DurableObject {
       await this.save('board');
       for (const w of this.ctrls()) this.send(w, { t: 'board', board: s.board });
       return;
+    }
+    // the teleprompter: the script, who sees it, and where it is (pos in lines of text, rolling at speed from at)
+    if (m.t === 'prompt' && m.prompt && typeof m.prompt === 'object') {
+      const p = m.prompt, o = s.prompt;
+      s.prompt = {
+        script: p.script === undefined ? o.script : String(p.script).replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 20000),
+        to: p.to === undefined ? o.to : ['off', 'ctrl', 'all', 'host'].includes(p.to) || PID.test(p.to) ? p.to : o.to,
+        run: p.run === undefined ? o.run : !!p.run,
+        speed: p.speed === undefined ? o.speed : Math.max(0.1, Math.min(8, Number(p.speed) || 1.2)),
+        pos: Math.max(0, Math.min(1e5, Number(p.pos) || 0)), at: Date.now(),
+      };
+      await this.save('prompt');
+      return this.each({ t: 'prompt', prompt: s.prompt });
     }
     if (m.t === 'mark' && s.rec.on) {
       const t = s.takes.find((x) => x.id === s.rec.take); if (!t) return;

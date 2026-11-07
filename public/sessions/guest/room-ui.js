@@ -64,7 +64,7 @@
       this.mutedBy = ''; // a host or producer muted this person's mic (so they can turn it back on without asking)
       this.render();
       const s = this.session;
-      s.on('peers', () => { this.sync(); this.talkCheck(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
+      s.on('peers', () => { this.sync(); this.talkCheck(); this.drawPrompt(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
         .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => this.drawTop()).on('rec', () => { this.drawTop(); this.drawDock(); })
         .on('data', (from, d) => {
           if (!d) return;
@@ -72,15 +72,15 @@
           if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
           if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
         })
-        .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan())
+        .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan()).on('prompt', () => this.drawPrompt())
         .on('host', () => this.drawTop());
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
       this.raf = () => { this.meters(); this.rafId = requestAnimationFrame(this.raf); }; this.rafId = requestAnimationFrame(this.raf);
-      this.ro = new ResizeObserver(() => { this.fit(); this.fitFs(); }); this.ro.observe(this.el);
+      this.ro = new ResizeObserver(() => { this.fit(); this.fitFs(); this.placePrompt(); }); this.ro.observe(this.el);
       addEventListener('keydown', this.keys = (e) => { if (e.key === 'Escape' && !this.fsEl.hidden) this.full(false); });
     }
-    destroy() { clearInterval(this.tick); cancelAnimationFrame(this.rafId); this.ro.disconnect(); removeEventListener('keydown', this.keys); try { this.ac && this.ac.close(); } catch {} this.el.innerHTML = ''; this.fsEl.remove(); }
+    destroy() { clearInterval(this.tick); cancelAnimationFrame(this.rafId); this.ro.disconnect(); removeEventListener('keydown', this.keys); try { this.ac && this.ac.close(); } catch {} this.el.innerHTML = ''; this.fsEl.remove(); this.pEl.remove(); cancelAnimationFrame(this.pRaf); }
 
     render() {
       const h = this.host;
@@ -116,6 +116,13 @@
                   <div class="row cdset">${[1, 5, 10, 15, 30].map((m) => `<button class="btn soft sm js-cdm" data-m="${m}">${m}m</button>`).join('')}</div>
                   <div class="row"><input type="text" class="js-cdc" placeholder="mm:ss" aria-label="Countdown length (minutes, or mm:ss)" style="width:72px;flex:none;padding:6px 9px"><button class="btn sm js-cdgo">Start</button><button class="btn soft sm js-cdrs">Reset</button><span class="hint js-cdby" style="margin-left:auto"></span></div>
                 </div></div>
+              <div class="dsec"><span class="lbl">Teleprompter</span>
+                <div class="board pset">
+                  <div class="row"><label class="hint" for="pto" style="flex:none">Show it to</label><select class="js-pto" id="pto"></select></div>
+                  <textarea class="js-pscript" rows="5" maxlength="20000" placeholder="Paste the script. A blank line starts a new paragraph."></textarea>
+                  <div class="row"><button class="ib js-ptop" title="Back to the start" aria-label="Back to the start">${ico('up')}</button><button class="btn sm js-pgo">Roll</button>
+                    <label class="hint" style="flex:none">Speed</label><input type="range" class="js-pspeed" min="0.3" max="4" step="0.1" aria-label="Speed" style="flex:1;min-width:60px"><span class="num js-pspv" style="font-size:12px;width:30px"></span></div>
+                </div></div>
               <div class="dsec"><span class="lbl">Notes</span><textarea class="js-notes" rows="6" maxlength="5000" placeholder="Notes for the host and producers (guests don’t see these)"></textarea><span class="hint js-nby"></span></div>
               <div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>
             </div>` : ''}
@@ -141,6 +148,14 @@
         <div class="ftop"><div class="glass fttl js-fttl"></div><div class="fright"><div class="row" style="gap:8px">${this.ctrl ? `<div class="glass fcd js-fcd" hidden>${ico('timer')}<span class="num js-fcdt"></span><span class="js-fcdl"></span></div>` : ''}<div class="glass frec js-frec"><i></i><span class="js-fclock"></span></div></div><div class="glass fup js-fup"></div></div></div>
         <div class="glass fdock js-fdock"></div>`;
       document.body.appendChild(this.fsEl);
+      // the teleprompter: over everything, near the top (close to the camera); text size is each viewer's own
+      this.pEl = document.createElement('div'); this.pEl.className = 'prompter'; this.pEl.hidden = true;
+      this.pEl.innerHTML = `<div class="pview js-pview"><div class="ptext js-ptext"></div></div><i class="pline"></i>
+        <div class="pctl"><button class="js-pa" data-d="-1" aria-label="Smaller text">A−</button><button class="js-pa" data-d="1" aria-label="Bigger text">A+</button><button class="js-phide" aria-label="Hide the teleprompter">${ico('x')}</button></div>`;
+      document.body.appendChild(this.pEl);
+      this.pSize = Number((() => { try { return localStorage.getItem('sess-psize'); } catch { return 0; } })()) || 30; this.pHidden = false;
+      for (const b of this.pEl.querySelectorAll('.js-pa')) b.onclick = () => { this.pSize = Math.max(18, Math.min(64, this.pSize + Number(b.dataset.d) * 4)); try { localStorage.setItem('sess-psize', this.pSize); } catch {} this.drawPrompt(); };
+      $('.js-phide', this.pEl).onclick = () => { this.pHidden = true; this.drawPrompt(); toast('Teleprompter hidden. It comes back when the script changes.'); };
       const q = (c) => $(c, this.el);
       q('.js-drawer').onclick = () => { this.drawerOpen = !this.drawerOpen; q('.room').classList.toggle('closed', !this.drawerOpen); this.fit(); if (this.drawerOpen) this.showTab(this.tab); };
       for (const b of this.el.querySelectorAll('.js-tab')) b.onclick = () => this.showTab(b.dataset.t);
@@ -155,8 +170,8 @@
         for (const b of this.el.querySelectorAll('.js-addcam,.js-addcam2')) b.onclick = () => this.onAddCamera();
         if (q('.js-pcopy')) q('.js-pcopy').onclick = () => { navigator.clipboard.writeText(this.producerUrl).then(() => toast('Producer link copied. Only send it to someone you trust to run the room.', 3500)); };
       }
-      if (this.ctrl) this.wireBoard();
-      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads(); this.drawBoard();
+      if (this.ctrl) { this.wireBoard(); this.wirePrompt(); }
+      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads(); this.drawBoard(); this.drawPrompt();
     }
 
     // the side panel's tabs (People / Show / Chat / Invite for the host and producers; You / Chat for a guest)
@@ -193,6 +208,48 @@
       q('.js-cdl').onchange = () => { const c = s.board.cd; if (c) s.setBoard({ cd: { ...c, label: q('.js-cdl').value } }); };
       let h = 0; q('.js-notes').oninput = () => { clearTimeout(h); h = setTimeout(() => s.setBoard({ notes: q('.js-notes').value }), 500); };
       q('.js-notes').onblur = () => { clearTimeout(h); if (q('.js-notes').value !== (s.board.notes || '')) s.setBoard({ notes: q('.js-notes').value }); };
+    }
+    // ---- teleprompter: { script, to ('off' | 'ctrl' | 'all' | a pid), run, speed (lines a second... in em/s), pos (em), at (room time) }
+    promptPos() { const p = this.session.prompt; if (!p) return 0; return Math.max(0, p.pos + (p.run ? p.speed * (this.session.now() - p.at) / 1000 : 0)); }
+    // over the pictures (not the side panel); in full screen, over the whole screen
+    placePrompt() {
+      if (!this.pEl || this.pEl.hidden) return;
+      const st = $('.js-stage', this.el), fs = !this.fsEl.hidden, r = !fs && st && st.getBoundingClientRect();
+      if (r && r.width > 300 && innerWidth > 640) { this.pEl.style.left = `${r.left + r.width / 2}px`; this.pEl.style.width = `${Math.min(860, r.width - 32)}px`; this.pEl.style.top = `${Math.max(8, r.top + 12)}px`; }
+      else { this.pEl.style.left = ''; this.pEl.style.width = ''; this.pEl.style.top = ''; }
+    }
+    promptMine() { const p = this.session.prompt; if (!p || !p.script || p.to === 'off') return false; return p.to === 'all' || (p.to === 'ctrl' && this.ctrl) || p.to === this.session.pid; }
+    sendPrompt(part) { const s = this.session, p = s.prompt || {}; s.setPrompt({ ...part, pos: part.pos !== undefined ? part.pos : this.promptPos() }); }
+    wirePrompt() {
+      const q = (c) => $(c, this.el);
+      let h = 0; q('.js-pscript').oninput = () => { clearTimeout(h); h = setTimeout(() => this.sendPrompt({ script: q('.js-pscript').value }), 600); };
+      q('.js-pto').onchange = () => this.sendPrompt({ to: q('.js-pto').value });
+      q('.js-pgo').onclick = () => { const p = this.session.prompt || {}; if (!p.script) return toast('Paste a script first'); if (!p.run && p.to === 'off') this.sendPrompt({ run: true, to: 'all' }); else this.sendPrompt({ run: !p.run }); };
+      q('.js-ptop').onclick = () => this.sendPrompt({ pos: 0, run: false });
+      q('.js-pspeed').oninput = () => { q('.js-pspv').textContent = `${Number(q('.js-pspeed').value).toFixed(1)}×`; };
+      q('.js-pspeed').onchange = () => this.sendPrompt({ speed: Number(q('.js-pspeed').value) });
+    }
+    drawPrompt() {
+      const p = this.session.prompt || { script: '', to: 'off', run: false, speed: 1.2, pos: 0 };
+      if (this.ctrl && $('.js-pto', this.el)) {
+        const q = (c) => $(c, this.el), ta = q('.js-pscript');
+        if (document.activeElement !== ta && ta.value !== (p.script || '')) ta.value = p.script || '';
+        const opts = [['off', 'Nobody (off)'], ['ctrl', 'The host and producers'], ['all', 'Everyone']].concat([...this.session.peers.values()].filter((x) => x.role === 'guest').map((x) => [x.pid, `Only ${x.name}`]));
+        if (!this.session.producer) { /* the host is 'host' */ } else opts.push(['host', 'Only the host']);
+        const html = opts.map(([v, l]) => `<option value="${esc(v)}"${v === p.to ? ' selected' : ''}>${esc(l)}</option>`).join('');
+        if (q('.js-pto').innerHTML !== html) q('.js-pto').innerHTML = html;
+        q('.js-pgo').textContent = p.run ? 'Pause' : this.promptPos() > 0 ? 'Carry on' : 'Roll';
+        if (document.activeElement !== q('.js-pspeed')) { q('.js-pspeed').value = p.speed; q('.js-pspv').textContent = `${Number(p.speed).toFixed(1)}×`; }
+      }
+      const key = `${p.script}|${p.to}`;
+      if (key !== this.pKey) { this.pKey = key; this.pHidden = false; $('.js-ptext', this.pEl).innerHTML = (p.script || '').split(/\n\s*\n/).map((x) => `<p>${esc(x.trim()).replace(/\n/g, '<br>')}</p>`).join(''); }
+      const show = this.promptMine() && !this.pHidden;
+      this.pEl.hidden = !show; this.pEl.style.setProperty('--ps', `${this.pSize}px`); this.placePrompt();
+      cancelAnimationFrame(this.pRaf);
+      if (!show) return;
+      const view = $('.js-pview', this.pEl), txt = $('.js-ptext', this.pEl);
+      const step = () => { txt.style.transform = `translateY(${-this.promptPos() * this.pSize}px)`; if ((this.session.prompt || {}).run) this.pRaf = requestAnimationFrame(step); };
+      step();
     }
     // the show's running order from the plan: press a segment to start its countdown
     drawPlan() {
@@ -540,7 +597,7 @@
       for (const [k, t] of this.tiles) t.fs.classList.toggle('spot', k === this.spot);
       if (on && !was) { try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {}); } catch {} for (const t of this.tiles.values()) $('video', t.fs).play().catch(() => {}); }
       else if (!on) { this.panelFs(false); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
-      this.fitFs(); this.drawDock(); this.drawCountdown();
+      this.fitFs(); this.placePrompt(); this.drawDock(); this.drawCountdown();
     }
     // the side panel floating over the full-screen view (the same panel, fixed above it, so nothing moves)
     panelFs(on) {
