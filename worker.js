@@ -21,7 +21,6 @@ export { IntercomRoom } from './intercom.js';
 export { HubInstalls } from './installs.js';
 export { LinkRelay } from './link-relay.js';
 export { SessionRoom } from './sessions.js';
-export { SessionsAccount } from './sessions-accounts.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
