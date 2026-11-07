@@ -1,4 +1,4 @@
-// Showcaller Sessions: your account. Sign in with an emailed link, then see every session the studio app added to your
+// Showcaller Sessions: your account. Sign in with email and password, then see every session the studio app added to your
 // account: its guest and producer links, the plan (when, rundown, guests and their tech checks) and the takes, each with
 // "Edit in browser" once the app has shared it, and "Invite an editor" to email someone that take's edit link.
 (function () {
@@ -20,22 +20,33 @@
   const len = (s) => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60; return h ? `${h} h ${m} min` : m ? `${m} min` : `${s} s`; };
   const copyBtn = (text, label = 'Copy link') => `<button class="btn soft sm" data-copy="${esc(text)}">${esc(label)}</button>`;
 
-  // signed out
-  function signedOut() {
-    show('#signin'); $('#me').hidden = $('#out').hidden = true;
-    $('#form').hidden = false; $('#sent').hidden = true; $('#err').hidden = true;
+  // signed out: sign in, make an account, or reset a forgotten password (both confirmed by an emailed link)
+  let mode = 'in';
+  const MODES = {
+    in: ['Sign in', 'Your Showcaller Sessions: plans, takes and edit links.', 'Sign in', 'current-password', 'Password'],
+    up: ['Create an account', 'Choose a password. We’ll email you a link to confirm your address.', 'Create account', 'new-password', 'Choose a password (8 or more characters)'],
+    reset: ['Reset your password', 'Choose a new password. It starts working once you press the link we email you.', 'Email me a link', 'new-password', 'New password (8 or more characters)'],
+  };
+  function setMode(m) {
+    mode = m; const [t, p, b, ac, ph] = MODES[m];
+    $('#mtitle').textContent = t; $('#mtext').textContent = p; $('#send').textContent = b; $('#pw').autocomplete = ac; $('#pw').placeholder = ph;
+    $('#alt').innerHTML = m === 'in' ? '<button type="button" class="lnk" data-mode="up">Create an account</button><button type="button" class="lnk" data-mode="reset">Forgot password?</button>' : '<button type="button" class="lnk" data-mode="in">Back to sign in</button>';
+    $('#err').hidden = true; $('#form').hidden = false; $('#sent').hidden = true; $('#alt').hidden = false;
   }
+  function signedOut() { show('#signin'); $('#me').hidden = $('#out').hidden = true; setMode(q.get('mode') === 'up' ? 'up' : 'in'); }
   $('#form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = $('#email').value.trim(); $('#err').hidden = true; $('#send').disabled = true;
+    const email = $('#email').value.trim(), password = $('#pw').value; $('#err').hidden = true; $('#send').disabled = true;
     try {
-      const o = await call('/sessions/auth/start', { email });
-      $('#form').hidden = true; $('#sent').hidden = false; $('#sentto').textContent = email;
+      if (mode === 'in') { await call('/sessions/auth/login', { email, password }); $('#pw').value = ''; $('#send').disabled = false; return load(); }
+      const o = await call('/sessions/auth/start', { email, password, purpose: mode === 'up' ? 'signup' : 'reset' });
+      $('#form').hidden = true; $('#alt').hidden = true; $('#sent').hidden = false; $('#pw').value = '';
+      $('#senttext').textContent = `We sent a link to ${email}. Press it to ${mode === 'up' ? 'confirm your email and finish making your account' : 'start using your new password'}. It works once, for 15 minutes.`;
       if (o.link) { window.__acctLink = o.link; } // tests only: the site isn't sending email
     } catch (er) { $('#err').textContent = er.message; $('#err').hidden = false; }
     $('#send').disabled = false;
   });
-  $('#again').addEventListener('click', () => { $('#form').hidden = false; $('#sent').hidden = true; $('#email').focus(); });
+  $('#again').addEventListener('click', () => { setMode('in'); $('#email').focus(); });
   $('#out').addEventListener('click', async () => { try { await call('/sessions/auth/logout', {}); } catch {} location.href = '/sessions/account/'; });
 
   // signed in
@@ -99,6 +110,7 @@
   function fail(h, p) { show(''); const b = $('#msg'); b.hidden = false; b.innerHTML = `<h2>${esc(h)}</h2><p>${esc(p)}</p>`; }
 
   document.addEventListener('click', async (e) => {
+    const md = e.target.closest('[data-mode]'); if (md) return setMode(md.dataset.mode);
     const r = e.target.closest('[data-room]'); if (r) return open(r.dataset.room);
     const c = e.target.closest('[data-copy]');
     if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); U.toast('Copied'); } catch { prompt('Copy this link:', c.dataset.copy); } return; }
