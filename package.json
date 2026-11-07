@@ -1,0 +1,9 @@
+{
+  "name": "stagewallstudio",
+  "private": true,
+  "type": "module",
+  "description": "showcallerstudio.com, a Cloudflare Worker (wrangler.jsonc). The only package is the Claude API SDK for Showcaller Sessions' AI-picked clips (sessions-ai.js).",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0"
+  }
+}

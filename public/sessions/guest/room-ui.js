@@ -64,23 +64,23 @@
       this.mutedBy = ''; // a host or producer muted this person's mic (so they can turn it back on without asking)
       this.render();
       const s = this.session;
-      s.on('peers', () => { this.sync(); this.talkCheck(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
-        .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => this.drawTop()).on('rec', () => { this.drawTop(); this.drawDock(); })
+      s.on('peers', () => { this.sync(); this.talkCheck(); this.drawPrompt(); }).on('stream', (p) => this.attach(p.pid, p.stream)).on('gone', (p) => this.sync())
+        .on('chat', (m) => this.addChat(m)).on('waiting', () => this.drawWaiting()).on('cfg', () => { this.drawTop(); this.drawDock(); }).on('rec', () => { this.drawTop(); this.drawDock(); })
         .on('data', (from, d) => {
           if (!d) return;
           if (d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); }
           if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
           if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
         })
-        .on('board', () => this.drawBoard())
-        .on('host', () => this.drawTop());
+        .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan()).on('prompt', () => this.drawPrompt())
+        .on('host', () => { this.drawTop(); this.drawDock(); }).on('notice', (t) => toast(t, 5000));
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
       this.raf = () => { this.meters(); this.rafId = requestAnimationFrame(this.raf); }; this.rafId = requestAnimationFrame(this.raf);
-      this.ro = new ResizeObserver(() => { this.fit(); this.fitFs(); }); this.ro.observe(this.el);
+      this.ro = new ResizeObserver(() => { this.fit(); this.fitFs(); this.placePrompt(); }); this.ro.observe(this.el);
       addEventListener('keydown', this.keys = (e) => { if (e.key === 'Escape' && !this.fsEl.hidden) this.full(false); });
     }
-    destroy() { clearInterval(this.tick); cancelAnimationFrame(this.rafId); this.ro.disconnect(); removeEventListener('keydown', this.keys); try { this.ac && this.ac.close(); } catch {} this.el.innerHTML = ''; this.fsEl.remove(); }
+    destroy() { clearInterval(this.tick); cancelAnimationFrame(this.rafId); this.ro.disconnect(); removeEventListener('keydown', this.keys); try { this.ac && this.ac.close(); } catch {} this.el.innerHTML = ''; this.fsEl.remove(); this.pEl.remove(); cancelAnimationFrame(this.pRaf); }
 
     render() {
       const h = this.host;
@@ -109,11 +109,19 @@
               ${h && this.onAddCamera ? `<button class="btn soft sm js-addcam" style="align-self:flex-start">${ico('plus')} Add a studio camera or mic</button>` : ''}
             </div>
             ${this.ctrl ? `<div class="dpane" data-t="show">
+              <div class="dsec js-rosec" hidden><span class="lbl">Running order <span class="js-rotot" style="letter-spacing:0;text-transform:none;font-weight:500"></span></span><div class="rolist js-ro"></div></div>
               <div class="dsec"><span class="lbl">Countdown</span>
                 <div class="board">
                   <div class="row"><span class="num cdbig js-cdt">00:00</span><input type="text" class="js-cdl" placeholder="What for (Break, Wrap…)" maxlength="60" aria-label="Countdown label"></div>
                   <div class="row cdset">${[1, 5, 10, 15, 30].map((m) => `<button class="btn soft sm js-cdm" data-m="${m}">${m}m</button>`).join('')}</div>
                   <div class="row"><input type="text" class="js-cdc" placeholder="mm:ss" aria-label="Countdown length (minutes, or mm:ss)" style="width:72px;flex:none;padding:6px 9px"><button class="btn sm js-cdgo">Start</button><button class="btn soft sm js-cdrs">Reset</button><span class="hint js-cdby" style="margin-left:auto"></span></div>
+                </div></div>
+              <div class="dsec"><span class="lbl">Teleprompter</span>
+                <div class="board pset">
+                  <div class="row"><label class="hint" for="pto" style="flex:none">Show it to</label><select class="js-pto" id="pto"></select></div>
+                  <textarea class="js-pscript" rows="5" maxlength="20000" placeholder="Paste the script. A blank line starts a new paragraph."></textarea>
+                  <div class="row"><button class="ib js-ptop" title="Back to the start" aria-label="Back to the start">${ico('up')}</button><button class="btn sm js-pgo">Roll</button>
+                    <label class="hint" style="flex:none">Speed</label><input type="range" class="js-pspeed" min="0.3" max="4" step="0.1" aria-label="Speed" style="flex:1;min-width:60px"><span class="num js-pspv" style="font-size:12px;width:30px"></span></div>
                 </div></div>
               <div class="dsec"><span class="lbl">Notes</span><textarea class="js-notes" rows="6" maxlength="5000" placeholder="Notes for the host and producers (guests don’t see these)"></textarea><span class="hint js-nby"></span></div>
               <div class="dsec js-marksec" hidden><span class="lbl">Marks this take</span><div class="chat js-marks"></div></div>
@@ -140,6 +148,14 @@
         <div class="ftop"><div class="glass fttl js-fttl"></div><div class="fright"><div class="row" style="gap:8px">${this.ctrl ? `<div class="glass fcd js-fcd" hidden>${ico('timer')}<span class="num js-fcdt"></span><span class="js-fcdl"></span></div>` : ''}<div class="glass frec js-frec"><i></i><span class="js-fclock"></span></div></div><div class="glass fup js-fup"></div></div></div>
         <div class="glass fdock js-fdock"></div>`;
       document.body.appendChild(this.fsEl);
+      // the teleprompter: over everything, near the top (close to the camera); text size is each viewer's own
+      this.pEl = document.createElement('div'); this.pEl.className = 'prompter'; this.pEl.hidden = true;
+      this.pEl.innerHTML = `<div class="pview js-pview"><div class="ptext js-ptext"></div></div><i class="pline"></i>
+        <div class="pctl"><button class="js-pa" data-d="-1" aria-label="Smaller text">A−</button><button class="js-pa" data-d="1" aria-label="Bigger text">A+</button><button class="js-phide" aria-label="Hide the teleprompter">${ico('x')}</button></div>`;
+      document.body.appendChild(this.pEl);
+      this.pSize = Number((() => { try { return localStorage.getItem('sess-psize'); } catch { return 0; } })()) || 30; this.pHidden = false;
+      for (const b of this.pEl.querySelectorAll('.js-pa')) b.onclick = () => { this.pSize = Math.max(18, Math.min(64, this.pSize + Number(b.dataset.d) * 4)); try { localStorage.setItem('sess-psize', this.pSize); } catch {} this.drawPrompt(); };
+      $('.js-phide', this.pEl).onclick = () => { this.pHidden = true; this.drawPrompt(); toast('Teleprompter hidden. It comes back when the script changes.'); };
       const q = (c) => $(c, this.el);
       q('.js-drawer').onclick = () => { this.drawerOpen = !this.drawerOpen; q('.room').classList.toggle('closed', !this.drawerOpen); this.fit(); if (this.drawerOpen) this.showTab(this.tab); };
       for (const b of this.el.querySelectorAll('.js-tab')) b.onclick = () => this.showTab(b.dataset.t);
@@ -154,8 +170,8 @@
         for (const b of this.el.querySelectorAll('.js-addcam,.js-addcam2')) b.onclick = () => this.onAddCamera();
         if (q('.js-pcopy')) q('.js-pcopy').onclick = () => { navigator.clipboard.writeText(this.producerUrl).then(() => toast('Producer link copied. Only send it to someone you trust to run the room.', 3500)); };
       }
-      if (this.ctrl) this.wireBoard();
-      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads(); this.drawBoard();
+      if (this.ctrl) { this.wireBoard(); this.wirePrompt(); }
+      this.drawTop(); this.drawDock(); this.drawWaiting(); this.drawTracks(); this.drawUploads(); this.drawBoard(); this.drawPrompt();
     }
 
     // the side panel's tabs (People / Show / Chat / Invite for the host and producers; You / Chat for a guest)
@@ -193,6 +209,63 @@
       let h = 0; q('.js-notes').oninput = () => { clearTimeout(h); h = setTimeout(() => s.setBoard({ notes: q('.js-notes').value }), 500); };
       q('.js-notes').onblur = () => { clearTimeout(h); if (q('.js-notes').value !== (s.board.notes || '')) s.setBoard({ notes: q('.js-notes').value }); };
     }
+    // ---- teleprompter: { script, to ('off' | 'ctrl' | 'all' | a pid), run, speed (lines a second... in em/s), pos (em), at (room time) }
+    promptPos() { const p = this.session.prompt; if (!p) return 0; return Math.max(0, p.pos + (p.run ? p.speed * (this.session.now() - p.at) / 1000 : 0)); }
+    // over the pictures (not the side panel); in full screen, over the whole screen
+    placePrompt() {
+      if (!this.pEl || this.pEl.hidden) return;
+      const st = $('.js-stage', this.el), fs = !this.fsEl.hidden, r = !fs && st && st.getBoundingClientRect();
+      if (r && r.width > 300 && innerWidth > 640) { this.pEl.style.left = `${r.left + r.width / 2}px`; this.pEl.style.width = `${Math.min(860, r.width - 32)}px`; this.pEl.style.top = `${Math.max(8, r.top + 12)}px`; }
+      else { this.pEl.style.left = ''; this.pEl.style.width = ''; this.pEl.style.top = ''; }
+    }
+    promptMine() { const p = this.session.prompt; if (!p || !p.script || p.to === 'off') return false; return p.to === 'all' || (p.to === 'ctrl' && this.ctrl) || p.to === this.session.pid; }
+    sendPrompt(part) { const s = this.session, p = s.prompt || {}; s.setPrompt({ ...part, pos: part.pos !== undefined ? part.pos : this.promptPos() }); }
+    wirePrompt() {
+      const q = (c) => $(c, this.el);
+      let h = 0; q('.js-pscript').oninput = () => { clearTimeout(h); h = setTimeout(() => this.sendPrompt({ script: q('.js-pscript').value }), 600); };
+      q('.js-pto').onchange = () => this.sendPrompt({ to: q('.js-pto').value });
+      q('.js-pgo').onclick = () => { const p = this.session.prompt || {}; if (!p.script) return toast('Paste a script first'); if (!p.run && p.to === 'off') this.sendPrompt({ run: true, to: 'all' }); else this.sendPrompt({ run: !p.run }); };
+      q('.js-ptop').onclick = () => this.sendPrompt({ pos: 0, run: false });
+      q('.js-pspeed').oninput = () => { q('.js-pspv').textContent = `${Number(q('.js-pspeed').value).toFixed(1)}×`; };
+      q('.js-pspeed').onchange = () => this.sendPrompt({ speed: Number(q('.js-pspeed').value) });
+    }
+    drawPrompt() {
+      const p = this.session.prompt || { script: '', to: 'off', run: false, speed: 1.2, pos: 0 };
+      if (this.ctrl && $('.js-pto', this.el)) {
+        const q = (c) => $(c, this.el), ta = q('.js-pscript');
+        if (document.activeElement !== ta && ta.value !== (p.script || '')) ta.value = p.script || '';
+        const opts = [['off', 'Nobody (off)'], ['ctrl', 'The host and producers'], ['all', 'Everyone']].concat([...this.session.peers.values()].filter((x) => x.role === 'guest').map((x) => [x.pid, `Only ${x.name}`]));
+        if (!this.session.producer) { /* the host is 'host' */ } else opts.push(['host', 'Only the host']);
+        const html = opts.map(([v, l]) => `<option value="${esc(v)}"${v === p.to ? ' selected' : ''}>${esc(l)}</option>`).join('');
+        if (q('.js-pto').innerHTML !== html) q('.js-pto').innerHTML = html;
+        q('.js-pgo').textContent = p.run ? 'Pause' : this.promptPos() > 0 ? 'Carry on' : 'Roll';
+        if (document.activeElement !== q('.js-pspeed')) { q('.js-pspeed').value = p.speed; q('.js-pspv').textContent = `${Number(p.speed).toFixed(1)}×`; }
+      }
+      const key = `${p.script}|${p.to}`;
+      if (key !== this.pKey) { this.pKey = key; this.pHidden = false; $('.js-ptext', this.pEl).innerHTML = (p.script || '').split(/\n\s*\n/).map((x) => `<p>${esc(x.trim()).replace(/\n/g, '<br>')}</p>`).join(''); }
+      const show = this.promptMine() && !this.pHidden;
+      this.pEl.hidden = !show; this.pEl.style.setProperty('--ps', `${this.pSize}px`); this.placePrompt();
+      cancelAnimationFrame(this.pRaf);
+      if (!show) return;
+      const view = $('.js-pview', this.pEl), txt = $('.js-ptext', this.pEl);
+      const step = () => { txt.style.transform = `translateY(${-this.promptPos() * this.pSize}px)`; if ((this.session.prompt || {}).run) this.pRaf = requestAnimationFrame(step); };
+      step();
+    }
+    // the show's running order from the plan: press a segment to start its countdown
+    drawPlan() {
+      if (!this.ctrl) return;
+      const p = this.session.plan, ro = (p && p.rundown) || [], sec = $('.js-rosec', this.el); if (!sec) return;
+      sec.hidden = !ro.length; if (!ro.length) return;
+      const cur = this.session.board && this.session.board.cd && this.session.board.cd.label;
+      const tot = ro.reduce((t, x) => t + (x.min || 0), 0);
+      $('.js-rotot', this.el).textContent = tot ? `· ${tot} min` : '';
+      const html = ro.map((x, i) => `<button class="ro${cur && x.t && cur === x.t ? ' on' : ''}" data-i="${i}"><span class="rn">${i + 1}</span><span class="rt">${esc(x.t || `Segment ${i + 1}`)}</span><span class="rm">${x.min ? `${x.min}m` : ''}</span></button>`).join('');
+      const el = $('.js-ro', this.el); if (el.innerHTML === html) return; el.innerHTML = html;
+      for (const b of el.querySelectorAll('.ro')) b.onclick = () => {
+        const x = ro[b.dataset.i], ms = (x.min || 0) * 60000, s = this.session;
+        s.setBoard({ cd: { label: x.t || `Segment ${Number(b.dataset.i) + 1}`, dur: ms, end: ms ? s.now() + ms : 0, left: ms } });
+      };
+    }
     drawBoard() {
       if (!this.ctrl) return;
       const q = (c) => $(c, this.el), b = this.session.board || {}, c = b.cd;
@@ -200,7 +273,7 @@
       const l = q('.js-cdl'); if (document.activeElement !== l) l.value = (c && c.label) || '';
       q('.js-nby').textContent = b.by && b.at ? `Last change by ${b.by}, ${new Date(b.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
       q('.js-cdgo').textContent = c && c.end ? 'Pause' : c && c.left !== c.dur ? 'Carry on' : 'Start';
-      this.drawCountdown();
+      this.drawPlan(); this.drawCountdown();
     }
     drawCountdown() {
       if (!this.ctrl) return;
@@ -360,7 +433,7 @@
       const name = s.cfg.name || 'Session';
       q('.js-name').textContent = name;
       q('.js-sub').textContent = this.ctrl ? `${this.producer ? 'Producing · ' : ''}${n} ${n === 1 ? 'track' : 'tracks'} · ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} · ${this.producer ? 'you aren’t recorded' : 'each person records on their own computer'}`
-        : s.hostOnline === false ? 'The host is offline. You can stay here; recording starts when they’re back.' : `Recording in ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} on this computer`;
+        : s.rec && s.rec.on && s.rec.solo ? 'Recording on your own. It uploads to the host like any take.' : s.hostOnline === false ? (s.cfg.solo ? 'The host isn’t here. Press “Record on my own” to record yourself now.' : 'The host is offline. You can stay here; recording starts when they’re back.') : `Recording in ${(SessionsCore.QUALITY[s.cfg.quality] || {}).label || '1080p'} on this computer`;
       q('.js-people').innerHTML = this.people().filter((p) => !p.screen).slice(0, 6).map((p) => `<span style="${avStyle(p.pid)}" title="${esc(p.name)}">${esc(initials(p.name))}</span>`).join('');
       $('.js-fttl', this.fsEl).innerHTML = `${esc(name)}<span>${n} ${n === 1 ? 'person' : 'people'}</span>`;
       if (this.host) q('.js-wr').checked = s.cfg.wait !== false;
@@ -386,6 +459,7 @@
       const html = `<button class="rb js-mic ${micOn ? '' : 'off'}" aria-label="${micOn ? 'Mute your mic' : 'Unmute your mic'}" title="${micOn ? 'Mute (recorded silence)' : 'Unmute'}">${ico(micOn ? 'mic' : 'micoff')}</button>
         <button class="rb js-cam ${camOn ? '' : 'off'}" aria-label="${camOn ? 'Turn your camera off' : 'Turn your camera on'}" title="${camOn ? 'Camera off' : 'Camera on'}">${ico(camOn ? 'cam' : 'camoff')}</button>
         ${this.share ? `<button class="rb js-share ${this.share.active ? 'on' : ''}" aria-label="${this.share.active ? 'Stop sharing your screen' : 'Share your screen'}" title="${this.share.active ? 'Stop sharing' : 'Share your screen (recorded as its own track)'}">${ico('screen')}</button>` : ''}
+        ${!this.ctrl && s.cfg && s.cfg.solo && (on ? s.rec.solo : !s.hostOnline) ? `<button class="recb ${on ? '' : 'stopped'} js-solo" title="${on ? 'Stop recording' : 'Record yourself now. The host gets it like any other take.'}"><i></i>${on ? 'Stop' : 'Record on my own'}</button>` : ''}
         ${this.ctrl ? `<button class="recb ${on ? '' : 'stopped'} js-rec"><i></i>${on ? 'Stop' : 'Record'}</button>
         <button class="rb js-mark" aria-label="Add a mark" title="Mark this moment for the edit" ${on ? '' : 'disabled style="opacity:.45"'}>${ico('flag')}</button>` : ''}`;
       d.innerHTML = html;
@@ -397,6 +471,7 @@
         $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); } };
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
+        const so = $('.js-solo', root); if (so) so.onclick = () => s.solo(!on);
         if (this.ctrl) {
           $('.js-rec', root).onclick = () => this.onRecord ? this.onRecord(!on) : s.record(!on);
           $('.js-mark', root).onclick = () => { s.mark(''); toast('Mark added'); };
@@ -524,7 +599,7 @@
       for (const [k, t] of this.tiles) t.fs.classList.toggle('spot', k === this.spot);
       if (on && !was) { try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {}); } catch {} for (const t of this.tiles.values()) $('video', t.fs).play().catch(() => {}); }
       else if (!on) { this.panelFs(false); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
-      this.fitFs(); this.drawDock(); this.drawCountdown();
+      this.fitFs(); this.placePrompt(); this.drawDock(); this.drawCountdown();
     }
     // the side panel floating over the full-screen view (the same panel, fixed above it, so nothing moves)
     panelFs(on) {
