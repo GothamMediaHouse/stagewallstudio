@@ -34,7 +34,9 @@
         <div class="f"><label for="cam">Camera</label><select id="cam"></select></div>
         <div class="f"><label for="mic">Microphone</label><select id="mic"></select></div>
         <label class="chk"><input type="checkbox" id="speakers"> I’m not wearing headphones (turns on echo cancelling)</label>
-        <button class="btn big" id="join" disabled>Join the session</button>
+        <div class="when" id="jwhen" hidden></div>
+        <div class="jbtns"><button class="btn big" id="join" disabled>Join the session</button><button class="btn soft big" id="tcheck" disabled><svg class="ico"><use href="#i-check"/></svg>Do a tech check</button></div>
+        <div class="card tcres" id="tcres" hidden></div>
         <div class="err" id="jerr" hidden></div>
         <div class="hint" id="resume" hidden></div>
         <div class="hint" id="jhint">Chrome, Edge or Safari, on a computer or a phone. Keep this page open until it says everything is uploaded.</div>
