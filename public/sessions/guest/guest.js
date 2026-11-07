@@ -108,7 +108,7 @@
           }
         } else { sink.tok = session.tok; sink.pump(); if (share) { share.sink.tok = session.tok; share.sink.pump(); } }
       }
-      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status }); }
+      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status, onSelfChange: tellStatus }); }
       $('#sessname').textContent = session.cfg.name || 'Remote recording';
     } else if (s === 'reconnecting') U.toast('Connection lost. Reconnecting… (your recording carries on)', 4000);
     else if (s === 'closed') {
@@ -146,14 +146,22 @@
     const sinks = [sink, share && share.sink].filter(Boolean);
     const st = { pending: 0, bytes: 0, sent: 0, sentBytes: 0 };
     for (const k of sinks) { st.pending += k.q.length; st.bytes += k.pendingBytes(); st.sent += k.sent; st.sentBytes += k.sentBytes; }
-    return { ...st, rec: !!(rec && rec.running), scr: !!(share && share.recording), res: recRes, err: recErr || (sink && sink.fail > 3 ? 'Upload trouble, retrying' : '') };
+    const a = stream && stream.getAudioTracks()[0];
+    return { ...st, rec: !!(rec && rec.running), scr: !!(share && share.recording), res: recRes, err: recErr || (sink && sink.fail > 3 ? 'Upload trouble, retrying' : ''),
+      mic: a ? a.enabled : undefined, free: space.free, hours: space.free ? space.free / (C.gbPerHour(quality) * 1e9) : undefined };
   }
-  setInterval(() => {
+  // the room this browser has for its safety copy, so the host and producers can see who's running short
+  const space = { free: 0 };
+  const measure = () => C.freeSpace().then((f) => { if (f) space.free = f.free; }).catch(() => {});
+  measure(); setInterval(measure, 30000);
+  // the host and producers see everyone's recording, uploads, space and mic
+  function tellStatus() {
     if (!session || session.state !== 'in' || session.producer) return;
     const st = status();
     session.tell('host', { st });
     for (const p of session.peers.values()) if (p.role === 'producer') session.tell(p.pid, { st });
-  }, 2000);
+  }
+  setInterval(tellStatus, 2000);
   // keep a phone's screen on while in the room (the camera stops if it locks)
   async function keepAwake() { try { if (navigator.wakeLock && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch {} }
   document.addEventListener('visibilitychange', () => {
