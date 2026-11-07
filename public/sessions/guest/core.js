@@ -31,6 +31,7 @@
       this.screen = null; // a shared screen (its own MediaStream), sent in the call and recorded as its own track
       this.stream = opts.stream || null;
       this.peers = new Map(); // pid -> { pid, name, role, pc, stream, polite, making, ignore }
+      this.xout = new Map(); // the host's studio cameras, sent (picture only) to producers: key -> MediaStream
       this.offset = 0; this.rtt = Infinity; this.state = 'connecting'; this.cfg = {}; this.rec = { on: false }; this.ice = [];
       this.waiting = new Map(); this.takes = []; this.closed = false; this.tries = 0; this.board = { notes: '', cd: null }; this.plan = null; this.prompt = null;
     }
@@ -136,13 +137,19 @@
     // call: true when this side makes the offer (the person who just arrived); the other side answers with its tracks
     add(info, call) {
       if (info.pid === this.pid) return;
-      const p = { ...info, polite: this.pid > info.pid, making: false, ignore: false, stream: new MediaStream(), screen: null, mainId: '', sent: false, early: [] };
+      const p = { ...info, polite: this.pid > info.pid, making: false, ignore: false, stream: new MediaStream(), screen: null, mainId: '', sent: false, early: [], xs: new Map(), xids: new Set() };
       const pc = p.pc = new RTCPeerConnection({ iceServers: this.ice });
       this.peers.set(info.pid, p);
       // the first stream a person sends is their camera + mic; another one is their shared screen
       pc.ontrack = (e) => {
         const sid = e.streams[0] ? e.streams[0].id : '';
         if (!p.mainId) p.mainId = sid;
+        if (sid && sid !== p.mainId && p.xids.has(sid)) { // one of the host's studio cameras (producers only)
+          const st = e.streams[0]; p.xs.set(sid, st);
+          st.onremovetrack = () => { if (!st.getTracks().length) p.xs.delete(sid); this.emit('peers'); };
+          e.track.onended = () => setTimeout(() => this.emit('peers'), 300);
+          this.emit('peers'); return;
+        }
         if (sid && sid !== p.mainId) {
           p.screen = e.streams[0];
           p.screen.onremovetrack = () => { if (!p.screen.getTracks().length) { p.screen = null; this.emit('peers'); } };
@@ -163,6 +170,7 @@
       if (p.sent) return; p.sent = true;
       if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t);
       if (this.screen) for (const t of this.screen.getTracks()) this.addScreenTrack(p, t);
+      this.addStudio(p);
       if (!this.stream) { p.pc.addTransceiver('audio', { direction: 'recvonly' }); p.pc.addTransceiver('video', { direction: 'recvonly' }); }
     }
     addCallTrack(p, t) {
@@ -185,6 +193,26 @@
       const ids = new Set(sc.getTracks().map((t) => t.id));
       for (const p of this.peers.values()) for (const s of p.pc.getSenders()) if (s.track && ids.has(s.track.id)) { try { p.pc.removeTrack(s); } catch {} }
       this.emit('peers');
+    }
+    // the host's studio cameras go to producers too (small pictures, no sound), so a producer sees every source.
+    // The producer is told which streams are cameras before they arrive (same socket, so in order).
+    setStudio(list) { // [{ key, stream }] the cameras that are on
+      const want = new Map(list.filter((x) => x.stream && x.stream.getVideoTracks().length).map((x) => [x.key, x.stream]));
+      for (const [k, st] of [...this.xout]) if (want.get(k) !== st) { this.xout.delete(k); this.dropStudio(st); }
+      for (const [k, st] of want) if (!this.xout.has(k)) { this.xout.set(k, st); for (const p of this.peers.values()) if (p.sent && p.role === 'producer') { this.tellStudio(p); for (const t of st.getVideoTracks()) this.lowCall(p.pc.addTrack(t, st), t); } }
+    }
+    tellStudio(p) { this.tell(p.pid, { xs: [...this.xout.values()].map((st) => st.id) }); }
+    addStudio(p) {
+      if (p.role !== 'producer' || !this.xout.size) return;
+      this.tellStudio(p);
+      for (const st of this.xout.values()) for (const t of st.getVideoTracks()) this.lowCall(p.pc.addTrack(t, st), t);
+    }
+    dropStudio(st) {
+      const ids = new Set(st.getTracks().map((t) => t.id));
+      for (const p of this.peers.values()) {
+        for (const s of p.pc.getSenders()) if (s.track && ids.has(s.track.id)) { try { p.pc.removeTrack(s); } catch {} }
+        if (p.role === 'producer') this.tellStudio(p);
+      }
     }
     // the call only needs a small picture (the recording is the full one), about 360p at 900 kb/s
     async lowCall(sender, track) {
@@ -209,7 +237,11 @@
     }
     async onsig(from, d) {
       if (!d) return;
-      if (d.k === 'x') return this.emit('data', from, d.d);
+      if (d.k === 'x') {
+        const q = this.peers.get(from);
+        if (q && d.d && Array.isArray(d.d.xs)) { q.xids = new Set(d.d.xs); for (const k of [...q.xs.keys()]) if (!q.xids.has(k)) q.xs.delete(k); this.emit('peers'); }
+        return this.emit('data', from, d.d);
+      }
       const p = this.peers.get(from); if (!p) return;
       const pc = p.pc;
       try {
@@ -219,7 +251,7 @@
           await pc.setRemoteDescription(d.sdp);
           for (const c of p.early.splice(0)) { try { await pc.addIceCandidate(c); } catch {} }
           if (d.sdp.type === 'offer') {
-            if (!p.sent) { p.sent = true; if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t); if (this.screen) for (const t of this.screen.getTracks()) this.addScreenTrack(p, t); }
+            if (!p.sent) { p.sent = true; if (this.stream) for (const t of this.stream.getTracks()) this.addCallTrack(p, t); if (this.screen) for (const t of this.screen.getTracks()) this.addScreenTrack(p, t); this.addStudio(p); }
             await pc.setLocalDescription(); this.send({ t: 'sig', to: from, data: { sdp: pc.localDescription } });
           }
         } else if (d.ice) {

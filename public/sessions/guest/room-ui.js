@@ -71,10 +71,11 @@
           if (!d) return;
           if (d.st) { this.status.set(from, { ...d.st, at: Date.now() }); this.drawTracks(); this.drawUploads(); }
           if (d.ctl && s.isCtrl(from)) this.onCtl(from, d);
-          if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; this.drawTracks(); }
+          if (d.studio && from === 'host' && this.ctrl) { this.studio = d.studio; const k = d.studio.map((x) => `${x.pid}:${x.sid}:${x.off}:${x.name}`).join(); if (k !== this.studioKey) { this.studioKey = k; this.sync(); } else this.drawTracks(); }
         })
         .on('board', () => this.drawBoard()).on('plan', () => this.drawPlan()).on('prompt', () => this.drawPrompt())
         .on('host', () => { this.drawTop(); this.drawDock(); }).on('notice', (t) => toast(t, 5000));
+      if (this.host) this.sendStudio();
       this.sync();
       this.tick = setInterval(() => this.everySecond(), 1000);
       this.raf = () => { this.meters(); this.rafId = requestAnimationFrame(this.raf); }; this.rafId = requestAnimationFrame(this.raf);
@@ -305,7 +306,7 @@
     }
     askBar(text, btn, go) {
       const el = $('.js-talkbar', this.el); this.asking = { text, btn, go };
-      el.hidden = false; el.innerHTML = `<span>${esc(text)}</span><button class="btn sm js-ask">${esc(btn)}</button><button class="muted js-askno" style="font-size:12px">Not now</button>`;
+      el.hidden = false; requestAnimationFrame(() => this.fit()); el.innerHTML = `<span>${esc(text)}</span><button class="btn sm js-ask">${esc(btn)}</button><button class="muted js-askno" style="font-size:12px">Not now</button>`;
       $('.js-ask', el).onclick = () => { this.asking = null; go(); this.applyTalk(); };
       $('.js-askno', el).onclick = () => { this.asking = null; this.applyTalk(); };
     }
@@ -328,7 +329,7 @@
         v.muted = hush; tile.el.classList.toggle('pvt', !!(t && (pid === t.a || pid === t.b)));
       }
       if (this.asking) return;
-      el.hidden = !t;
+      if (el.hidden !== !t) { el.hidden = !t; requestAnimationFrame(() => this.fit()); }
       if (!t) { el.innerHTML = ''; this.drawTracks(); return; }
       const other = t.a === me ? t.b : t.a;
       el.innerHTML = inIt
@@ -340,19 +341,24 @@
     mutePeer(pid, on) { this.session.tell(pid, { ctl: 'mute', on }); toast(on ? 'Unmute sent' : 'Muted', 2000); }
     studioToggle(pid, on) { if (this.host && this.onStudioToggle) this.onStudioToggle(pid, on); else this.session.tell('host', { ctl: 'studio', pid, on }); }
 
+    sendStudio() { if (this.host && this.session.setStudio) this.session.setStudio(this.extras.filter((x) => !x.off).map((x) => ({ key: x.pid, stream: x.stream }))); }
+
     // ---- tiles ----
     people() {
       const s = this.session, list = [{ pid: s.pid, name: s.name, role: s.role, self: true }];
       if (s.screen) list.push({ pid: `${s.pid}~s`, name: `${s.name} · screen`, role: 'screen', stream: s.screen, local: true, screen: true });
       for (const x of this.extras) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: x.stream, local: true });
+      const live = (st) => st && st.getVideoTracks().some((t) => t.readyState === 'live');
       for (const p of s.peers.values()) {
         list.push({ pid: p.pid, name: p.name, role: p.role, stream: p.stream });
-        if (p.screen && p.screen.getVideoTracks().some((t) => t.readyState === 'live')) list.push({ pid: `${p.pid}~s`, name: `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
+        if (live(p.screen)) list.push({ pid: `${p.pid}~s`, name: `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
+        // a producer sees the host's studio cameras too
+        if (p.pid === 'host' && !this.host) for (const x of this.studio) { const st = !x.off && x.sid && p.xs && p.xs.get(x.sid); if (live(st)) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: st }); }
       }
       return list;
     }
     // the host's extra studio cameras (each its own recorded track): [{ pid, name, stream, rec, res }]
-    setExtras(list) { this.extras = list; this.sync();
+    setExtras(list) { this.extras = list; this.sendStudio(); this.sync();
     }
     sync() {
       const list = this.people(), grid = $('.js-tiles', this.el);
@@ -420,10 +426,32 @@
         l.an.getFloatTimeDomainData(l.buf); let p = 0; for (let i = 0; i < l.buf.length; i++) p = Math.max(p, Math.abs(l.buf[i]));
         l.lv = Math.max(p, l.lv * 0.85);
         const t = this.tiles.get(pid); if (!t) continue;
-        const on = l.track.enabled !== false;
-        $('.nm i', t.el).style.height = `${on ? Math.round(6 + Math.min(1, l.lv * 3) * 12) : 6}px`;
+        const on = l.track.enabled !== false, db = l.lv > 0 ? 20 * Math.log10(l.lv) : -90, bar = $('.nm i', t.el);
+        bar.style.height = `${on ? Math.round(6 + Math.max(0, Math.min(1, (db + 50) / 50)) * 12) : 6}px`;
+        bar.style.background = !on ? '' : db > -3 ? 'var(--red)' : db > -12 ? 'var(--amber)' : '';
         const talk = on && l.lv > 0.06;
         t.el.classList.toggle('talk', talk); t.fs.classList.toggle('talk', talk);
+      }
+      this.rowMeters();
+    }
+    // a level meter on each row in People: green to -12 dB, amber to -3, red above; a red end when it clips
+    rowMeters() {
+      const box = $('.js-trks', this.el); if (!box) return;
+      if (!this.pk) this.pk = new Map();
+      const now = performance.now();
+      for (const m of box.querySelectorAll('.js-mtr')) {
+        const pid = m.dataset.p, l = this.levels.get(pid);
+        let v = this.levelOf ? this.levelOf(pid) : null;
+        if (v == null && l) v = l.track.enabled === false ? 0 : l.lv;
+        if (v == null) { m.hidden = true; continue; }
+        m.hidden = false;
+        const db = v > 0 ? 20 * Math.log10(v) : -90, w = Math.max(0, Math.min(1, (db + 60) / 60));
+        let k = this.pk.get(pid); if (!k) this.pk.set(pid, k = { w: 0, at: 0, clip: 0 });
+        if (w >= k.w || now - k.at > 1500) { k.w = w; k.at = now; }
+        if (v >= 0.985) k.clip = now;
+        $('i', m).style.width = `${(1 - w) * 100}%`;
+        $('b', m).style.left = `calc(${k.w * 100}% - 2px)`;
+        m.classList.toggle('clip', now - k.clip < 2000);
       }
     }
 
@@ -579,7 +607,7 @@
       const btns = (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
         + (kick ? ib('js-kick', 'x', 'Remove them from the session', pid) : '')
         + (cam && cam !== 'screen' && this.host && !busy ? ib('js-xrm', 'x', 'Remove this source', pid) : '');
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);
