@@ -3,7 +3,8 @@
 // the free tools page's waiting lists, every app's version check and one-click update (updates.js), and
 // Showcaller Hub's app list with full downloads from GitHub releases (hub.js), and Showcaller Intercom's join-from-anywhere
 // rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js), and the Showcaller Link
-// relay, so a studio can let clients in without opening a port on its router (link-relay.js).
+// relay, so a studio can let clients in without opening a port on its router (link-relay.js), and Showcaller Sessions'
+// remote recording rooms, with each guest's recording uploaded to cloud storage for the studio Mac (sessions.js).
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
@@ -14,10 +15,12 @@ import { hubCatalog, download, hubDownload } from './hub.js';
 import { intercom, intercomPage } from './intercom.js';
 import { hubReport, hubInstalls } from './installs.js';
 import { linkRelay } from './link-relay.js';
+import { sessions, sessionsPage } from './sessions.js';
 
 export { IntercomRoom } from './intercom.js';
 export { HubInstalls } from './installs.js';
 export { LinkRelay } from './link-relay.js';
+export { SessionRoom } from './sessions.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
@@ -46,6 +49,9 @@ export default {
     if (/^\/i\/[a-z0-9]{8,24}\/(d\/)?[A-Za-z0-9_-]{8,60}\/?$/.test(url.pathname) && request.method === 'GET') return intercomPage(request, env);
     // Showcaller Link: studios and their clients meeting here, without a port opened at the studio (link-relay.js)
     if (url.pathname === '/link/relay/host' || url.pathname === '/link/relay/data' || url.pathname === '/link/relay/c') return linkRelay(request, env);
+    // Showcaller Sessions: remote guests recorded for editing, pieces kept in cloud storage until the studio Mac downloads them (sessions.js)
+    if (url.pathname.startsWith('/sessions/') && !url.pathname.startsWith('/sessions/guest/')) return sessions(request, env);
+    if (/^\/s\/[a-z0-9]{8,24}\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {
