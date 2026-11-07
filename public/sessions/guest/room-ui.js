@@ -249,7 +249,7 @@
       const scrRow = () => this.share && this.share.active ? this.trackRow(`${s.pid}~s`, `${s.name} · screen`, this.share.recording ? `Recording your screen ${this.host ? 'to this Mac' : 'here'}` : on ? 'Starting…' : 'Shared. Recorded when the recording starts.', 100, true, false, 'screen') : '';
       if (this.ctrl) {
         const me = this.selfStatus ? this.selfStatus() : {};
-        if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `Saves straight to this Mac`, 100, true));
+        if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `${me.input ? `${me.input} · ` : ''}saves straight to this Mac`, 100, true, false, false, !!this.onChangeSelf));
         else rows.push(this.trackRow(s.pid, `${s.name} (you)`, 'Producer · not recorded', 100, true));
         rows.push(scrRow());
         for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `${x.iface ? `${x.iface} · input ${x.ch + 1}` : x.ndi ? `NDI · ${x.ndi}` : x.cam ? `Studio camera${x.audio ? ' + sound' : ''}` : 'Studio mic (sound only)'} · saves straight to this Mac`, 100, true, false, x.cam || x.ndi ? true : 'mic'));
@@ -273,6 +273,7 @@
       el.innerHTML = rows.join('');
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
       for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
+      for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
       // tile corner tag
       for (const [pid, t] of this.tiles) {
         const ex = this.extras.find((x) => x.pid === pid);
@@ -284,8 +285,9 @@
         $('small', t.fs).textContent = st.rec ? `${st.res || ''} REC` : '';
       }
     }
-    trackRow(pid, name, sub, pct, ok, kick, cam) {
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && cam !== 'screen' && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this source" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+    trackRow(pid, name, sub, pct, ok, kick, cam, change) {
+      const busy = this.session.rec && this.session.rec.on;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="row" style="min-width:0"><b style="flex:1">${esc(name)}</b>${change && !busy ? `<button class="muted js-chg" title="Change your camera or microphone" style="font-size:12px">Change</button>` : ''}${kick ? `<button class="muted js-kick" data-p="${pid}" title="Remove" style="font-size:12px">Remove</button>` : ''}${cam && cam !== 'screen' && !(this.session.rec && this.session.rec.on) ? `<button class="muted js-xrm" data-p="${pid}" title="Remove this source" style="font-size:12px">Remove</button>` : ''}</div><small>${esc(sub)}</small><div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);
