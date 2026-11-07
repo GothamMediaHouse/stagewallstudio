@@ -1,20 +1,54 @@
 {
- "written": "2026-11-06T02:25:09.265Z",
+ "written": "2026-11-07T22:39:07.155Z",
  "apps": {
   "switcher": {
-   "version": "2.5.2",
+   "version": "3.0.1",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.5.2/Showcaller-Switcher-2.5.2-mac-arm64.zip",
-     "sha256": "81cd81d9cff11f6c5d9d8750150aa7f501f8325138fc461d42da18a75bd34b0d",
-     "size": 157661758,
-     "version": "2.5.2"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-3.0.1/Showcaller-Switcher-3.0.1-mac-arm64.zip",
+     "sha256": "2d9a98e5076e34a9ca5b647a50015d2685c82c72e60b696d4786dbb1c72a7df4",
+     "size": 158176244,
+     "version": "3.0.1"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-2.5.2/Showcaller-Switcher-2.5.2-win-x64.exe",
-     "sha256": "785325ddd8ace46037488c17b9f9c27cbfafc673f22b03cfb317b8a378eaee64",
-     "size": 146441046,
-     "version": "2.5.2"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/switcher-3.0.1/Showcaller-Switcher-3.0.1-win-x64.exe",
+     "sha256": "54a8e83f918de26b5d9233c15ae000d79c53553714fe130271fcb50b65dbc21a",
+     "size": 146797261,
+     "version": "3.0.1"
+    }
+   }
+  },
+  "sessions": {
+   "version": "0.14.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-0.14.0/Showcaller-Sessions-0.14.0-mac-arm64.zip",
+     "sha256": "f7192b0ac510edc75b60fb473b0355f2458f20a9d1e549829d578778e6de6c67",
+     "size": 160296721,
+     "version": "0.14.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-0.14.0/Showcaller-Sessions-0.14.0-win-x64.exe",
+     "sha256": "b5c0ba858cfb6f263d560faa62bc545da8378bceaa1d003d0485163de88ee0e3",
+     "size": 159828994,
+     "version": "0.14.0"
+    }
+   }
+  },
+  "hub": {
+   "version": "1.14.0",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.14.0/Showcaller-Hub-1.14.0-mac-arm64.zip",
+     "sha256": "d83e8db8b698ea8b11ec4bfaef678f3415a86a98da0d2209a178cb739a71ae66",
+     "size": 157941470,
+     "version": "1.14.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.14.0/Showcaller-Hub-1.14.0-win-x64.exe",
+     "sha256": "dbaf0bf4767917a7a63fd414c1ac803eed44f80eee2558280f79190df3bfa93f",
+     "size": 146549445,
+     "version": "1.14.0"
     }
    }
   },
@@ -223,23 +257,6 @@
      "sha256": "417ac2010fc111dcfb7e16865dc94cb81f4f9bc76a88a1189299d8a924208dce",
      "size": 129390415,
      "version": "3.17.0"
-    }
-   }
-  },
-  "hub": {
-   "version": "1.13.4",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.13.4/Showcaller-Hub-1.13.4-mac-arm64.zip",
-     "sha256": "447a89face0cc49a1962464ed64c5a1f4363d5c56c379aaf1e45449d608ac0de",
-     "size": 157927454,
-     "version": "1.13.4"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.13.4/Showcaller-Hub-1.13.4-win-x64.exe",
-     "sha256": "8f282856ba1881bfaf04136f55906da4549ab913c3e45db5a6d7a9532d19443a",
-     "size": 146600758,
-     "version": "1.13.4"
     }
    }
   },
