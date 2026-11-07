@@ -5,10 +5,12 @@
 // of the email): Cloudflare's free plan limits how many Durable Object classes a site has, so accounts don't get their own.
 //
 //   POST …/sessions/auth/login {email, password}  signs in: the browser gets the cookie, the app (header X-Sessions-App) its key
-//   POST …/sessions/auth/start {email, password, purpose: signup|reset, device?}   emails a link that confirms the address
-//        and sets the password (device: the app's own code, so it can collect its key once the link is used)
-//   GET  …/sessions/auth/verify?a&t               a page with a Sign in button (email scanners open links; only the POST signs in)
-//   POST …/sessions/auth/verify                   signs this browser in (cookie sss) and hands the app its key if it asked
+//   POST …/sessions/auth/start {email, purpose: signup|reset, device?}   emails a link to choose a password (device: the app's
+//        own code, so it can collect its key once the link is used). The password is typed on the link's page, never with the
+//        request, so someone who asks for a link for another person's email can't choose that person's password.
+//   GET  …/sessions/auth/verify?a&t               the link's page: choose a password (email scanners open links; only the POST counts)
+//   POST …/sessions/auth/verify {a, t, password}  sets the password, signs out everywhere else, signs this browser in (cookie
+//        sss) and hands the app its key if it asked
 //   GET  …/sessions/auth/poll?a&d                 the app waiting for its key: {wait} until the link is used, then {token, email} once
 //   POST …/sessions/auth/logout
 //   GET  …/sessions/acct/me                       the account and its sessions
@@ -68,10 +70,10 @@ export async function accounts(request, env) {
     const email = String(b.email || '').trim().toLowerCase().slice(0, 120);
     if (!EMAIL.test(email)) return j({ error: 'That email doesn’t look right' }, 400);
     const device = /^[A-Za-z0-9_-]{20,80}$/.test(b.device || '') ? b.device : '';
-    const bad = pwProblem(b.password); if (bad) return j({ error: bad }, 400);
     const purpose = b.purpose === 'reset' ? 'reset' : 'signup';
+    if (!await mailGate(env, request)) return j({ error: 'Too many emails right now. Try again in an hour.' }, 429);
     const a = await accountId(email);
-    return acct(env, a).fetch(new Request(`https://acct.sessions/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device, password: b.password, purpose }) }));
+    return acct(env, a).fetch(new Request(`https://acct.sessions/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device, purpose }) }));
   }
   if (p === '/sessions/auth/login' && post) {
     const app = !!request.headers.get('X-Sessions-App');
@@ -90,9 +92,11 @@ export async function accounts(request, env) {
     const a = url.searchParams.get('a') || '', t = url.searchParams.get('t') || '';
     if (request.method === 'GET') return verifyPage(a, t);
     if (!post || !sameSite) return j({ error: 'Use the button in the email' }, 405);
-    const f = await request.formData().catch(() => null), fa = String(f?.get('a') || ''), ft = String(f?.get('t') || '');
-    if (!ACCT.test(fa)) return verifyPage('', '', 'This sign-in link isn’t right. Ask for a new one.');
-    const res = await acct(env, fa).fetch(new Request('https://acct.sessions/verify', { method: 'POST', body: JSON.stringify({ t: ft }) }));
+    const f = await request.formData().catch(() => null), fa = String(f?.get('a') || ''), ft = String(f?.get('t') || ''), fp = String(f?.get('password') || '');
+    if (!ACCT.test(fa)) return verifyPage('', '', 'This link isn’t right. Ask for a new one.');
+    const bad = pwProblem(fp); if (bad) return verifyPage(fa, ft, '', bad);
+    if (fp !== String(f?.get('password2') || '')) return verifyPage(fa, ft, '', 'The two passwords aren’t the same');
+    const res = await acct(env, fa).fetch(new Request('https://acct.sessions/verify', { method: 'POST', body: JSON.stringify({ t: ft, password: fp }) }));
     const o = await res.json();
     if (!res.ok) return verifyPage('', '', o.error || 'That didn’t work. Ask for a new link.');
     return new Response(null, { status: 303, headers: { Location: `/sessions/account/${o.app ? '?app=1' : ''}`, 'Set-Cookie': setCookie(`${fa}.${o.token}`, WEB_DAYS), 'Cache-Control': 'no-store' } });
@@ -114,18 +118,28 @@ export async function accounts(request, env) {
   const op = p.slice('/sessions/acct/'.length);
   if (!['me', 'rooms', 'rooms/remove', 'rooms/keys', 'room', 'invite', 'members'].includes(op)) return j({ error: 'Unknown' }, 404);
   const body = post ? await request.text() : undefined; if (body && body.length > 200000) return j({ error: 'Too big' }, 413);
-  return acct(env, tok.slice(0, 32)).fetch(new Request(`https://acct.sessions/${op}?${url.searchParams}&origin=${encodeURIComponent(url.origin)}`, { method: request.method, headers: { 'X-Tok': tok.slice(33) }, body }));
+  // the links in emails and on the page are made from this site's own address, never from anything in the request's query
+  const qs = new URLSearchParams(url.searchParams); qs.set('origin', url.origin);
+  return acct(env, tok.slice(0, 32)).fetch(new Request(`https://acct.sessions/${op}?${qs}`, { method: request.method, headers: { 'X-Tok': tok.slice(33) }, body }));
 }
 
-function verifyPage(a, t, error) {
+// at most 10 account emails an hour from one address (SESSIONS_MAIL_PER_IP), and a daily cap for the whole site (SESSIONS_MAIL_DAILY, default 80),
+// so nobody can use the sign-up form to send floods of email from this site or use up the email plan
+async function mailGate(env, request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'local';
+  const r = await acct(env, 'mail-gate').fetch(new Request(`https://acct.sessions/gate?ip=${encodeURIComponent(await sha(ip))}`, { method: 'POST' }));
+  return r.ok;
+}
+
+function verifyPage(a, t, error, formError) {
   const ok = !error && ACCT.test(a) && /^[A-Za-z0-9_-]{20,80}$/.test(t);
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
 <title>Sign in · Showcaller Sessions</title><link rel="icon" href="/favicon-32.png"><link rel="stylesheet" href="/sessions/guest/sessions.css"><link rel="stylesheet" href="/sessions/account/account.css"></head>
 <body><main class="acc-center"><div class="card acc-box"><h1>Showcaller Sessions</h1>${ok
-    ? `<p>Confirm your email to finish setting your password and sign in.</p><form method="post" action="/sessions/auth/verify"><input type="hidden" name="a" value="${esc(a)}"><input type="hidden" name="t" value="${esc(t)}"><button class="btn big" id="go">Confirm and sign in</button></form>`
+    ? `<p>Choose your password. It works in the Sessions app and on this website.</p>${formError ? `<p class="acc-err">${esc(formError)}</p>` : ''}<form method="post" action="/sessions/auth/verify" class="fields"><input type="hidden" name="a" value="${esc(a)}"><input type="hidden" name="t" value="${esc(t)}"><input type="password" name="password" id="pw1" autocomplete="new-password" placeholder="Password (8 or more characters)" aria-label="Password" required minlength="8" maxlength="200"><input type="password" name="password2" id="pw2" autocomplete="new-password" placeholder="The same password again" aria-label="The same password again" required minlength="8" maxlength="200"><button class="btn big" id="go">Set password and sign in</button></form>`
     : `<p class="acc-err">${esc(error || 'This link isn’t right. Ask for a new one.')}</p><p><a class="btn soft" href="/sessions/account/">Back to sign in</a></p>`}</div></main>
 <script>try{const t=localStorage.getItem('sess-theme');if(t)document.documentElement.dataset.theme=t}catch{}</script></body></html>`;
-  return new Response(html, { status: ok ? 200 : 400, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin' } });
+  return new Response(html, { status: ok && !formError ? 200 : 400, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin' } });
 }
 
 // runs inside the account's SessionRoom object (sessions.js hands it requests for https://acct.sessions/…)
@@ -139,20 +153,29 @@ export class SessionsAccount {
     try {
       if (op === 'start') {
         const b = await request.json(), sent = (await this.get('sent', [])).filter((x) => x > now - 3600e3);
-        if (b.purpose === 'signup' && await this.get('pw')) return j({ error: 'There’s already an account for this email. Sign in, or use “Forgot password”.', exists: true }, 409);
         if (sent.length >= 5) return j({ error: 'That’s 5 emails this hour. Use the newest one, or try again later.' }, 429);
-        const salt = rand(16), pw = { salt, hash: await pwHash(b.password, salt), iter: PW_ITER };
         const t = rand(), logins = (await this.get('logins', [])).filter((x) => x.exp > now).slice(-4);
-        logins.push({ h: await sha(t), exp: now + LINK_MIN * 60e3, dev: b.device ? await sha(b.device) : '', pw, reset: b.purpose === 'reset' });
+        logins.push({ h: await sha(t), exp: now + LINK_MIN * 60e3, dev: b.device ? await sha(b.device) : '' });
         sent.push(now);
         await this.ctx.storage.put({ logins, sent, email: b.email, a: b.a });
-        const link = `${origin}/sessions/auth/verify?a=${b.a}&t=${t}`, reset = b.purpose === 'reset';
-        const subject = reset ? 'Reset your Showcaller Sessions password' : 'Confirm your email for Showcaller Sessions';
-        const what = reset ? 'Press the button to confirm your new Showcaller Sessions password.' : 'Press the button to confirm your email and finish making your Showcaller Sessions account.';
+        // someone making an account for an email that has one gets the reset email, so the answer never says whether it exists
+        const link = `${origin}/sessions/auth/verify?a=${b.a}&t=${t}`, has = !!(await this.get('pw')), reset = b.purpose === 'reset' || has;
+        const subject = has ? 'Your Showcaller Sessions password' : 'Finish making your Showcaller Sessions account';
+        const what = has ? `You (or someone with your email address) asked to ${b.purpose === 'reset' ? 'reset your password' : 'make an account, but you already have one'}. Press the button to choose a new password.` : 'Press the button to confirm your email and choose your password.';
         const m = await mail(this.env, b.email, subject,
-          `${what}\n${link}\n\nThe link works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email and nothing changes.`,
-          wrap(`<p>${what}</p>${button(link, reset ? 'Confirm new password' : 'Confirm my email')}<p style="color:#666;font-size:13px">It works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email and nothing changes.</p>`));
+          `${what}\n${link}\n\nThe link works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email: nothing changes and your password stays the same.`,
+          wrap(`<p>${what}</p>${button(link, reset ? 'Choose a new password' : 'Choose my password')}<p style="color:#666;font-size:13px">It works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email: nothing changes and your password stays the same.</p>`));
         return j({ ok: true, a: b.a, ...(m.fake ? { link } : {}) });
+      }
+      if (op === 'gate') {
+        // the site-wide email gate (this object is named acct:mail-gate, not an account)
+        const g = await this.get('g', { day: '', n: 0, ips: {} }), day = new Date(now).toISOString().slice(0, 10), ip = url.searchParams.get('ip') || '';
+        if (g.day !== day) { g.day = day; g.n = 0; }
+        for (const [k, v] of Object.entries(g.ips)) if (v.at < now - 3600e3) delete g.ips[k];
+        const me = g.ips[ip] || { n: 0, at: now };
+        if (me.n >= Number(this.env.SESSIONS_MAIL_PER_IP || 10) || g.n >= Number(this.env.SESSIONS_MAIL_DAILY || 80)) return new Response('no', { status: 429 });
+        me.n++; g.ips[ip] = me; g.n++; await this.ctx.storage.put('g', g);
+        return new Response('ok');
       }
       if (op === 'login') {
         const b = await request.json(), pw = await this.get('pw'), f = await this.get('fails', { n: 0, at: 0 });
@@ -169,11 +192,10 @@ export class SessionsAccount {
         const l = logins.find((x) => x.h === h && x.exp > now);
         if (!l) return j({ error: 'This sign-in link has been used or has run out. Ask for a new one.' }, 403);
         await this.ctx.storage.put('logins', logins.filter((x) => x !== l));
-        if (l.pw) {
-          // a new password signs out everywhere else
-          if (l.reset) for (const k of (await this.ctx.storage.list({ prefix: 's:' })).keys()) await this.ctx.storage.delete(k);
-          await this.ctx.storage.put('pw', l.pw); await this.ctx.storage.delete('fails');
-        }
+        // a new password signs out everywhere else
+        for (const k of (await this.ctx.storage.list({ prefix: 's:' })).keys()) await this.ctx.storage.delete(k);
+        const salt = rand(16);
+        await this.ctx.storage.put('pw', { salt, hash: await pwHash(String(b.password), salt), iter: PW_ITER }); await this.ctx.storage.delete('fails');
         const token = await this.newSession('web');
         if (l.dev) await this.ctx.storage.put(`dev:${l.dev}`, { token: await this.newSession('app'), exp: now + LINK_MIN * 60e3 });
         return j({ token, app: !!l.dev });
@@ -221,8 +243,9 @@ export class SessionsAccount {
         return j({ rooms: rooms.map(pub), bad });
       }
       if (op === 'rooms/remove' && request.method === 'POST') {
-        const id = JSON.parse(await request.text() || '{}').id;
+        const id = JSON.parse(await request.text() || '{}').id, gone = rooms.find((r) => r.id === id);
         await this.ctx.storage.put('rooms', rooms.filter((r) => r.id !== id));
+        for (const m of gone?.members || []) await acct(this.env, m.a).fetch(new Request('https://acct.sessions/share', { method: 'POST', body: JSON.stringify({ owner: await this.get('a'), room: id, remove: true }) }));
         return j({ ok: true });
       }
       if (op === 'rooms/keys') {
@@ -245,7 +268,11 @@ export class SessionsAccount {
         if (!EMAIL.test(to)) return j({ error: 'That email doesn’t look right' }, 400);
         if (to === email) return j({ error: 'That’s you' }, 400);
         const ma = await accountId(to), members = (rr.members || []).filter((m) => m.a !== ma);
-        if (!b.remove) { if (members.length >= 10) return j({ error: 'That’s 10 people on this session already' }, 400); members.push({ email: to, a: ma, at: now }); }
+        if (!b.remove) {
+          if (members.length >= 10) return j({ error: 'That’s 10 people on this session already' }, 400);
+          if (!await this.emailToday()) return j({ error: 'That’s 40 emails today, try again tomorrow' }, 429);
+          members.push({ email: to, a: ma, at: now });
+        }
         rr.members = members; await this.ctx.storage.put('rooms', rooms);
         await acct(this.env, ma).fetch(new Request('https://acct.sessions/share', { method: 'POST', body: JSON.stringify({ owner: await this.get('a'), room: rr.id, name: rr.name, by: email, remove: !!b.remove, email: to, a: ma }) }));
         let m = {};
@@ -265,10 +292,7 @@ export class SessionsAccount {
         if (!EMAIL.test(to)) return j({ error: 'That email doesn’t look right' }, 400);
         const link = await this.editLink(rr, b.take, origin);
         if (!link) return j({ error: 'Share this take from the studio app first (Edit together)' }, 409);
-        const day = new Date().toISOString().slice(0, 10), u = await this.get('inv', {});
-        if (u.day !== day) { u.day = day; u.n = 0; }
-        if (u.n >= 40) return j({ error: 'That’s 40 invites today, try again tomorrow' }, 429);
-        u.n++; await this.ctx.storage.put('inv', u);
+        if (!await this.emailToday()) return j({ error: 'That’s 40 emails today, try again tomorrow' }, 429);
         const show = esc(rr.name), name = clean(b.take);
         const m = await mail(this.env, to, `Help edit “${rr.name}” (${name})`,
           `${email} asked you to help edit “${rr.name}” (${name}) in Showcaller Sessions.\n\nOpen the edit in your browser: ${link}\n\nYou edit by deleting words from the transcript. Anyone with this link can edit this take, so keep it to yourself.`,
@@ -277,6 +301,14 @@ export class SessionsAccount {
       }
       return j({ error: 'Unknown' }, 404);
     } catch (e) { return j({ error: e.status ? e.message : 'Something went wrong' }, e.status || (e instanceof SyntaxError ? 400 : 500)); }
+  }
+
+  // editor invites and shares: 40 emails a day per account
+  async emailToday() {
+    const day = new Date().toISOString().slice(0, 10), u = await this.get('inv', {});
+    if (u.day !== day) { u.day = day; u.n = 0; }
+    if (u.n >= 40) return false;
+    u.n++; await this.ctx.storage.put('inv', u); return true;
   }
 
   async newSession(kind) {
