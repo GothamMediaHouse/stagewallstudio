@@ -20,14 +20,16 @@
 
 <main class="acc-center" id="signin" hidden>
   <div class="card acc-box">
-    <h1>Sign in</h1>
-    <p>We’ll email you a link. There’s no password to remember.</p>
+    <h1 id="mtitle">Sign in</h1>
+    <p id="mtext">Your Showcaller Sessions: plans, takes and edit links.</p>
     <form id="form" class="fields">
-      <input type="text" id="email" inputmode="email" autocomplete="email" placeholder="you@example.com" aria-label="Your email" required>
-      <button class="btn big" id="send">Email me a link</button>
+      <input type="text" id="email" inputmode="email" autocomplete="username" placeholder="you@example.com" aria-label="Your email" required>
+      <input type="password" id="pw" autocomplete="current-password" placeholder="Password" aria-label="Password" required minlength="8">
+      <button class="btn big" id="send">Sign in</button>
     </form>
     <p class="acc-err" id="err" hidden></p>
-    <div id="sent" hidden><h2>Check your email</h2><p>We sent a sign-in link to <b id="sentto"></b>. It works once, for 15 minutes.</p><button class="btn soft sm" id="again">Use another email</button></div>
+    <div class="acc-alt" id="alt"><button type="button" class="lnk" data-mode="up">Create an account</button><button type="button" class="lnk" data-mode="reset">Forgot password?</button></div>
+    <div id="sent" hidden><h2>Check your email</h2><p id="senttext"></p><button class="btn soft sm" id="again">Back to sign in</button></div>
   </div>
 </main>
 

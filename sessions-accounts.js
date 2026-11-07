@@ -1,9 +1,12 @@
-// Showcaller Sessions accounts: sign in with an emailed link (no passwords). An account holds its sessions (rooms), so
+// Showcaller Sessions accounts: email and password. An emailed link confirms the address when the account is made and
+// when a forgotten password is reset (the new password only counts once the link is used). An account holds its sessions (rooms), so
 // they work on any Mac the owner signs in on, and the dashboard at /sessions/account/ lists each session's plan, takes
 // and edit links, and invites editors by email. Each account lives in its own SessionRoom object named 'acct:<id>' (a hash
 // of the email): Cloudflare's free plan limits how many Durable Object classes a site has, so accounts don't get their own.
 //
-//   POST …/sessions/auth/start {email, device?}   emails a sign-in link (device: the app's own code, to collect its key)
+//   POST …/sessions/auth/login {email, password}  signs in: the browser gets the cookie, the app (header X-Sessions-App) its key
+//   POST …/sessions/auth/start {email, password, purpose: signup|reset, device?}   emails a link that confirms the address
+//        and sets the password (device: the app's own code, so it can collect its key once the link is used)
 //   GET  …/sessions/auth/verify?a&t               a page with a Sign in button (email scanners open links; only the POST signs in)
 //   POST …/sessions/auth/verify                   signs this browser in (cookie sss) and hands the app its key if it asked
 //   GET  …/sessions/auth/poll?a&d                 the app waiting for its key: {wait} until the link is used, then {token, email} once
@@ -28,6 +31,13 @@ const rand = (n = 24) => btoa(String.fromCharCode(...crypto.getRandomValues(new 
 const j = (o, status = 200, h = {}) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...h } });
 const clean = (s, n = 60) => String(s || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n);
 const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const PW_ITER = 100000; // PBKDF2-SHA256 (the most Workers allow)
+async function pwHash(pw, salt) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode(salt), iterations: PW_ITER }, k, 256));
+}
+const same = (x, y) => { if (x.length !== y.length) return false; let d = 0; for (let i = 0; i < x.length; i++) d |= x.charCodeAt(i) ^ y.charCodeAt(i); return d === 0; };
+const pwProblem = (pw) => typeof pw !== 'string' || pw.length < 8 ? 'Use a password of at least 8 characters' : pw.length > 200 ? 'That password is too long' : '';
 const DAY = 86400e3, WEB_DAYS = 30, APP_DAYS = 365, LINK_MIN = 15;
 export const accountId = async (email) => (await sha(`showcaller-sessions-account:${email}`)).slice(0, 32);
 const acct = (env, a) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(`acct:${a}`));
@@ -58,8 +68,23 @@ export async function accounts(request, env) {
     const email = String(b.email || '').trim().toLowerCase().slice(0, 120);
     if (!EMAIL.test(email)) return j({ error: 'That email doesn’t look right' }, 400);
     const device = /^[A-Za-z0-9_-]{20,80}$/.test(b.device || '') ? b.device : '';
+    const bad = pwProblem(b.password); if (bad) return j({ error: bad }, 400);
+    const purpose = b.purpose === 'reset' ? 'reset' : 'signup';
     const a = await accountId(email);
-    return acct(env, a).fetch(new Request(`https://acct.sessions/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device }) }));
+    return acct(env, a).fetch(new Request(`https://acct.sessions/start?origin=${encodeURIComponent(url.origin)}`, { method: 'POST', body: JSON.stringify({ email, a, device, password: b.password, purpose }) }));
+  }
+  if (p === '/sessions/auth/login' && post) {
+    const app = !!request.headers.get('X-Sessions-App');
+    if (!sameSite && !app) return j({ error: 'Not from this site' }, 403);
+    let b; try { b = await request.json(); } catch { return j({ error: 'That request couldn’t be read' }, 400); }
+    const email = String(b.email || '').trim().toLowerCase().slice(0, 120);
+    if (!EMAIL.test(email) || typeof b.password !== 'string' || !b.password || b.password.length > 200) return j({ error: 'Wrong email or password' }, 403);
+    const a = await accountId(email);
+    const res = await acct(env, a).fetch(new Request('https://acct.sessions/login', { method: 'POST', body: JSON.stringify({ password: b.password, app }) }));
+    const o = await res.json();
+    if (!res.ok) return j(o, res.status);
+    if (app) return j({ token: `${a}.${o.token}`, email });
+    return j({ ok: true, email }, 200, { 'Set-Cookie': setCookie(`${a}.${o.token}`, WEB_DAYS) });
   }
   if (p === '/sessions/auth/verify') {
     const a = url.searchParams.get('a') || '', t = url.searchParams.get('t') || '';
@@ -97,8 +122,8 @@ function verifyPage(a, t, error) {
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
 <title>Sign in · Showcaller Sessions</title><link rel="icon" href="/favicon-32.png"><link rel="stylesheet" href="/sessions/guest/sessions.css"><link rel="stylesheet" href="/sessions/account/account.css"></head>
 <body><main class="acc-center"><div class="card acc-box"><h1>Showcaller Sessions</h1>${ok
-    ? `<p>Sign in to see your sessions, plans and takes.</p><form method="post" action="/sessions/auth/verify"><input type="hidden" name="a" value="${esc(a)}"><input type="hidden" name="t" value="${esc(t)}"><button class="btn big" id="go">Sign in</button></form>`
-    : `<p class="acc-err">${esc(error || 'This sign-in link isn’t right. Ask for a new one.')}</p><p><a class="btn soft" href="/sessions/account/">Get a new link</a></p>`}</div></main>
+    ? `<p>Confirm your email to finish setting your password and sign in.</p><form method="post" action="/sessions/auth/verify"><input type="hidden" name="a" value="${esc(a)}"><input type="hidden" name="t" value="${esc(t)}"><button class="btn big" id="go">Confirm and sign in</button></form>`
+    : `<p class="acc-err">${esc(error || 'This link isn’t right. Ask for a new one.')}</p><p><a class="btn soft" href="/sessions/account/">Back to sign in</a></p>`}</div></main>
 <script>try{const t=localStorage.getItem('sess-theme');if(t)document.documentElement.dataset.theme=t}catch{}</script></body></html>`;
   return new Response(html, { status: ok ? 200 : 400, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin' } });
 }
@@ -114,22 +139,41 @@ export class SessionsAccount {
     try {
       if (op === 'start') {
         const b = await request.json(), sent = (await this.get('sent', [])).filter((x) => x > now - 3600e3);
-        if (sent.length >= 5) return j({ error: 'That’s 5 sign-in emails this hour. Use the newest one, or try again later.' }, 429);
+        if (b.purpose === 'signup' && await this.get('pw')) return j({ error: 'There’s already an account for this email. Sign in, or use “Forgot password”.', exists: true }, 409);
+        if (sent.length >= 5) return j({ error: 'That’s 5 emails this hour. Use the newest one, or try again later.' }, 429);
+        const salt = rand(16), pw = { salt, hash: await pwHash(b.password, salt), iter: PW_ITER };
         const t = rand(), logins = (await this.get('logins', [])).filter((x) => x.exp > now).slice(-4);
-        logins.push({ h: await sha(t), exp: now + LINK_MIN * 60e3, dev: b.device ? await sha(b.device) : '' });
+        logins.push({ h: await sha(t), exp: now + LINK_MIN * 60e3, dev: b.device ? await sha(b.device) : '', pw, reset: b.purpose === 'reset' });
         sent.push(now);
         await this.ctx.storage.put({ logins, sent, email: b.email, a: b.a });
-        const link = `${origin}/sessions/auth/verify?a=${b.a}&t=${t}`;
-        const m = await mail(this.env, b.email, 'Sign in to Showcaller Sessions',
-          `Sign in to Showcaller Sessions:\n${link}\n\nThe link works once, for ${LINK_MIN} minutes. If you didn’t ask for it, you can ignore this email.`,
-          wrap(`<p>Here’s your link to sign in to Showcaller Sessions${b.device ? ' on your Mac' : ''}.</p>${button(link, 'Sign in')}<p style="color:#666;font-size:13px">It works once, for ${LINK_MIN} minutes. If you didn’t ask for it, you can ignore this email.</p>`));
+        const link = `${origin}/sessions/auth/verify?a=${b.a}&t=${t}`, reset = b.purpose === 'reset';
+        const subject = reset ? 'Reset your Showcaller Sessions password' : 'Confirm your email for Showcaller Sessions';
+        const what = reset ? 'Press the button to confirm your new Showcaller Sessions password.' : 'Press the button to confirm your email and finish making your Showcaller Sessions account.';
+        const m = await mail(this.env, b.email, subject,
+          `${what}\n${link}\n\nThe link works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email and nothing changes.`,
+          wrap(`<p>${what}</p>${button(link, reset ? 'Confirm new password' : 'Confirm my email')}<p style="color:#666;font-size:13px">It works once, for ${LINK_MIN} minutes. If you didn’t ask for it, ignore this email and nothing changes.</p>`));
         return j({ ok: true, a: b.a, ...(m.fake ? { link } : {}) });
+      }
+      if (op === 'login') {
+        const b = await request.json(), pw = await this.get('pw'), f = await this.get('fails', { n: 0, at: 0 });
+        if (f.at > now - 15 * 60e3 && f.n >= 10) return j({ error: 'Too many tries. Wait 15 minutes, or use “Forgot password”.' }, 429);
+        if (!pw || !same(await pwHash(String(b.password), pw.salt), pw.hash)) {
+          await this.ctx.storage.put('fails', { n: (f.at > now - 15 * 60e3 ? f.n : 0) + 1, at: now });
+          return j({ error: 'Wrong email or password' }, 403);
+        }
+        await this.ctx.storage.delete('fails');
+        return j({ token: await this.newSession(b.app ? 'app' : 'web') });
       }
       if (op === 'verify') {
         const b = await request.json(), h = await sha(String(b.t || '')), logins = await this.get('logins', []);
         const l = logins.find((x) => x.h === h && x.exp > now);
         if (!l) return j({ error: 'This sign-in link has been used or has run out. Ask for a new one.' }, 403);
         await this.ctx.storage.put('logins', logins.filter((x) => x !== l));
+        if (l.pw) {
+          // a new password signs out everywhere else
+          if (l.reset) for (const k of (await this.ctx.storage.list({ prefix: 's:' })).keys()) await this.ctx.storage.delete(k);
+          await this.ctx.storage.put('pw', l.pw); await this.ctx.storage.delete('fails');
+        }
         const token = await this.newSession('web');
         if (l.dev) await this.ctx.storage.put(`dev:${l.dev}`, { token: await this.newSession('app'), exp: now + LINK_MIN * 60e3 });
         return j({ token, app: !!l.dev });
@@ -208,8 +252,8 @@ export class SessionsAccount {
         if (!b.remove) {
           const link = `${origin}/sessions/account/?s=${rr.id}`;
           m = await mail(this.env, to, `${email} shared “${rr.name}” with you`,
-            `${email} shared the session “${rr.name}” with you in Showcaller Sessions: the plan, the guest and producer links, and the takes.\n\nSign in with this email address to see it: ${link}`,
-            wrap(`<p><b>${esc(email)}</b> shared the session <b>${esc(rr.name)}</b> with you in Showcaller Sessions: the plan, the guest and producer links, and the takes.</p>${button(link, 'See the session')}<p style="color:#666;font-size:13px">Sign in with this email address (${esc(to)}). There’s no password.</p>`));
+            `${email} shared the session “${rr.name}” with you in Showcaller Sessions: the plan, the guest and producer links, and the takes.\n\nSign in with this email address (or create an account with it) to see it: ${link}`,
+            wrap(`<p><b>${esc(email)}</b> shared the session <b>${esc(rr.name)}</b> with you in Showcaller Sessions: the plan, the guest and producer links, and the takes.</p>${button(link, 'See the session')}<p style="color:#666;font-size:13px">Sign in with this email address (${esc(to)}), or create an account with it if you don’t have one yet.</p>`));
         }
         return j({ ok: true, members: members.map((x) => ({ email: x.email, at: x.at })), ...(m.fake ? { link: `${origin}/sessions/account/?s=${rr.id}` } : {}) });
       }
