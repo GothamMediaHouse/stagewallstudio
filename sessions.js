@@ -10,6 +10,7 @@
 //   GET  …/sessions/api/list|get|takes, POST …/del   the app's downloads (header X-Session-Secret)
 //   https://…/s/R                                    the guest page (public/sessions/guest/)
 //   GET/POST …/sessions/api/plan, POST …/api/invite   the show plan: when, rundown, guest list; invite emails (app only)
+//   POST …/sessions/api/clips   AI-picked clips from a take's transcript (app only; sessions-ai.js, 20 a day per room)
 //   GET …/sessions/info?r&g, POST …/sessions/techcheck?r&g, GET/POST …/sessions/speed   the guest page before the day
 //
 // Cloud keys: r/<room>/<take>/<pid>/<v|a|m>/<000001>. A page that reloads mid-take records a new part: its pieces
@@ -18,6 +19,7 @@
 // A person's shared screen is its own track: pid + 's', uploaded with that person's key.
 // The producer key is made from the room's owner hash (the app works it out from its secret), so nothing extra is stored.
 import { DurableObject } from 'cloudflare:workers';
+import { pickClips } from './sessions-ai.js';
 
 const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
 export const producerKey = async (ownerHash) => (await sha(`showcaller-sessions-producer:${ownerHash}`)).slice(0, 32);
@@ -51,6 +53,11 @@ export async function sessions(request, env) {
   if (p === '/sessions/api/plan' || p === '/sessions/api/invite') {
     const res = await room(env, r).fetch(new Request(`https://room/${p.slice(14)}?r=${r}&origin=${encodeURIComponent(url.origin)}`, { method: request.method, headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '', 'Content-Type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
     return res;
+  }
+  if (p === '/sessions/api/clips' && request.method === 'POST') {
+    if (!env.ANTHROPIC_API_KEY && !env.SESSIONS_AI_FAKE) return j({ error: 'AI clips aren’t set up on this site yet' }, 503);
+    const body = await request.text(); if (body.length > 600000) return j({ error: 'This take is too long for AI clips' }, 413);
+    return room(env, r).fetch(new Request('https://room/clips', { method: 'POST', headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '' }, body }));
   }
   if (!env.SESSIONS) return j({ error: 'Cloud storage for Sessions isn’t set up on this site yet' }, 503);
   if (p === '/sessions/up') return upload(request, env, url, r);
@@ -209,6 +216,38 @@ export class SessionRoom extends DurableObject {
       g.sent = Date.now(); await this.save('plan');
       for (const w of this.ctrls()) this.send(w, { t: 'plan', plan: s.plan });
       return j({ ok: true, plan: s.plan });
+    }
+    if (url.pathname === '/aibudget') {
+      // one shared counter for the whole site, so AI clips can't run up the bill (this object is named 'ai-budget', not a room)
+      const day = new Date().toISOString().slice(0, 10), b = (await this.ctx.storage.get('aib')) || {};
+      if (b.day !== day) { b.day = day; b.n = 0; }
+      if (b.n >= Number(this.env.SESSIONS_AI_DAILY || 400)) return new Response('no', { status: 429 });
+      b.n++; await this.ctx.storage.put('aib', b);
+      return new Response('ok');
+    }
+    if (url.pathname === '/clips') {
+      // as with planning, a room the app made but hasn't opened yet is claimed by its key
+      const sec = request.headers.get('X-Session-Secret') || '';
+      if (!s.owner && sec.length >= 20) { s.owner = await sha(`showcaller-sessions:${sec}`); await this.save('owner'); }
+      if (!await this.isOwner(request.headers.get('X-Session-Secret') || '')) return j({ error: 'Wrong session key' }, 403);
+      let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad request' }, 400); }
+      const lines = String(b.lines || '').slice(0, 500000);
+      if (lines.length < 40) return j({ error: 'Make a transcript first' }, 400);
+      const day = new Date().toISOString().slice(0, 10), u = (await this.ctx.storage.get('ai')) || {};
+      if (u.day !== day) { u.day = day; u.n = 0; }
+      if (u.n >= 20) return j({ error: 'That’s 20 AI picks today for this session, try again tomorrow' }, 429);
+      const g = await this.env.SESSIONS_ROOM.get(this.env.SESSIONS_ROOM.idFromName('ai-budget')).fetch(new Request('https://room/aibudget'));
+      if (!g.ok) return j({ error: 'AI clips are busy today, try again tomorrow' }, 429);
+      u.n++; await this.ctx.storage.put('ai', u);
+      const o = { lines, title: clean(b.title, 80), count: Math.max(1, Math.min(10, b.count | 0 || 6)), min: Math.max(5, Math.min(120, +b.min || 20)), max: Math.max(10, Math.min(180, +b.max || 60)),
+        marks: (Array.isArray(b.marks) ? b.marks : []).filter((x) => isFinite(x)).slice(0, 50).map((x) => Math.round(x)) };
+      if (this.env.SESSIONS_AI_FAKE && !this.env.ANTHROPIC_API_KEY) {
+        // for the tests: the first and the last line that start a long enough stretch
+        const t = [...lines.matchAll(/^\[(\d+(?:\.\d+)?)\]/gm)].map((m) => +m[1]);
+        return j({ clips: [{ start: t[0], end: Math.min(t[0] + o.max, t[t.length - 1] + 3), title: 'The opening', why: 'Test pick', hook: lines.split('\n')[0].replace(/^\[[^\]]*\]\s*/, '').slice(0, 60) }], left: 20 - u.n, fake: true });
+      }
+      try { return j({ clips: await pickClips(this.env, o), left: 20 - u.n }); }
+      catch (e) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: e.ours ? e.message : `The AI didn’t answer (${e.status || 'no connection'})` }, e.status === 429 ? 429 : 502); }
     }
     if (url.pathname === '/auth') return new Response(null, { status: await this.isOwner(request.headers.get('X-Session-Secret') || '') ? 204 : 403 });
     if (url.pathname === '/takes') {
