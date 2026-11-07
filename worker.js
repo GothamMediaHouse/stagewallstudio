@@ -51,7 +51,7 @@ export default {
     if (url.pathname === '/link/relay/host' || url.pathname === '/link/relay/data' || url.pathname === '/link/relay/c') return linkRelay(request, env);
     // Showcaller Sessions: remote guests recorded for editing, pieces kept in cloud storage until the studio Mac downloads them (sessions.js)
     if (url.pathname.startsWith('/sessions/') && !url.pathname.startsWith('/sessions/guest/')) return sessions(request, env);
-    if (/^\/s\/[a-z0-9]{8,24}\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
+    if (/^\/s\/[a-z0-9]{8,24}(\/edit\/t\d{2,4})?\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {

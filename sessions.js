@@ -10,6 +10,10 @@
 //   GET  …/sessions/api/list|get|takes, POST …/del   the app's downloads (header X-Session-Secret)
 //   https://…/s/R                                    the guest page (public/sessions/guest/)
 //   GET/POST …/sessions/api/plan, POST …/api/invite   the show plan: when, rundown, guest list; invite emails (app only)
+//   https://…/s/R/edit/T?k=K                         editing a take together in a browser (public/sessions/edit/); K is that take's edit key
+//   wss://…/sessions/editws?r&take&k&name             the live edit: cuts and word fixes, who's editing (the app joins the same way)
+//   POST …/sessions/api/share?take&op=start|part|done|data   the app puts the take's small preview video and transcript up
+//   GET  …/sessions/editmedia?r&take&k&f=proxy|data    the browser editor gets them (proxy supports Range)
 //   POST …/sessions/api/clips   AI-picked clips from a take's transcript (app only; sessions-ai.js, 20 a day per room)
 //   GET …/sessions/info?r&g, POST …/sessions/techcheck?r&g, GET/POST …/sessions/speed   the guest page before the day
 //
@@ -23,6 +27,8 @@ import { pickClips } from './sessions-ai.js';
 
 const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
 export const producerKey = async (ownerHash) => (await sha(`showcaller-sessions-producer:${ownerHash}`)).slice(0, 32);
+// a take's edit key: anyone with the link can edit that one take (and nothing else); the app works it out from its secret
+export const editKey = async (ownerHash, take) => (await sha(`showcaller-sessions-editor:${ownerHash}:${take}`)).slice(0, 32);
 const MAX_PIECE = 64 * 1024 * 1024;
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 const sha = async (s) => hex(await crypto.subtle.digest('SHA-256', typeof s === 'string' ? new TextEncoder().encode(s) : s));
@@ -59,9 +65,40 @@ export async function sessions(request, env) {
     const body = await request.text(); if (body.length > 600000) return j({ error: 'This take is too long for AI clips' }, 413);
     return room(env, r).fetch(new Request('https://room/clips', { method: 'POST', headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '' }, body }));
   }
+  if (p === '/sessions/editws') {
+    if (request.headers.get('Upgrade') !== 'websocket') return new Response('Use a WebSocket', { status: 426 });
+    if (!TAKE.test(url.searchParams.get('take') || '')) return j({ error: 'No such take' }, 404);
+    return room(env, r).fetch(request);
+  }
   if (!env.SESSIONS) return j({ error: 'Cloud storage for Sessions isn’t set up on this site yet' }, 503);
+  if (p === '/sessions/editmedia') return editMedia(request, env, url, r);
   if (p === '/sessions/up') return upload(request, env, url, r);
   return api(request, env, url, r);
+}
+
+// the browser editor's preview video and transcript, for whoever has the take's edit key
+async function editMedia(request, env, url, r) {
+  const take = url.searchParams.get('take') || '', k = url.searchParams.get('k') || '', f = url.searchParams.get('f');
+  if (!TAKE.test(take) || !/^(proxy|data)$/.test(f) || k.length !== 32) return j({ error: 'Bad request' }, 400);
+  const ck = `${r}|ed|${take}|${k}`;
+  if (!cached(ck)) {
+    const res = await room(env, r).fetch(new Request(`https://room/editkey?take=${take}&k=${encodeURIComponent(k)}`));
+    if (!res.ok) return j({ error: 'This edit link isn’t good any more' }, 403);
+    remember(ck, 300e3);
+  }
+  const key = `e/${r}/${take}/${f === 'proxy' ? 'proxy.mp4' : 'data.json'}`;
+  if (f === 'data') { const o = await env.SESSIONS.get(key); return o ? new Response(o.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }) : j({ error: 'This take hasn’t been shared yet' }, 404); }
+  const o = await env.SESSIONS.get(key, { range: request.headers, onlyIf: request.headers });
+  if (!o) return j({ error: 'No preview yet' }, 404);
+  const h = new Headers({ 'Content-Type': 'video/mp4', 'Accept-Ranges': 'bytes', 'Cache-Control': 'private, max-age=3600', ETag: o.httpEtag });
+  if (!o.body) return new Response(null, { status: 304, headers: h });
+  if (o.range && request.headers.has('Range')) {
+    const off = o.range.offset ?? (o.size - o.range.suffix), len = o.range.length ?? (o.size - off);
+    h.set('Content-Range', `bytes ${off}-${off + len - 1}/${o.size}`); h.set('Content-Length', String(len));
+    return new Response(o.body, { status: 206, headers: h });
+  }
+  h.set('Content-Length', String(o.size));
+  return new Response(o.body, { headers: h });
 }
 
 async function upload(request, env, url, r) {
@@ -134,12 +171,43 @@ async function api(request, env, url, r) {
     await env.SESSIONS.delete(keys.map((k) => base + rel(k)));
     return j({ ok: true, deleted: keys.length });
   }
+  if (op === 'share' && request.method === 'POST') {
+    // the app puts a take up for editing in a browser: a small preview video (in parts, R2 multipart) and the transcript
+    const take = url.searchParams.get('take') || '', sop = url.searchParams.get('op'), ekey = `e/${r}/${take}/`;
+    if (!TAKE.test(take)) return j({ error: 'Bad take' }, 400);
+    if (sop === 'data') {
+      const body = await request.text(); if (body.length > 20e6) return j({ error: 'Too big' }, 413);
+      try { JSON.parse(body); } catch { return j({ error: 'Bad data' }, 400); }
+      await env.SESSIONS.put(ekey + 'data.json', body, { httpMetadata: { contentType: 'application/json' } });
+      const kr = await room(env, r).fetch(new Request(`https://room/editkey?take=${take}&make=1`, { headers: { 'X-Session-Secret': secret } }));
+      return j(await kr.json());
+    }
+    if (sop === 'start') { const m = await env.SESSIONS.createMultipartUpload(ekey + 'proxy.mp4', { httpMetadata: { contentType: 'video/mp4' } }); return j({ upload: m.uploadId }); }
+    const up = url.searchParams.get('upload') || '';
+    if (!up) return j({ error: 'Bad upload' }, 400);
+    const m = env.SESSIONS.resumeMultipartUpload(ekey + 'proxy.mp4', up);
+    if (sop === 'part') {
+      const n = Number(url.searchParams.get('n'));
+      if (!(Number.isInteger(n) && n >= 1 && n <= 10000) || !request.body) return j({ error: 'Bad part' }, 400);
+      const len = Number(request.headers.get('Content-Length') || 0); if (len > 95 * 1024 * 1024) return j({ error: 'Part too big' }, 413);
+      const part = await m.uploadPart(n, request.body);
+      return j({ part: { partNumber: part.partNumber, etag: part.etag } });
+    }
+    if (sop === 'done') {
+      let parts; try { parts = (await request.json()).parts; } catch {}
+      if (!Array.isArray(parts) || !parts.length) return j({ error: 'Bad parts' }, 400);
+      await m.complete(parts.map((x) => ({ partNumber: Number(x.partNumber), etag: String(x.etag) })));
+      return j({ ok: true });
+    }
+    return j({ error: 'Unknown' }, 404);
+  }
   if (op === 'takes' && request.method === 'GET') return room(env, r).fetch(new Request('https://room/takes', { headers: { 'X-Session-Secret': secret } }));
   return j({ error: 'Unknown' }, 404);
 }
 
 // the guest page, for /s/<room>
 export function sessionsPage(request, env) {
+  if (/\/edit\/t\d{2,4}\/?$/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(new Request(new URL('/sessions/edit/', request.url), request));
   return env.ASSETS.fetch(new Request(new URL('/sessions/guest/', request.url), request));
 }
 
@@ -216,6 +284,25 @@ export class SessionRoom extends DurableObject {
       g.sent = Date.now(); await this.save('plan');
       for (const w of this.ctrls()) this.send(w, { t: 'plan', plan: s.plan });
       return j({ ok: true, plan: s.plan });
+    }
+    if (url.pathname === '/editkey') {
+      // ?k: is this the take's edit key. ?make=1 with the room's secret: here it is (the app shares the link)
+      const take = url.searchParams.get('take') || ''; if (!TAKE.test(take) || !s.owner) return j({ error: 'No' }, 403);
+      const key = await editKey(s.owner, take);
+      if (url.searchParams.get('make')) return await this.isOwner(request.headers.get('X-Session-Secret') || '') ? j({ key }) : j({ error: 'Wrong session key' }, 403);
+      return new Response(null, { status: url.searchParams.get('k') === key ? 204 : 403 });
+    }
+    if (url.pathname === '/sessions/editws') {
+      const take = url.searchParams.get('take') || '', k = url.searchParams.get('k') || '';
+      const [c2, s2] = Object.values(new WebSocketPair());
+      if (!s.owner || k !== await editKey(s.owner, take)) { this.ctx.acceptWebSocket(s2, ['x']); s2.close(4003, 'This edit link isn’t good any more'); return new Response(null, { status: 101, webSocket: c2 }); }
+      const id = Math.random().toString(36).slice(2, 10), app = url.searchParams.get('app') === '1';
+      this.ctx.acceptWebSocket(s2, ['ed', `ed:${take}`]);
+      s2.serializeAttachment({ ed: take, id, name: clean(url.searchParams.get('name')) || (app ? 'Studio' : 'Editor'), app });
+      const d = await this.edDoc(take);
+      this.send(s2, { t: 'doc', me: id, cuts: d.cuts, rev: d.rev, fixes: d.fixes, by: d.by });
+      this.edPeople(take);
+      return new Response(null, { status: 101, webSocket: c2 });
     }
     if (url.pathname === '/aibudget') {
       // one shared counter for the whole site, so AI clips can't run up the bill (this object is named 'ai-budget', not a room)
@@ -340,6 +427,7 @@ export class SessionRoom extends DurableObject {
     let m; try { m = JSON.parse(msg); } catch { return; }
     const a = ws.deserializeAttachment(), tags = this.ctx.getTags(ws), s = await this.state();
     if (m.t === 'time') return this.send(ws, { t: 'time', c: m.c, s: Date.now() });
+    if (tags.includes('ed')) return this.edMsg(ws, a, m);
     if (!tags.includes('in')) return;
     const isHost = tags.includes('host'), isProd = tags.includes('prod');
     if (m.t === 'sig' && typeof m.to === 'string') {
@@ -445,10 +533,39 @@ export class SessionRoom extends DurableObject {
     }
   }
 
+  // ---- editing a take together: one shared list of cuts per take (last change wins, everyone sees it at once)
+  async edDoc(take) {
+    this.eds = this.eds || {};
+    if (!this.eds[take]) this.eds[take] = (await this.ctx.storage.get(`ed:${take}`)) || { cuts: [], rev: 0, fixes: {}, by: '' };
+    return this.eds[take];
+  }
+  edPeople(take) {
+    const list = this.open(`ed:${take}`).map((w) => { const a = w.deserializeAttachment(); return { id: a.id, name: a.name, app: a.app }; });
+    for (const w of this.open(`ed:${take}`)) this.send(w, { t: 'people', list });
+  }
+  async edMsg(ws, a, m) {
+    const take = a.ed, d = await this.edDoc(take), others = (o) => { for (const w of this.open(`ed:${take}`)) if (w !== ws) this.send(w, o); };
+    if (m.t === 'cuts' && Array.isArray(m.cuts) && m.cuts.length <= 5000) {
+      const cuts = m.cuts.filter((c) => Array.isArray(c) && c.length === 2 && isFinite(c[0]) && isFinite(c[1]) && c[0] >= 0 && c[1] > c[0] && c[1] < 1e6).map(([x, y]) => [Math.round(x * 1000) / 1000, Math.round(y * 1000) / 1000]);
+      d.cuts = cuts; d.rev++; d.by = a.name;
+      await this.ctx.storage.put(`ed:${take}`, d);
+      this.send(ws, { t: 'ack', rev: d.rev });
+      return others({ t: 'cuts', cuts, rev: d.rev, by: a.name });
+    }
+    if (m.t === 'fix' && Number.isInteger(m.i) && m.i >= 0 && m.i < 1e6) {
+      const w = clean(m.w, 60); if (!w) return;
+      d.fixes[m.i] = w; if (Object.keys(d.fixes).length > 5000) return;
+      await this.ctx.storage.put(`ed:${take}`, d);
+      return others({ t: 'fix', i: m.i, w, by: a.name });
+    }
+    if (m.t === 'at' && isFinite(m.tk)) return others({ t: 'at', id: a.id, name: a.name, tk: Math.max(0, +m.tk) });
+  }
+
   async webSocketClose(ws) { this.gone(ws); }
   async webSocketError(ws) { this.gone(ws); }
   gone(ws) {
     const tags = this.ctx.getTags(ws), a = ws.deserializeAttachment?.() || {};
+    if (tags.includes('ed')) { const ed = a.ed; setTimeout(() => this.edPeople(ed), 0); return; }
     if (tags.includes('in')) {
       if (this.open(`p:${a.pid}`).some((w) => w !== ws)) return;
       this.each({ t: 'leave', pid: a.pid }, (b) => b.pid !== a.pid);
