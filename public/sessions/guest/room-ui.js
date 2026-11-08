@@ -36,6 +36,7 @@
  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9.7 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
  <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M10 9v6l5-3z"/></symbol>
+ <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></symbol>
  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M12 13V8M9.5 10.5 12 8l2.5 2.5"/></symbol>
 <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
@@ -490,6 +491,7 @@
       const micOn = a && a.enabled, camOn = v && v.enabled;
       const html = `<button class="rb js-mic ${micOn ? '' : 'off'}" aria-label="${micOn ? 'Mute your mic' : 'Unmute your mic'}" title="${micOn ? 'Mute (recorded silence)' : 'Unmute'}">${ico(micOn ? 'mic' : 'micoff')}</button>
         <button class="rb js-cam ${camOn ? '' : 'off'}" aria-label="${camOn ? 'Turn your camera off' : 'Turn your camera on'}" title="${camOn ? 'Camera off' : 'Camera on'}">${ico(camOn ? 'cam' : 'camoff')}</button>
+        ${this.onLive ? `<button class="rb js-live ${this.liveOn ? 'on live' : ''}" aria-label="Go live" title="${this.liveOn ? 'Live now: open the stream panel' : 'Go live: stream the call to YouTube, Facebook, LinkedIn or any RTMP server'}">${ico('live')}</button>` : ''}
         ${this.onMedia ? `<button class="rb js-media ${this.mediaOn ? 'on' : ''}" aria-label="Media board" title="Media board: play intros, stings and clips into the call (recorded)">${ico('play')}</button>` : ''}
         ${this.share ? `<button class="rb js-share ${this.share.active ? 'on' : ''}" aria-label="${this.share.active ? 'Stop sharing your screen' : 'Share your screen'}" title="${this.share.active ? 'Stop sharing' : 'Share your screen (recorded as its own track)'}">${ico('screen')}</button>` : ''}
         ${!this.ctrl && s.cfg && s.cfg.solo && (on ? s.rec.solo : !s.hostOnline) ? `<button class="recb ${on ? '' : 'stopped'} js-solo" title="${on ? 'Stop recording' : 'Record yourself now. The host gets it like any other take.'}"><i></i>${on ? 'Stop' : 'Record on my own'}</button>` : ''}
@@ -504,6 +506,7 @@
         $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); } };
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
         if (this.onMedia) $('.js-media', root).onclick = () => this.onMedia();
+        if (this.onLive) $('.js-live', root).onclick = () => this.onLive();
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
         const so = $('.js-solo', root); if (so) so.onclick = () => s.solo(!on);
         if (this.ctrl) {
