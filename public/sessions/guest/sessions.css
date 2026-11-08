@@ -7,7 +7,7 @@
 :root{
  --ground:#0b0c0f; --surface:#0e1014; --card:#14161b; --sunk:#1a1d23; --line:#22252c; --line2:#2c3038;
  --fg:#e8e9ee; --mute:#8f94a1; --dim:#6b707d; --shadow:0 20px 50px -24px rgba(0,0,0,.8);
- --v:#8b6cff; --v2:#a48bff; --vsoft:rgba(139,108,255,.16); --vtext:#b9a6ff; --red:#ff4d57; --redsoft:rgba(255,77,87,.14); --green:#3ddc97; --greensoft:rgba(61,220,151,.12); --amber:#ffb020; --ambersoft:rgba(255,176,32,.12);
+ --v:#2fd3bd; --v2:#5fe0cf; --vsoft:rgba(47,211,189,.16); --vtext:#7ee8da; --red:#ff4d57; --redsoft:rgba(255,77,87,.14); --green:#3ddc97; --greensoft:rgba(61,220,151,.12); --amber:#ffb020; --ambersoft:rgba(255,176,32,.12);
  --chip:rgba(8,9,12,.74); --chipfg:#eceef3; --onv:#0b0c0f; color-scheme:dark;
  --display:"Inter",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif; --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
  --r:10px; --r2:12px;
@@ -15,7 +15,7 @@
 :root[data-theme="light"]{
  --ground:#eef0f3; --surface:#f6f7f9; --card:#ffffff; --sunk:#eef0f3; --line:#e1e4e9; --line2:#d3d7de;
  --fg:#16181d; --mute:#5f6573; --dim:#8a909c; --shadow:0 16px 40px -24px rgba(20,22,30,.35);
- --v:#6d4aff; --v2:#8b6cff; --vsoft:#efeaff; --vtext:#5232d6; --red:#e5484d; --redsoft:#fde8e9; --green:#13915c; --greensoft:#e2f5ec; --amber:#a35f00; --ambersoft:#fff1d9;
+ --v:#0f9f8c; --v2:#2fd3bd; --vsoft:#e0f7f3; --vtext:#0b7d6e; --red:#e5484d; --redsoft:#fde8e9; --green:#13915c; --greensoft:#e2f5ec; --amber:#a35f00; --ambersoft:#fff1d9;
  --chip:rgba(255,255,255,.9); --chipfg:#16181d; --onv:#fff; color-scheme:light}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{min-height:100%}
@@ -126,7 +126,7 @@ input[type=range]{accent-color:var(--v);width:100%}
 .fs .fgrid{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
 .fs .ft{position:relative;overflow:hidden}
 .fs .ft canvas{width:100%;height:100%;display:block;object-fit:cover}
-.fs .ft.talk::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 3px #9b7bff}
+.fs .ft.talk::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 3px #4fe0cc}
 .fs .fnm{position:absolute;left:18px;bottom:18px;font:600 16px var(--display);text-shadow:0 1px 8px rgba(0,0,0,.7);display:flex;gap:10px;align-items:baseline}
 .fs .fnm small{font:500 12px var(--mono);opacity:.75}
 .fs .ft:nth-child(4) .fnm{left:auto;right:18px}
@@ -361,7 +361,7 @@ body > #v-room .win{max-width:1680px}
 .uploads .num,.recp.idle .num{font-family:var(--body);font-weight:500}
 .rstage > .tiles{margin-block:auto}
 /* full screen and its floating panel are always dark, whatever the theme */
-.fs,.drawer.floating{--card:rgba(255,255,255,.06);--sunk:rgba(255,255,255,.08);--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.16);--fg:#eceef3;--mute:#a3a8b5;--dim:#7d828f;--vtext:#b9a6ff;--vsoft:rgba(139,108,255,.2);--onv:#0b0c0f;--red:#ff4d57;--redsoft:rgba(255,77,87,.16);color-scheme:dark}
+.fs,.drawer.floating{--card:rgba(255,255,255,.06);--sunk:rgba(255,255,255,.08);--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.16);--fg:#eceef3;--mute:#a3a8b5;--dim:#7d828f;--vtext:#7ee8da;--vsoft:rgba(47,211,189,.2);--onv:#0b0c0f;--red:#ff4d57;--redsoft:rgba(255,77,87,.16);color-scheme:dark}
 .drawer.floating input,.drawer.floating textarea,.drawer.floating select{background:rgba(0,0,0,.3)}
 .fs{-webkit-user-select:none;user-select:none}
 body:has(.drawer.floating) .fs .fup{display:none}
@@ -390,8 +390,8 @@ body:has(.drawer.floating) .fs .fup{display:none}
 .prompter .pview{position:absolute;inset:0;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 78%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 78%,transparent 100%)}
 .prompter .ptext{position:absolute;left:0;right:0;top:33%;padding:0 48px 60vh;font:600 var(--ps)/1.45 var(--body);will-change:transform}
 .prompter .ptext p{margin:0 0 .8em}
-.prompter .pline{position:absolute;left:12px;right:12px;top:calc(33% + var(--ps) * .72);height:0;border-top:2px solid rgba(139,108,255,.55);pointer-events:none}
-.prompter .pline::before{content:"";position:absolute;left:-6px;top:-7px;border:6px solid transparent;border-left:9px solid #a48bff}
+.prompter .pline{position:absolute;left:12px;right:12px;top:calc(33% + var(--ps) * .72);height:0;border-top:2px solid rgba(47,211,189,.55);pointer-events:none}
+.prompter .pline::before{content:"";position:absolute;left:-6px;top:-7px;border:6px solid transparent;border-left:9px solid #5fe0cf}
 .prompter .pctl{position:absolute;right:8px;top:8px;display:flex;gap:4px;opacity:.35;transition:opacity .15s}
 .prompter:hover .pctl{opacity:1}
 .prompter .pctl button{width:30px;height:28px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;font:700 11px var(--body);display:grid;place-items:center}
