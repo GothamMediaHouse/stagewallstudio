@@ -44,6 +44,9 @@ const remember = (k, ms) => { if (okCache.size > 5000) okCache.clear(); okCache.
 
 const room = (env, r) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(r));
 
+// a session's recording options: frame rate, High bitrate, sound only (anything not sent stays as it was)
+const recOpts = (n, o) => ({ fps: [24, 25, 30, 60].includes(Number(n.fps)) ? Number(n.fps) : (o.fps || 30), high: n.high === undefined ? !!o.high : !!n.high, audio: n.audio === undefined ? !!o.audio : !!n.audio });
+
 // a studio's branding on its guest page: a name, an accent colour and a small logo (PNG, JPEG or WebP, at most 90 KB)
 export function cleanBrand(b) {
   if (!b || typeof b !== 'object') return null;
@@ -282,7 +285,7 @@ export class SessionRoom extends DurableObject {
     if (url.pathname === '/info') {
       // what the guest page shows before the day: the show's name and time, and who this invite is for
       const g = s.plan.guests.find((x) => x.id === url.searchParams.get('g'));
-      return j({ name: s.cfg.name, quality: s.cfg.quality, at: s.plan.at, tz: s.plan.tz, mins: s.plan.rundown.reduce((t, x) => t + x.min, 0), guest: g ? { name: g.name, role: g.role } : null, host: this.open('host').length > 0, brand: s.brand });
+      return j({ name: s.cfg.name, quality: s.cfg.quality, ...recOpts(s.cfg, {}), at: s.plan.at, tz: s.plan.tz, mins: s.plan.rundown.reduce((t, x) => t + x.min, 0), guest: g ? { name: g.name, role: g.role } : null, host: this.open('host').length > 0, brand: s.brand });
     }
     if (url.pathname === '/brand' && request.method === 'POST') {
       // the owner's branding for the guest page (set on their account, which sends it to each of its sessions)
@@ -309,7 +312,7 @@ export class SessionRoom extends DurableObject {
       let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad plan' }, 400); }
       if (url.pathname === '/plan') {
         s.plan = cleanPlan(b.plan || {}, s.plan);
-        if (b.name !== undefined || b.solo !== undefined || b.quality !== undefined) { if (b.name !== undefined) s.cfg.name = clean(b.name, 60) || s.cfg.name; if (b.solo !== undefined) s.cfg.solo = !!b.solo; if (['720', '1080', '4k'].includes(b.quality)) s.cfg.quality = b.quality; await this.save('cfg'); this.each({ t: 'cfg', cfg: s.cfg }); }
+        if (b.name !== undefined || b.solo !== undefined || b.quality !== undefined || b.fps !== undefined || b.high !== undefined || b.audio !== undefined) { if (b.name !== undefined) s.cfg.name = clean(b.name, 60) || s.cfg.name; if (b.solo !== undefined) s.cfg.solo = !!b.solo; if (['720', '1080', '4k'].includes(b.quality)) s.cfg.quality = b.quality; Object.assign(s.cfg, recOpts(b, s.cfg)); await this.save('cfg'); this.each({ t: 'cfg', cfg: s.cfg }); }
         if (typeof b.script === 'string' && b.script !== s.prompt.script) { s.prompt = { ...s.prompt, script: b.script.replace(/[\u0000-\u0008\u000b-\u001f]/g, '').slice(0, 20000), at: Date.now() }; await this.save('prompt'); this.each({ t: 'prompt', prompt: s.prompt }); }
         await this.save('plan');
         for (const w of this.ctrls()) this.send(w, { t: 'plan', plan: s.plan });
@@ -526,7 +529,7 @@ export class SessionRoom extends DurableObject {
       return;
     }
     if (m.t === 'cfg' && m.cfg && typeof m.cfg === 'object' && isHost) {
-      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait, solo: m.cfg.solo === undefined ? !!s.cfg.solo : !!m.cfg.solo };
+      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait, solo: m.cfg.solo === undefined ? !!s.cfg.solo : !!m.cfg.solo, ...recOpts(m.cfg, s.cfg) };
       await this.save('cfg');
       return this.each({ t: 'cfg', cfg: s.cfg });
     }
