@@ -15,7 +15,7 @@ import { hubCatalog, download, hubDownload } from './hub.js';
 import { intercom, intercomPage } from './intercom.js';
 import { hubReport, hubInstalls } from './installs.js';
 import { linkRelay } from './link-relay.js';
-import { sessions, sessionsPage } from './sessions.js';
+import { sessions, sessionsPage, sessionsCleanup } from './sessions.js';
 
 export { IntercomRoom } from './intercom.js';
 export { HubInstalls } from './installs.js';
@@ -60,5 +60,9 @@ export default {
       return route[1](request, env);
     }
     return env.ASSETS.fetch(request);
+  },
+  // nightly (wrangler.jsonc triggers): Sessions' cloud copies that nobody downloaded are deleted after 30 days
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sessionsCleanup(env));
   },
 };

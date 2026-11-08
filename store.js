@@ -43,7 +43,7 @@ export function endDate(o, now = Date.now()) {
   return ymd(Date.parse(o.start + 'T00:00:00Z') + (RENT_DAYS[o.term] - 1) * DAY);
 }
 
-async function stripe(env, method, path, params) {
+export async function stripe(env, method, path, params) {
   const body = params ? new URLSearchParams(params).toString() : undefined;
   const r = await fetch(`https://api.stripe.com/v1${path}${method === 'GET' && body ? `?${body}` : ''}`, {
     method,
@@ -160,15 +160,34 @@ export async function fulfil(env, sessionId) {
 }
 
 export async function webhook(request, env) {
-  if (!env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY || !env.LICENSE_SIGNING_KEY) return json({ error: 'Not set up' }, 503);
+  if (!env.STRIPE_WEBHOOK_SECRET || !env.STRIPE_SECRET_KEY) return json({ error: 'Not set up' }, 503);
   const raw = await request.text();
   if (!(await stripeSignatureOk(raw, request.headers.get('Stripe-Signature'), env.STRIPE_WEBHOOK_SECRET))) return json({ error: 'Bad signature' }, 400);
   let ev; try { ev = JSON.parse(raw); } catch { return json({ error: 'Bad body' }, 400); }
+  // Showcaller Sessions subscriptions (sessions-accounts.js) carry the account in their metadata
+  if (isSessionsEvent(ev)) {
+    try { await sessionsBilling(env, ev); }
+    catch (e) { console.log('sessions billing', e.message); return json({ error: 'Try again' }, 500); }
+    return json({ received: true });
+  }
+  if (!env.LICENSE_SIGNING_KEY) return json({ error: 'Not set up' }, 503);
   if (ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') {
     try { await fulfil(env, ev.data.object.id); }
     catch (e) { console.log('fulfil', e.message); return json({ error: 'Try again' }, 500); } // Stripe retries
   }
   return json({ received: true });
+}
+
+// Showcaller Sessions: a subscription's state goes onto its account (the app is locked without an active one)
+const isSessionsEvent = (ev) => { const o = ev.data?.object || {}; return !!(o.metadata?.sessions_acct || o.subscription_details?.metadata?.sessions_acct) && /^(checkout\.session\.completed|customer\.subscription\.(created|updated|deleted))$/.test(ev.type); };
+export async function sessionsBilling(env, ev) {
+  let sub = ev.data.object;
+  if (ev.type === 'checkout.session.completed') { if (!sub.subscription) return; sub = await stripe(env, 'GET', `/subscriptions/${encodeURIComponent(sub.subscription)}`); }
+  const a = sub.metadata?.sessions_acct; if (!/^[a-f0-9]{32}$/.test(a || '')) return;
+  const end = sub.current_period_end || sub.items?.data?.[0]?.current_period_end || 0;
+  const plan = { status: sub.status, until: end * 1000, customer: sub.customer, sub: sub.id, cancelAt: sub.cancel_at ? sub.cancel_at * 1000 : 0 };
+  const r = await env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(`acct:${a}`)).fetch(new Request('https://acct.sessions/plan', { method: 'POST', body: JSON.stringify(plan) }));
+  if (!r.ok) throw new Error(`account ${r.status}`);
 }
 
 // The thank-you page: shows the key once the payment has gone through

@@ -21,9 +21,14 @@
 //   POST …/sessions/acct/invite {room, take, email}   emails an editor the take's edit link
 //   POST …/sessions/acct/members {room, email, remove?}   lets someone else (a client producing the show) see one session
 //        on their own dashboard: plan, links, takes and edit links, never the room's key or the owner's other sessions
+//   POST …/sessions/acct/brand {brand: {name, color, logo}}   the guest page's branding, for every session in the account
+//   POST …/sessions/acct/ready {room, take, people, minutes}  the studio app has a take's files: emails the owner and the
+//        people the session is shared with, once per take
+//   POST …/sessions/acct/checkout | billing      a Stripe page to subscribe, or to manage the subscription (SESSIONS_STRIPE_PRICE)
 // Signed in = header "Authorization: Bearer <account>.<key>" (the app) or the cookie sss=<account>.<key> (the dashboard).
 // Tests: with SESSIONS_AUTH_FAKE set and no RESEND_API_KEY, emails aren't sent and their links come back in the answer.
-import { editKey, producerKey } from './sessions.js';
+import { editKey, producerKey, cleanBrand } from './sessions.js';
+import { stripe } from './store.js';
 
 const ACCT = /^[a-f0-9]{32}$/, ROOM = /^[a-z0-9]{8,24}$/, TAKE = /^t\d{2,4}$/;
 const EMAIL = /^[^@\s<>"]+@[^@\s<>"]+\.[^@\s<>"]+$/;
@@ -40,7 +45,19 @@ async function pwHash(pw, salt) {
 }
 const same = (x, y) => { if (x.length !== y.length) return false; let d = 0; for (let i = 0; i < x.length; i++) d |= x.charCodeAt(i) ^ y.charCodeAt(i); return d === 0; };
 const pwProblem = (pw) => typeof pw !== 'string' || pw.length < 8 ? 'Use a password of at least 8 characters' : pw.length > 200 ? 'That password is too long' : '';
-const DAY = 86400e3, WEB_DAYS = 30, APP_DAYS = 365, LINK_MIN = 15;
+const DAY = 86400e3, WEB_DAYS = 30, APP_DAYS = 365, LINK_MIN = 15, TRIAL_DAYS = 14, GRACE_DAYS = 7;
+// tests: fake email and no Stripe key, so "Subscribe" just switches the plan on
+const fakeBilling = (env) => !!env.SESSIONS_AUTH_FAKE && !env.RESEND_API_KEY && !env.STRIPE_SECRET_KEY;
+// what the app and the dashboard see of a plan. Active = a trial or paid month that hasn't run out (a failed payment
+// keeps working for GRACE_DAYS while Stripe retries); SESSIONS_COMP_EMAILS (comma list) are on the house.
+export function planView(p, env, email, now = Date.now()) {
+  const comp = String(env.SESSIONS_COMP_EMAILS || '').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean).includes(String(email || '').toLowerCase());
+  if (comp) return { status: 'comp', active: true, until: 0, billing: false };
+  const st = p.status, until = p.until || 0;
+  const active = (['trial', 'active', 'trialing'].includes(st) && until > now) || (['past_due', 'unpaid'].includes(st) && until + GRACE_DAYS * DAY > now);
+  return { status: st, active, until, daysLeft: until > now ? Math.ceil((until - now) / DAY) : 0, canManage: !!p.customer, cancelAt: p.cancelAt || 0,
+    billing: fakeBilling(env) || !!(env.STRIPE_SECRET_KEY && env.SESSIONS_STRIPE_PRICE) };
+}
 export const accountId = async (email) => (await sha(`showcaller-sessions-account:${email}`)).slice(0, 32);
 const acct = (env, a) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(`acct:${a}`));
 const roomDO = (env, r) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(r));
@@ -116,7 +133,7 @@ export async function accounts(request, env) {
   }
   if (!tok) return j({ error: 'Sign in first', signin: true }, 401);
   const op = p.slice('/sessions/acct/'.length);
-  if (!['me', 'rooms', 'rooms/remove', 'rooms/keys', 'room', 'invite', 'members'].includes(op)) return j({ error: 'Unknown' }, 404);
+  if (!['me', 'rooms', 'rooms/remove', 'rooms/keys', 'room', 'invite', 'members', 'brand', 'ready', 'checkout', 'billing', 'fakeplan'].includes(op)) return j({ error: 'Unknown' }, 404);
   const body = post ? await request.text() : undefined; if (body && body.length > 200000) return j({ error: 'Too big' }, 413);
   // the links in emails and on the page are made from this site's own address, never from anything in the request's query
   const qs = new URLSearchParams(url.searchParams); qs.set('origin', url.origin);
@@ -220,13 +237,76 @@ export class SessionsAccount {
         if (!r || !(r.members || []).some((m) => m.a === url.searchParams.get('m'))) return j({ error: 'This session isn’t shared with you any more' }, 404);
         const v = await this.roomView(r, origin); delete v.members; return j({ ...v, shared: true, by: await this.get('email') });
       }
+      if (op === 'plan' && request.method === 'POST') {
+        // from the Stripe webhook only (store.js; the worker never sends this path from outside)
+        const b = await request.json(), old = await this.get('plan', {});
+        await this.ctx.storage.put('plan', { ...old, status: String(b.status || ''), until: Number(b.until) || 0, customer: String(b.customer || old.customer || ''), sub: String(b.sub || ''), cancelAt: Number(b.cancelAt) || 0, at: now });
+        return j({ ok: true });
+      }
       // signed in from here on
       const sk = `s:${await sha(request.headers.get('X-Tok') || '')}`, sess = await this.get(sk);
       if (!sess || sess.exp < now) { if (sess) await this.ctx.storage.delete(sk); return j({ error: 'Sign in again', signin: true }, 401); }
       if (op === 'logout') { await this.ctx.storage.delete(sk); return j({ ok: true }); }
       const rooms = await this.get('rooms', []), email = await this.get('email');
       const pub = (r) => ({ id: r.id, name: r.name, created: r.created, added: r.added });
-      if (op === 'me') return j({ email, app: sess.kind === 'app', rooms: rooms.map(pub), shared: (await this.get('shared', [])).map((x) => ({ id: x.id, name: x.name, by: x.by, created: x.at, shared: true })) });
+      if (op === 'me') return j({ email, app: sess.kind === 'app', rooms: rooms.map(pub), shared: (await this.get('shared', [])).map((x) => ({ id: x.id, name: x.name, by: x.by, created: x.at, shared: true })),
+        plan: planView(await this.plan(sess.kind === 'app'), this.env, email), brand: await this.get('brand', null) });
+      if (op === 'brand' && request.method === 'POST') {
+        // the guest page's branding, sent to every session in the account (and to new ones as they're added)
+        const b = cleanBrand(JSON.parse(await request.text() || '{}').brand);
+        await this.ctx.storage.put('brand', b);
+        await Promise.all(rooms.map((r) => this.sendBrand(r, b)));
+        return j({ ok: true, brand: b });
+      }
+      if (op === 'ready' && request.method === 'POST') {
+        // the studio app has every file of a take: tell the owner and everyone the session is shared with, once per take
+        const b = JSON.parse(await request.text() || '{}'), rr = rooms.find((x) => x.id === b.room);
+        if (!rr) return j({ error: 'That session isn’t in your account' }, 404);
+        if (!TAKE.test(b.take || '')) return j({ error: 'No such take' }, 404);
+        rr.ready = rr.ready || [];
+        if (rr.ready.includes(b.take)) return j({ ok: true, already: true });
+        rr.ready = [...rr.ready, b.take].slice(-200); await this.ctx.storage.put('rooms', rooms);
+        const to = [email, ...(rr.members || []).map((m) => m.email)].filter(Boolean), n = Number(b.take.slice(1));
+        const people = (Array.isArray(b.people) ? b.people : []).map((x) => clean(x, 60)).filter(Boolean).slice(0, 20), mins = Math.max(0, Math.round(Number(b.minutes) || 0));
+        const link = `${origin}/sessions/account/?s=${rr.id}`, what = `Take ${n} of “${rr.name}” is ready`;
+        const detail = `${mins ? `${mins} min` : 'The take'}${people.length ? ` with ${people.join(', ')}` : ''}: every person and camera is on the studio Mac as its own file, with a timeline for Resolve.`;
+        const sent = []; let fake = null;
+        for (const t of to) {
+          if (!await this.emailToday()) break;
+          const m = await mail(this.env, t, what, `${what}.\n\n${detail}\n\nSee the session: ${link}`,
+            wrap(`<p><b>${esc(what)}.</b></p><p>${esc(detail)}</p>${button(link, 'See the session')}`));
+          sent.push(t); if (m.fake) fake = { to: sent, subject: what, link };
+        }
+        return j({ ok: true, sent: sent.length, ...(fake ? { fake } : {}) });
+      }
+      if (op === 'checkout' && request.method === 'POST') {
+        // start a subscription: Stripe's own checkout page (the app opens it in the browser)
+        const plan = await this.plan(false), a = await this.get('a');
+        if (fakeBilling(this.env)) { await this.ctx.storage.put('plan', { ...plan, status: 'active', until: now + 30 * DAY, customer: 'cus_test', sub: 'sub_test', at: now }); return j({ url: `${origin}/sessions/account/?paid=1`, fake: true }); }
+        if (!this.env.STRIPE_SECRET_KEY || !this.env.SESSIONS_STRIPE_PRICE) return j({ error: 'Subscriptions aren’t set up on the website yet' }, 503);
+        const p = { mode: 'subscription', 'line_items[0][price]': this.env.SESSIONS_STRIPE_PRICE, 'line_items[0][quantity]': '1', client_reference_id: a,
+          'metadata[sessions_acct]': a, 'subscription_data[metadata][sessions_acct]': a, allow_promotion_codes: 'true',
+          success_url: `${origin}/sessions/account/?paid=1`, cancel_url: `${origin}/sessions/account/` };
+        if (plan.customer) p.customer = plan.customer; else p.customer_email = email;
+        const cs = await stripe(this.env, 'POST', '/checkout/sessions', p);
+        return j({ url: cs.url });
+      }
+      if (op === 'billing' && request.method === 'POST') {
+        // change the card, see invoices or cancel: Stripe's billing page
+        const plan = await this.plan(false);
+        if (!plan.customer) return j({ error: 'There’s no subscription on this account yet' }, 404);
+        if (fakeBilling(this.env)) return j({ url: `${origin}/sessions/account/?billing=1`, fake: true });
+        const ps = await stripe(this.env, 'POST', '/billing_portal/sessions', { customer: plan.customer, return_url: `${origin}/sessions/account/` });
+        return j({ url: ps.url });
+      }
+      if (op === 'fakeplan' && request.method === 'POST') {
+        // tests only (fake email and no Stripe): set the plan
+        if (!fakeBilling(this.env)) return j({ error: 'Unknown' }, 404);
+        const b = JSON.parse(await request.text() || '{}');
+        await this.ctx.storage.put('plan', { ...(await this.plan(false)), status: String(b.status), until: Number(b.until) || 0 });
+        return j({ ok: true, plan: planView(await this.plan(false), this.env, email) });
+      }
+
       if (op === 'rooms' && request.method === 'POST') {
         const b = JSON.parse(await request.text() || '{}'), bad = [];
         for (const x of (Array.isArray(b.rooms) ? b.rooms : []).slice(0, 50)) {
@@ -236,7 +316,7 @@ export class SessionsAccount {
           if (!res.ok) { bad.push(x.id); continue; }
           const cfg = (await res.json()).cfg || {}, was = rooms.find((r) => r.id === x.id);
           const r = { id: x.id, secret: x.secret, name: clean(x.name) || cfg.name || 'Session', created: Number(x.created) || was?.created || now, added: was?.added || now };
-          if (was) Object.assign(was, r); else rooms.push(r);
+          if (was) Object.assign(was, r); else { rooms.push(r); const br = await this.get('brand', null); if (br) await this.sendBrand(r, br); }
         }
         if (rooms.length > 300) return j({ error: 'That’s too many sessions for one account' }, 400);
         await this.ctx.storage.put('rooms', rooms);
@@ -301,6 +381,16 @@ export class SessionsAccount {
       }
       return j({ error: 'Unknown' }, 404);
     } catch (e) { return j({ error: e.status ? e.message : 'Something went wrong' }, e.status || (e instanceof SyntaxError ? 400 : 500)); }
+  }
+
+  // the subscription: a 14-day trial starts the first time the studio app signs in
+  async plan(fromApp) {
+    let p = await this.get('plan', null);
+    if (!p && fromApp) { p = { status: 'trial', until: Date.now() + TRIAL_DAYS * DAY, at: Date.now() }; await this.ctx.storage.put('plan', p); }
+    return p || { status: 'none', until: 0 };
+  }
+  async sendBrand(r, brand) {
+    await roomDO(this.env, r.id).fetch(new Request('https://room/brand', { method: 'POST', headers: { 'X-Session-Secret': r.secret }, body: JSON.stringify({ brand }) })).catch(() => {});
   }
 
   // editor invites and shares: 40 emails a day per account

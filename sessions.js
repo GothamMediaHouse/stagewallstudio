@@ -44,11 +44,42 @@ const remember = (k, ms) => { if (okCache.size > 5000) okCache.clear(); okCache.
 
 const room = (env, r) => env.SESSIONS_ROOM.get(env.SESSIONS_ROOM.idFromName(r));
 
+// a studio's branding on its guest page: a name, an accent colour and a small logo (PNG, JPEG or WebP, at most 90 KB)
+export function cleanBrand(b) {
+  if (!b || typeof b !== 'object') return null;
+  const name = clean(b.name, 60), color = /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color.toLowerCase() : '';
+  const logo = typeof b.logo === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(b.logo) && b.logo.length <= 120000 ? b.logo : '';
+  return name || color || logo ? { name, color, logo } : null;
+}
+
+// cloud copies are only there until the studio Mac downloads them: a nightly clean-up deletes guests' pieces nobody
+// collected after SESSIONS_KEEP_DAYS (default 30), and browser-edit previews after three times that
+export const keepDays = (env) => Math.max(1, Number(env.SESSIONS_KEEP_DAYS) || 30);
+export async function sessionsCleanup(env, now = Date.now()) {
+  if (!env.SESSIONS) return { deleted: 0 };
+  let deleted = 0;
+  for (const [prefix, days] of [['r/', keepDays(env)], ['e/', keepDays(env) * 3]]) {
+    const before = now - days * 86400e3;
+    let cursor; const old = [];
+    for (let page = 0; page < 50; page++) { // at most 50,000 objects looked at a night per prefix; deleted after the listing
+      const l = await env.SESSIONS.list({ prefix, cursor, limit: 1000 });
+      for (const o of l.objects) if (+new Date(o.uploaded) < before) old.push(o.key);
+      if (!l.truncated) break;
+      cursor = l.cursor;
+    }
+    for (let i = 0; i < old.length; i += 1000) { await env.SESSIONS.delete(old.slice(i, i + 1000)); deleted += Math.min(1000, old.length - i); }
+  }
+  console.log(`sessions clean-up: ${deleted} old cloud pieces deleted`);
+  return { deleted };
+}
+
 export async function sessions(request, env) {
   const url = new URL(request.url), p = url.pathname, r = url.searchParams.get('r') || '';
   // accounts: emailed sign-in links and the dashboard's data (sessions-accounts.js)
   if (p.startsWith('/sessions/auth/') || p.startsWith('/sessions/acct/')) return accounts(request, env);
   if (p === '/sessions/' && request.method === 'GET') return Response.redirect(new URL('/sessions/account/', url), 302);
+  // what's switched on for this site (no secrets, just yes or no): open it in a browser to check the setup
+  if (p === '/sessions/status' && request.method === 'GET') return j({ ai: !!env.ANTHROPIC_API_KEY, email: !!env.RESEND_API_KEY, billing: !!(env.STRIPE_SECRET_KEY && env.SESSIONS_STRIPE_PRICE && env.STRIPE_WEBHOOK_SECRET), storage: !!env.SESSIONS, keepDays: keepDays(env) });
   if (!ROOM.test(r)) return j({ error: 'No such session' }, 404);
   if (p === '/sessions/host' || p === '/sessions/ws') {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Use a WebSocket', { status: 426 });
@@ -227,8 +258,8 @@ export class SessionRoom extends DurableObject {
   each(o, filter = () => true) { const s = JSON.stringify(o); for (const w of this.open('in')) if (filter(w.deserializeAttachment())) this.send(w, s); }
   async state() {
     if (!this.st) {
-      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan', 'prompt', 'solo']);
-      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan(), prompt: m.get('prompt') || { script: '', to: 'off', run: false, speed: 1.2, pos: 0, at: 0 }, solo: m.get('solo') || {} };
+      const m = await this.ctx.storage.get(['owner', 'cfg', 'admitted', 'rec', 'takes', 'board', 'plan', 'prompt', 'solo', 'brand']);
+      this.st = { owner: m.get('owner') || '', cfg: m.get('cfg') || { name: 'Session', quality: '1080', wait: true }, admitted: m.get('admitted') || {}, rec: m.get('rec') || { on: false, n: 0 }, takes: m.get('takes') || [], board: m.get('board') || { notes: '', cd: null }, plan: m.get('plan') || emptyPlan(), prompt: m.get('prompt') || { script: '', to: 'off', run: false, speed: 1.2, pos: 0, at: 0 }, solo: m.get('solo') || {}, brand: m.get('brand') || null };
     }
     return this.st;
   }
@@ -251,7 +282,14 @@ export class SessionRoom extends DurableObject {
     if (url.pathname === '/info') {
       // what the guest page shows before the day: the show's name and time, and who this invite is for
       const g = s.plan.guests.find((x) => x.id === url.searchParams.get('g'));
-      return j({ name: s.cfg.name, quality: s.cfg.quality, at: s.plan.at, tz: s.plan.tz, mins: s.plan.rundown.reduce((t, x) => t + x.min, 0), guest: g ? { name: g.name, role: g.role } : null, host: this.open('host').length > 0 });
+      return j({ name: s.cfg.name, quality: s.cfg.quality, at: s.plan.at, tz: s.plan.tz, mins: s.plan.rundown.reduce((t, x) => t + x.min, 0), guest: g ? { name: g.name, role: g.role } : null, host: this.open('host').length > 0, brand: s.brand });
+    }
+    if (url.pathname === '/brand' && request.method === 'POST') {
+      // the owner's branding for the guest page (set on their account, which sends it to each of its sessions)
+      if (!await this.isOwner(request.headers.get('X-Session-Secret') || '')) return j({ error: 'Wrong session key' }, 403);
+      let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad request' }, 400); }
+      s.brand = cleanBrand(b.brand); await this.save('brand');
+      return j({ ok: true });
     }
     if (url.pathname === '/techcheck') {
       let c; try { c = JSON.parse(await request.text()); } catch { return j({ error: 'Bad check' }, 400); }
@@ -340,6 +378,7 @@ export class SessionRoom extends DurableObject {
         const t = [...lines.matchAll(/^\[(\d+(?:\.\d+)?)\]/gm)].map((m) => +m[1]);
         return j({ clips: [{ start: t[0], end: Math.min(t[0] + o.max, t[t.length - 1] + 3), title: 'The opening', why: 'Test pick', hook: lines.split('\n')[0].replace(/^\[[^\]]*\]\s*/, '').slice(0, 60) }], left: 20 - u.n, fake: true });
       }
+      if (!this.env.ANTHROPIC_API_KEY) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: 'AI clip picking isn’t switched on yet: the website needs its ANTHROPIC_API_KEY. Pick clips without AI for now.' }, 503); }
       try { return j({ clips: await pickClips(this.env, o), left: 20 - u.n }); }
       catch (e) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: e.ours ? e.message : `The AI didn’t answer (${e.status || 'no connection'})` }, e.status === 429 ? 429 : 502); }
     }
