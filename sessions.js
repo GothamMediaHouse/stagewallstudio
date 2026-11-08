@@ -14,7 +14,10 @@
 //   wss://…/sessions/editws?r&take&k&name             the live edit: cuts and word fixes, who's editing (the app joins the same way)
 //   POST …/sessions/api/share?take&op=start|part|done|data   the app puts the take's small preview video and transcript up
 //   GET  …/sessions/editmedia?r&take&k&f=proxy|data    the browser editor gets them (proxy supports Range)
-//   POST …/sessions/api/clips   AI-picked clips from a take's transcript (app only; sessions-ai.js, 20 a day per room)
+//   POST …/sessions/api/clips   AI-picked clips from a take's transcript (app only; sessions-ai.js)
+//   POST …/sessions/api/notes   AI show notes: summary, chapters, titles, description (app only)
+//   POST …/sessions/api/translate  translate up to 400 caption lines (app only; the app sends a long take in parts)
+//   (all three share 40 AI uses a day per room, and SESSIONS_AI_DAILY for the whole site)
 //   …/sessions/auth/*, …/sessions/acct/*   accounts: sign in by email, the dashboard at /sessions/account/ (sessions-accounts.js)
 //   GET …/sessions/info?r&g, POST …/sessions/techcheck?r&g, GET/POST …/sessions/speed   the guest page before the day
 //
@@ -24,7 +27,7 @@
 // A person's shared screen is its own track: pid + 's', uploaded with that person's key.
 // The producer key is made from the room's owner hash (the app works it out from its secret), so nothing extra is stored.
 import { DurableObject } from 'cloudflare:workers';
-import { pickClips } from './sessions-ai.js';
+import { pickClips, showNotes, translateLines } from './sessions-ai.js';
 import { accounts, SessionsAccount } from './sessions-accounts.js';
 
 const ROOM = /^[a-z0-9]{8,24}$/, PID = /^[a-z0-9]{8,16}$/, UPID = /^[a-z0-9]{8,17}$/, TAKE = /^t\d{2,4}$/;
@@ -99,10 +102,10 @@ export async function sessions(request, env) {
     const res = await room(env, r).fetch(new Request(`https://room/${p.slice(14)}?r=${r}&origin=${encodeURIComponent(url.origin)}`, { method: request.method, headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '', 'Content-Type': 'application/json' }, body: request.method === 'POST' ? await request.text() : undefined }));
     return res;
   }
-  if (p === '/sessions/api/clips' && request.method === 'POST') {
-    if (!env.ANTHROPIC_API_KEY && !env.SESSIONS_AI_FAKE) return j({ error: 'AI clips aren’t set up on this site yet' }, 503);
-    const body = await request.text(); if (body.length > 600000) return j({ error: 'This take is too long for AI clips' }, 413);
-    return room(env, r).fetch(new Request('https://room/clips', { method: 'POST', headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '' }, body }));
+  if (/^\/sessions\/api\/(clips|notes|translate)$/.test(p) && request.method === 'POST') {
+    if (!env.ANTHROPIC_API_KEY && !env.SESSIONS_AI_FAKE) return j({ error: 'AI tools aren’t set up on this site yet' }, 503);
+    const body = await request.text(); if (body.length > 600000) return j({ error: 'This take is too long for the AI' }, 413);
+    return room(env, r).fetch(new Request(`https://room/${p.slice(14)}`, { method: 'POST', headers: { 'X-Session-Secret': request.headers.get('X-Session-Secret') || '' }, body }));
   }
   if (p === '/sessions/editws') {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Use a WebSocket', { status: 426 });
@@ -360,30 +363,46 @@ export class SessionRoom extends DurableObject {
       b.n++; await this.ctx.storage.put('aib', b);
       return new Response('ok');
     }
-    if (url.pathname === '/clips') {
+    if (url.pathname === '/clips' || url.pathname === '/notes' || url.pathname === '/translate') {
       // as with planning, a room the app made but hasn't opened yet is claimed by its key
-      const sec = request.headers.get('X-Session-Secret') || '';
+      const kind = url.pathname.slice(1), sec = request.headers.get('X-Session-Secret') || '';
       if (!s.owner && sec.length >= 20) { s.owner = await sha(`showcaller-sessions:${sec}`); await this.save('owner'); }
-      if (!await this.isOwner(request.headers.get('X-Session-Secret') || '')) return j({ error: 'Wrong session key' }, 403);
+      if (!await this.isOwner(sec)) return j({ error: 'Wrong session key' }, 403);
       let b; try { b = JSON.parse(await request.text()); } catch { return j({ error: 'Bad request' }, 400); }
-      const lines = String(b.lines || '').slice(0, 500000);
-      if (lines.length < 40) return j({ error: 'Make a transcript first' }, 400);
-      const day = new Date().toISOString().slice(0, 10), u = (await this.ctx.storage.get('ai')) || {};
-      if (u.day !== day) { u.day = day; u.n = 0; }
-      if (u.n >= 20) return j({ error: 'That’s 20 AI picks today for this session, try again tomorrow' }, 429);
-      const g = await this.env.SESSIONS_ROOM.get(this.env.SESSIONS_ROOM.idFromName('ai-budget')).fetch(new Request('https://room/aibudget'));
-      if (!g.ok) return j({ error: 'AI clips are busy today, try again tomorrow' }, 429);
-      u.n++; await this.ctx.storage.put('ai', u);
-      const o = { lines, title: clean(b.title, 80), count: Math.max(1, Math.min(10, b.count | 0 || 6)), min: Math.max(5, Math.min(120, +b.min || 20)), max: Math.max(10, Math.min(180, +b.max || 60)),
-        marks: (Array.isArray(b.marks) ? b.marks : []).filter((x) => isFinite(x)).slice(0, 50).map((x) => Math.round(x)) };
-      if (this.env.SESSIONS_AI_FAKE && !this.env.ANTHROPIC_API_KEY) {
-        // for the tests: the first and the last line that start a long enough stretch
-        const t = [...lines.matchAll(/^\[(\d+(?:\.\d+)?)\]/gm)].map((m) => +m[1]);
-        return j({ clips: [{ start: t[0], end: Math.min(t[0] + o.max, t[t.length - 1] + 3), title: 'The opening', why: 'Test pick', hook: lines.split('\n')[0].replace(/^\[[^\]]*\]\s*/, '').slice(0, 60) }], left: 20 - u.n, fake: true });
+      let o;
+      if (kind === 'translate') {
+        const tl = (Array.isArray(b.lines) ? b.lines : []).slice(0, 400).map((x) => String(x || '').slice(0, 600));
+        const lang = clean(b.lang, 40);
+        if (!tl.length || !lang) return j({ error: 'Make a transcript first' }, 400);
+        o = { lines: tl, lang };
+      } else {
+        const lines = String(b.lines || '').slice(0, 500000);
+        if (lines.length < 40) return j({ error: 'Make a transcript first' }, 400);
+        o = kind === 'notes' ? { lines, title: clean(b.title, 80), people: (Array.isArray(b.people) ? b.people : []).slice(0, 12).map((x) => clean(x, 40)) }
+          : { lines, title: clean(b.title, 80), count: Math.max(1, Math.min(10, b.count | 0 || 6)), min: Math.max(5, Math.min(120, +b.min || 20)), max: Math.max(10, Math.min(180, +b.max || 60)),
+            marks: (Array.isArray(b.marks) ? b.marks : []).filter((x) => isFinite(x)).slice(0, 50).map((x) => Math.round(x)) };
       }
-      if (!this.env.ANTHROPIC_API_KEY) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: 'AI clip picking isn’t switched on yet: the website needs its ANTHROPIC_API_KEY. Pick clips without AI for now.' }, 503); }
-      try { return j({ clips: await pickClips(this.env, o), left: 20 - u.n }); }
-      catch (e) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: e.ours ? e.message : `The AI didn’t answer (${e.status || 'no connection'})` }, e.status === 429 ? 429 : 502); }
+      const LIM = 40, day = new Date().toISOString().slice(0, 10), u = (await this.ctx.storage.get('ai')) || {};
+      if (u.day !== day) { u.day = day; u.n = 0; }
+      if (u.n >= LIM) return j({ error: `That’s ${LIM} AI jobs today for this session, try again tomorrow` }, 429);
+      const g = await this.env.SESSIONS_ROOM.get(this.env.SESSIONS_ROOM.idFromName('ai-budget')).fetch(new Request('https://room/aibudget'));
+      if (!g.ok) return j({ error: 'The AI is busy today, try again tomorrow' }, 429);
+      u.n++; await this.ctx.storage.put('ai', u);
+      const left = LIM - u.n;
+      if (this.env.SESSIONS_AI_FAKE && !this.env.ANTHROPIC_API_KEY) {
+        // for the tests: answers built from the transcript itself
+        if (kind === 'translate') return j({ lines: o.lines.map((t) => `[${o.lang}] ${t}`), left, fake: true });
+        const t = [...o.lines.matchAll(/^\[(\d+(?:\.\d+)?)\]/gm)].map((m) => +m[1]);
+        if (kind === 'notes') return j({ notes: { summary: 'Test summary.', description: 'Test description.', titles: ['Test title one', 'Test title two'],
+          chapters: [{ start: 0, title: 'Hello' }, { start: t[Math.floor(t.length / 2)] || 0, title: 'Middle part' }], keywords: ['test'], quotes: [o.lines.split('\n')[0].replace(/^\[[^\]]*\]\s*[^:]*:\s*/, '').slice(0, 60)] }, left, fake: true });
+        return j({ clips: [{ start: t[0], end: Math.min(t[0] + o.max, t[t.length - 1] + 3), title: 'The opening', why: 'Test pick', hook: o.lines.split('\n')[0].replace(/^\[[^\]]*\]\s*/, '').slice(0, 60) }], left, fake: true });
+      }
+      if (!this.env.ANTHROPIC_API_KEY) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: 'The AI isn’t switched on yet: the website needs its ANTHROPIC_API_KEY.' }, 503); }
+      try {
+        if (kind === 'notes') return j({ notes: await showNotes(this.env, o), left });
+        if (kind === 'translate') return j({ lines: await translateLines(this.env, o), left });
+        return j({ clips: await pickClips(this.env, o), left });
+      } catch (e) { u.n--; await this.ctx.storage.put('ai', u); return j({ error: e.ours ? e.message : `The AI didn’t answer (${e.status || 'no connection'})` }, e.status === 429 ? 429 : 502); }
     }
     if (url.pathname === '/auth') return new Response(null, { status: await this.isOwner(request.headers.get('X-Session-Secret') || '') ? 204 : 403 });
     if (url.pathname === '/takes') {
