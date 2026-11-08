@@ -22,6 +22,12 @@
   }
   if (phone) $('#jhint').textContent = 'On a phone: keep this page open and the screen on while you record. Switching to another app pauses the camera.';
   $('#name').value = store.get('sess-name') || '';
+  // 1.4: "Open this in the app" (showcaller-sessions://…), on a computer, when this page isn't already inside the app
+  if (!phone && !/Electron|ShowcallerSessions/.test(navigator.userAgent)) {
+    const q = new URLSearchParams(); if (prod) q.set('producer', prod);
+    const g0 = (/[?&]g=([a-z0-9]{10})/.exec(location.search) || [])[1]; if (g0) q.set('g', g0);
+    $('#inappa').href = `showcaller-sessions://s/${room}${q.toString() ? `?${q}` : ''}`; $('#inapp').hidden = false;
+  }
   // an invite link (…?g=<id>) knows who it's for; the page shows when the show is, before the day
   const gid = (/[?&]g=([a-z0-9]{10})/.exec(location.search) || [])[1] || '';
   fetch(`/sessions/info?r=${room}${gid ? `&g=${gid}` : ''}`).then((r) => r.ok ? r.json() : null).then((i) => {
