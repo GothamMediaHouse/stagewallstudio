@@ -1,0 +1,3 @@
+Background blur and replace in Showcaller Sessions use Google MediaPipe Tasks Vision (@mediapipe/tasks-vision 1.2.2)
+and its Selfie Segmenter model, both under the Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+Copyright The MediaPipe Authors. Files: vision_bundle.mjs, vision_wasm_internal.js, vision_wasm_internal.wasm, selfie_segmenter.tflite.
