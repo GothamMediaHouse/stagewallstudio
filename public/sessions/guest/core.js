@@ -448,10 +448,11 @@ registerProcessor('sc-pcm',P)`;
   class ScreenShare extends Emitter {
     constructor(opts) { super(); Object.assign(this, opts); this.stream = null; this.rec = null; }
     get active() { return !!this.stream; } // (not "on": that is the event method)
-    async start() {
+    // stream: something else to send instead of a screen (1.3: the host's media board, a clip playing with its sound)
+    async start(stream) {
       if (this.stream) return;
-      if (!navigator.mediaDevices.getDisplayMedia) throw new Error('This browser can’t share a screen');
-      const st = await navigator.mediaDevices.getDisplayMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: false });
+      if (!stream && !navigator.mediaDevices.getDisplayMedia) throw new Error('This browser can’t share a screen');
+      const st = stream || await navigator.mediaDevices.getDisplayMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: false });
       this.stream = st;
       const vt = st.getVideoTracks()[0]; if (vt) vt.onended = () => this.stop();
       this.session.shareScreen(st);
@@ -460,7 +461,7 @@ registerProcessor('sc-pcm',P)`;
     }
     // each share within a take is its own part (… screen, … screen (part 2)), placed where it happened in the timeline
     part(take) {
-      const k = `sess-spart-${this.session.room}-${take}`; let n = 0;
+      const k = `sess-spart-${this.session.room}-${take}${this.tag ? `-${this.tag}` : ''}`; let n = 0;
       try { const v = this.store.get(k); n = v === null ? 0 : Number(v) + 1; this.store.set(k, String(n)); } catch {}
       return n;
     }
