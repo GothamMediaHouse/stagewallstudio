@@ -49,10 +49,9 @@ const DAY = 86400e3, WEB_DAYS = 30, APP_DAYS = 365, LINK_MIN = 15, TRIAL_DAYS = 
 // tests: fake email and no Stripe key, so "Subscribe" just switches the plan on
 const fakeBilling = (env) => !!env.SESSIONS_AUTH_FAKE && !env.RESEND_API_KEY && !env.STRIPE_SECRET_KEY;
 // what the app and the dashboard see of a plan. Active = a trial or paid month that hasn't run out (a failed payment
-// keeps working for GRACE_DAYS while Stripe retries); SESSIONS_COMP_EMAILS (comma list) are on the house.
+// keeps working for GRACE_DAYS while Stripe retries). A Showcaller key that includes Sessions unlocks the app without
+// a plan: the app checks that itself (the same keys as every other Showcaller app, added in Showcaller Hub).
 export function planView(p, env, email, now = Date.now()) {
-  const comp = String(env.SESSIONS_COMP_EMAILS || '').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean).includes(String(email || '').toLowerCase());
-  if (comp) return { status: 'comp', active: true, until: 0, billing: false };
   const st = p.status, until = p.until || 0;
   const active = (['trial', 'active', 'trialing'].includes(st) && until > now) || (['past_due', 'unpaid'].includes(st) && until + GRACE_DAYS * DAY > now);
   return { status: st, active, until, daysLeft: until > now ? Math.ceil((until - now) / DAY) : 0, canManage: !!p.customer, cancelAt: p.cancelAt || 0,
