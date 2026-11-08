@@ -35,6 +35,7 @@
  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9.7 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M10 9v6l5-3z"/></symbol>
  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M12 13V8M9.5 10.5 12 8l2.5 2.5"/></symbol>
 <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
@@ -346,12 +347,14 @@
     // ---- tiles ----
     people() {
       const s = this.session, list = [{ pid: s.pid, name: s.name, role: s.role, self: true }];
-      if (s.screen) list.push({ pid: `${s.pid}~s`, name: `${s.name} · screen`, role: 'screen', stream: s.screen, local: true, screen: true });
+      // 1.3: the host's media board plays through the same second stream as a shared screen; it has sound, a screen never does
+      const media = (st) => !!(st && st.getAudioTracks().length);
+      if (s.screen) list.push({ pid: `${s.pid}~s`, name: media(s.screen) ? 'Media board' : `${s.name} · screen`, role: 'screen', stream: s.screen, local: true, screen: true });
       for (const x of this.extras) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: x.stream, local: true });
-      const live = (st) => st && st.getVideoTracks().some((t) => t.readyState === 'live');
+      const live = (st) => st && st.getVideoTracks().some((t) => t.readyState === 'live'), heard = (st) => st && st.getAudioTracks().some((t) => t.readyState === 'live');
       for (const p of s.peers.values()) {
         list.push({ pid: p.pid, name: p.name, role: p.role, stream: p.stream });
-        if (live(p.screen)) list.push({ pid: `${p.pid}~s`, name: `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
+        if (live(p.screen) || heard(p.screen)) list.push({ pid: `${p.pid}~s`, name: media(p.screen) ? 'Media board' : `${p.name} · screen`, role: 'screen', stream: p.screen, screen: true });
         // a producer sees the host's studio cameras too
         if (p.pid === 'host' && !this.host) for (const x of this.studio) { const st = !x.off && x.sid && p.xs && p.xs.get(x.sid); if (live(st)) list.push({ pid: x.pid, name: x.name, role: 'cam', stream: st }); }
       }
@@ -379,7 +382,7 @@
           t.fs.ondblclick = () => this.full(true, this.spot === p.pid ? null : p.pid);
           if (p.self) grid.prepend(t.el); else if (p.local) { const after = [...grid.children].filter((c) => c.classList.contains('self') || c.classList.contains('local')).pop(); after ? after.after(t.el) : grid.prepend(t.el); } else grid.appendChild(t.el);
           if (p.local) t.el.classList.add('local');
-          if (p.screen) { t.el.classList.add('scr'); t.fs.classList.add('scr'); $('video', t.el).muted = true; }
+          if (p.screen) { t.el.classList.add('scr'); t.fs.classList.add('scr'); $('video', t.el).muted = !!p.local; } // the media board's sound is heard
           if (p.role === 'producer') t.el.classList.add('prod');
           $('.js-fgrid', this.fsEl).appendChild(t.fs);
           if (p.self) this.attach(p.pid, this.self.stream);
@@ -487,6 +490,7 @@
       const micOn = a && a.enabled, camOn = v && v.enabled;
       const html = `<button class="rb js-mic ${micOn ? '' : 'off'}" aria-label="${micOn ? 'Mute your mic' : 'Unmute your mic'}" title="${micOn ? 'Mute (recorded silence)' : 'Unmute'}">${ico(micOn ? 'mic' : 'micoff')}</button>
         <button class="rb js-cam ${camOn ? '' : 'off'}" aria-label="${camOn ? 'Turn your camera off' : 'Turn your camera on'}" title="${camOn ? 'Camera off' : 'Camera on'}">${ico(camOn ? 'cam' : 'camoff')}</button>
+        ${this.onMedia ? `<button class="rb js-media ${this.mediaOn ? 'on' : ''}" aria-label="Media board" title="Media board: play intros, stings and clips into the call (recorded)">${ico('play')}</button>` : ''}
         ${this.share ? `<button class="rb js-share ${this.share.active ? 'on' : ''}" aria-label="${this.share.active ? 'Stop sharing your screen' : 'Share your screen'}" title="${this.share.active ? 'Stop sharing' : 'Share your screen (recorded as its own track)'}">${ico('screen')}</button>` : ''}
         ${!this.ctrl && s.cfg && s.cfg.solo && (on ? s.rec.solo : !s.hostOnline) ? `<button class="recb ${on ? '' : 'stopped'} js-solo" title="${on ? 'Stop recording' : 'Record yourself now. The host gets it like any other take.'}"><i></i>${on ? 'Stop' : 'Record on my own'}</button>` : ''}
         ${this.ctrl ? `<button class="recb ${on ? '' : 'stopped'} js-rec"><i></i>${on ? 'Stop' : 'Record'}</button>
@@ -499,6 +503,7 @@
       for (const root of [d, $('.js-fdock', this.fsEl)]) {
         $('.js-mic', root).onclick = () => { if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); } };
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
+        if (this.onMedia) $('.js-media', root).onclick = () => this.onMedia();
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
         const so = $('.js-solo', root); if (so) so.onclick = () => s.solo(!on);
         if (this.ctrl) {
