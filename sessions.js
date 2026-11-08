@@ -682,7 +682,7 @@ function inviteMail({ show, plan, g, link }) {
   const rundown = plan.rundown.length ? `<p style="margin:16px 0 6px;color:#555"><b>Running order</b></p><ol style="margin:0;padding-left:20px;color:#333">${plan.rundown.map((x) => `<li>${esc(x.t)}${x.min ? ` <span style="color:#888">(${x.min} min)</span>` : ''}</li>`).join('')}</ol>` : '';
   const html = `<div style="font:15px/1.5 -apple-system,Segoe UI,Inter,sans-serif;color:#16181d;max-width:560px">
 <p>Hi ${esc(first)},</p><p>${esc(lines[1])}</p>${w ? `<p><b>${esc(w)}</b><br><span style="color:#666">about ${mins} minutes</span></p>` : ''}
-<p><a href="${esc(link)}" style="display:inline-block;background:#6d4aff;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${prod ? 'Open the producer page' : 'Open my link'}</a></p>
+<p><a href="${esc(link)}" style="display:inline-block;background:#0f9f8c;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${prod ? 'Open the producer page' : 'Open my link'}</a></p>
 <p style="color:#444">Before the day, open the link and press <b>Do a tech check</b>. It checks your camera, mic, connection and space in about a minute, and the host sees the result.</p>
 <p style="color:#666;font-size:13px">Chrome, Edge or Safari on a computer, with headphones if you have them. Nothing to install.</p>${rundown}
 <p style="color:#999;font-size:12px;margin-top:24px">Sent with Showcaller Sessions</p></div>`;
