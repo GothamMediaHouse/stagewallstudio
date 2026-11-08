@@ -26,6 +26,7 @@
   const gid = (/[?&]g=([a-z0-9]{10})/.exec(location.search) || [])[1] || '';
   fetch(`/sessions/info?r=${room}${gid ? `&g=${gid}` : ''}`).then((r) => r.ok ? r.json() : null).then((i) => {
     if (!i) return;
+    applyBrand(i.brand);
     if (i.quality && C.QUALITY[i.quality] && i.quality !== quality) { quality = i.quality; const v = stream && stream.getVideoTracks()[0], q = C.QUALITY[quality]; if (v) v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {}); }
     if (i.guest && i.guest.name && !$('#name').value) { $('#name').value = i.guest.name; $('#pvav').textContent = U.initials(i.guest.name); }
     if (i.at) {
@@ -35,6 +36,23 @@
       $('#jwhen').innerHTML = `<svg class="ico"><use href="#i-timer"/></svg><div><b>${U.esc(i.name)}</b><span>${U.esc(w)}${i.mins ? ` · about ${i.mins} min` : ''}</span>${soon > 3600e3 && !i.host ? '<small>It isn’t on yet. Do a tech check now so the host knows you’re ready.</small>' : ''}</div>`;
     }
   }).catch(() => {});
+
+  // the studio's own name, logo and colour (set in the studio app: Settings → Your guest page)
+  function applyBrand(b) {
+    if (!b) return;
+    const st = document.documentElement.style, c = /^#[0-9a-f]{6}$/i.test(b.color || '') ? b.color : '';
+    if (c) {
+      const n = parseInt(c.slice(1), 16), lum = (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+      st.setProperty('--v', c); st.setProperty('--v2', `color-mix(in srgb, ${c} 78%, #fff)`); st.setProperty('--vsoft', `color-mix(in srgb, ${c} 16%, transparent)`);
+      st.setProperty('--vtext', `color-mix(in srgb, ${c} 72%, var(--fg))`); st.setProperty('--onv', lum > 0.55 ? '#0b0c0f' : '#fff');
+    }
+    if (/^data:image\/(png|jpeg|webp);base64,/.test(b.logo || '')) {
+      const im = document.createElement('img'); im.className = 'blogo'; im.alt = b.name || ''; im.src = b.logo;
+      const lg = $('.topnav .logo'); if (lg) lg.replaceWith(im);
+    }
+    if (b.name) { $('.topnav .brand b').textContent = b.name; document.title = `${b.name} · Remote recording`; }
+    $('#powered').hidden = false; document.documentElement.classList.add('branded');
+  }
 
   // ---------- pre-join checks ----------
   const ok = (el, txt, good = true) => { el.innerHTML = `<svg class="ico ${good ? 'ok' : 'wa'}"><use href="#i-check"/></svg><span>${U.esc(txt)}</span>`; };

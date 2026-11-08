@@ -399,3 +399,7 @@ body:has(.drawer.floating) .fs .fup{display:none}
 .pset{display:flex;flex-direction:column;gap:8px}
 .pset select{height:30px;flex:1;min-width:0;padding:0 8px;font-size:12px}
 @media (max-width:640px){.prompter{top:8px;height:30vh}.prompter .ptext{padding:0 20px 60vh}}
+/* a studio's own brand on the guest page (0.15) */
+.brand .blogo{height:30px;width:auto;max-width:160px;object-fit:contain;flex:none}
+.powered{font-size:11px;color:var(--mute);white-space:nowrap}.powered b{font-weight:600;color:var(--fg)}
+@media (max-width:640px){.powered{display:none}}
