@@ -14,7 +14,7 @@
   if (!room) { show('done'); $('#donep').innerHTML = '<h2 class="h2">This link isn’t complete</h2><p class="muted">Ask the host to send it again.</p>'; return; }
 
   let pid = store.get(`sess-pid-${room}`); if (!/^[a-z0-9]{8,16}$/.test(pid || '')) { pid = C.rid(12); store.set(`sess-pid-${room}`, pid); }
-  let stream = null, quality = '1080', session = null, ui = null, rec = null, sink = null, recRes = '', recErr = '', share = null, wake = null;
+  let stream = null, quality = '1080', rcfg = {}, session = null, ui = null, rec = null, sink = null, recRes = '', recErr = '', share = null, wake = null;
   if (prod) {
     $('#jtitle').textContent = 'You’re producing this session';
     $('#jsub').textContent = 'You’ll see and hear everyone, let guests in, start and stop the recording and add marks. You aren’t recorded, so the camera is up to you.';
@@ -27,7 +27,11 @@
   fetch(`/sessions/info?r=${room}${gid ? `&g=${gid}` : ''}`).then((r) => r.ok ? r.json() : null).then((i) => {
     if (!i) return;
     applyBrand(i.brand);
-    if (i.quality && C.QUALITY[i.quality] && i.quality !== quality) { quality = i.quality; const v = stream && stream.getVideoTracks()[0], q = C.QUALITY[quality]; if (v) v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {}); }
+    const opts = { fps: i.fps, high: i.high, audio: i.audio };
+    if ((i.quality && C.QUALITY[i.quality] && i.quality !== quality) || JSON.stringify(opts) !== JSON.stringify(rcfg)) {
+      if (i.quality && C.QUALITY[i.quality]) quality = i.quality; rcfg = opts; recOptsNote();
+      const v = stream && stream.getVideoTracks()[0]; if (v) v.applyConstraints(C.videoAsk(quality, rcfg)).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {});
+    }
     if (i.guest && i.guest.name && !$('#name').value) { $('#name').value = i.guest.name; $('#pvav').textContent = U.initials(i.guest.name); }
     if (i.at) {
       const d = new Date(i.at), soon = i.at - Date.now();
@@ -54,30 +58,36 @@
     $('#powered').hidden = false; document.documentElement.classList.add('branded');
   }
 
+  // a sound-only session: say so where the camera check is (the camera is still seen in the call)
+  function recOptsNote() {
+    const n = $('#ck-audio'); if (!n) return;
+    n.hidden = !rcfg.audio; if (rcfg.audio) ok(n, 'Sound-only session: just your microphone is recorded');
+  }
+
   // ---------- pre-join checks ----------
   const ok = (el, txt, good = true) => { el.innerHTML = `<svg class="ico ${good ? 'ok' : 'wa'}"><use href="#i-check"/></svg><span>${U.esc(txt)}</span>`; };
   const okBrowser = !!(window.MediaRecorder && window.RTCPeerConnection && window.AudioWorkletNode && navigator.mediaDevices);
   ok($('#ck-browser'), okBrowser ? (C.pickMime().includes('mp4') ? 'This browser records MP4' : 'This browser records WebM (the app turns it into MP4)') : 'This browser can’t record. Use Chrome, Edge or Safari.', okBrowser);
   C.freeSpace().then((f) => {
     if (!f) return ok($('#ck-space'), 'Couldn’t check free space', false);
-    const hours = f.free / (C.gbPerHour(quality) * 1e9);
+    const hours = f.free / (C.gbPerHour(quality, rcfg) * 1e9);
     ok($('#ck-space'), hours >= 2 ? `Plenty of room to keep a copy (${hours > 20 ? '20+' : hours.toFixed(0)} h at ${C.QUALITY[quality].label})` : `Only about ${Math.max(0, hours * 60).toFixed(0)} min of space for a safety copy`, hours >= 1);
   });
 
   async function openPreview() {
-    const q0 = quality;
+    const q0 = quality, o0 = JSON.stringify(rcfg);
     const cam = $('#cam').value || undefined, mic = $('#mic').value || undefined;
     if (stream) for (const t of stream.getTracks()) t.stop();
     try {
-      stream = await C.openMedia({ quality, cam, mic, speakers: $('#speakers').checked });
+      stream = await C.openMedia({ quality, cfg: rcfg, cam, mic, speakers: $('#speakers').checked });
     } catch (e) {
-      try { stream = await C.openMedia({ quality, cam: 'off', mic, speakers: $('#speakers').checked }); ok($('#ck-cam'), 'No camera found. You can still join with sound.', false); }
+      try { stream = await C.openMedia({ quality, cfg: rcfg, cam: 'off', mic, speakers: $('#speakers').checked }); ok($('#ck-cam'), 'No camera found. You can still join with sound.', false); }
       catch (e2) { $('#jerr').hidden = false; $('#jerr').textContent = 'Allow the camera and microphone for this page (the icon in the address bar), then reload.'; return; }
     }
     $('#pv').srcObject = stream;
     const v = stream.getVideoTracks()[0];
-    // the session's quality arrived while the camera was opening
-    if (v && q0 !== quality) { const q = C.QUALITY[quality]; try { await v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }); } catch {} }
+    // the session's quality or options arrived while the camera was opening
+    if (v && (q0 !== quality || o0 !== JSON.stringify(rcfg))) { try { await v.applyConstraints(C.videoAsk(quality, rcfg)); } catch {} }
     if (v) { const s = v.getSettings(); ok($('#ck-cam'), `Camera ${s.width}×${s.height}${s.frameRate ? ` at ${Math.round(s.frameRate)} fps` : ''}`, (s.height || 0) >= 720); recRes = `${s.height >= 2000 ? '4K' : `${s.height}p`}`; }
     await listDevices();
     meter();
@@ -149,7 +159,7 @@
     const sp = await speedTest();
     const f = await C.freeSpace().catch(() => null);
     const v = stream && stream.getVideoTracks()[0], vs = v ? v.getSettings() : {}, a = stream && stream.getAudioTracks()[0];
-    const need = { '720': 3, '1080': 6, '4k': 15 }[quality] || 6, hours = f ? f.free / (C.gbPerHour(quality) * 1e9) : 0;
+    const need = { '720': 3, '1080': 6, '4k': 15 }[quality] || 6, hours = f ? f.free / (C.gbPerHour(quality, rcfg) * 1e9) : 0;
     const items = [
       [!!v && (vs.height || 0) >= 720, v ? `Camera ${vs.width}×${vs.height}${(vs.height || 0) < 720 ? ': lower than the show’s quality' : ''}` : 'No camera'],
       [!!a && peak > 0.01, a ? (peak > 0.01 ? `Mic works (${(a.label || 'mic').slice(0, 40)})` : 'We didn’t hear you. Check the mic choice above.') : 'No mic'],
@@ -207,10 +217,11 @@
     }
   }
   async function onCfg(cfg) {
-    if (cfg.quality && cfg.quality !== quality && !(rec && rec.running)) {
-      quality = cfg.quality;
-      const v = stream && stream.getVideoTracks()[0], q = C.QUALITY[quality];
-      if (v) { try { await v.applyConstraints({ width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 } }); } catch {} const s = v.getSettings(); recRes = `${s.height >= 2000 ? '4K' : `${s.height}p`}`; session.rescale(); }
+    const opts = { fps: cfg.fps, high: cfg.high, audio: cfg.audio };
+    if (((cfg.quality && cfg.quality !== quality) || JSON.stringify(opts) !== JSON.stringify(rcfg)) && !(rec && rec.running)) {
+      if (cfg.quality) quality = cfg.quality; rcfg = opts; recOptsNote();
+      const v = stream && stream.getVideoTracks()[0];
+      if (v) { try { await v.applyConstraints(C.videoAsk(quality, rcfg)); } catch {} const s = v.getSettings(); recRes = `${s.height >= 2000 ? '4K' : `${s.height}p`}`; session.rescale(); }
     }
     $('#sessname').textContent = cfg.name || 'Remote recording';
   }
@@ -237,7 +248,7 @@
     for (const k of sinks) { st.pending += k.q.length; st.bytes += k.pendingBytes(); st.sent += k.sent; st.sentBytes += k.sentBytes; }
     const a = stream && stream.getAudioTracks()[0];
     return { ...st, rec: !!(rec && rec.running), scr: !!(share && share.recording), res: recRes, err: recErr || (sink && sink.fail > 3 ? 'Upload trouble, retrying' : ''),
-      mic: a ? a.enabled : undefined, free: space.free, hours: space.free ? space.free / (C.gbPerHour(quality) * 1e9) : undefined };
+      mic: a ? a.enabled : undefined, free: space.free, hours: space.free ? space.free / (C.gbPerHour(quality, rcfg) * 1e9) : undefined };
   }
   // the room this browser has for its safety copy, so the host and producers can see who's running short
   const space = { free: 0 };

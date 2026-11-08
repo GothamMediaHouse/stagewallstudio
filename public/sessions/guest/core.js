@@ -291,11 +291,14 @@ registerProcessor('sc-pcm',P)`;
     async start(take, atServer, part = 0) {
       if (this.running) return;
       this.running = true; this.node = null; this.take = take; this.part = part; this.vSeq = part * PART; this.aSeq = part * PART; this.vBytes = 0; this.aBytes = 0;
-      const q = QUALITY[this.quality] || QUALITY['1080'], s = this.session;
-      const mime = pickMime(), vt = this.stream.getVideoTracks()[0], at = this.stream.getAudioTracks()[0];
+      const s = this.session, cfg = s.cfg || {}, vbps = bitrate(this.quality, cfg);
+      const mime = pickMime(), at = this.stream.getAudioTracks()[0];
+      // a sound-only session records just the WAV (the camera is still seen in the call); a shared screen or a studio camera
+      // the host added is always video
+      const vt = cfg.audio && !this.keepVideo ? null : this.stream.getVideoTracks()[0];
       const set = vt ? vt.getSettings() : {};
       this.meta = { v: 1, room: s.room, take, part, pid: this.pid || s.pid, name: this.name || s.name, quality: this.quality, mime, ext: mime.includes('mp4') ? 'mp4' : 'webm',
-        width: set.width || 0, height: set.height || 0, fps: set.frameRate || 0, sampleRate: RATE, channels: 1, bits: 24,
+        width: set.width || 0, height: set.height || 0, fps: set.frameRate || 0, vbps, sampleRate: RATE, channels: 1, bits: 24,
         vStart: 0, aStart: 0, vCount: 0, aCount: 0, done: false, ua: navigator.userAgent, startedAt: 0 };
       // the mic as 24-bit PCM, on its own audio clock (a studio camera with no sound has no WAV)
       if (at) {
@@ -318,7 +321,7 @@ registerProcessor('sc-pcm',P)`;
       // (a sound-only source, like a USB podcast mic, has no video file: just its WAV)
       this.mr = null;
       if (vt) {
-      this.mr = new MediaRecorder(this.stream, { mimeType: mime || undefined, videoBitsPerSecond: q.vbps, audioBitsPerSecond: 256000, videoKeyFrameIntervalDuration: PIECE_MS });
+      this.mr = new MediaRecorder(this.stream, { mimeType: mime || undefined, videoBitsPerSecond: vbps, audioBitsPerSecond: 256000, videoKeyFrameIntervalDuration: PIECE_MS });
       this.mr.ondataavailable = (e) => { if (e.data && e.data.size) { this.vBytes += e.data.size; this.put('v', this.vSeq++, e.data); } };
       this.mr.onstart = () => { this.meta.vStart = s.now(); };
       }
@@ -463,7 +466,7 @@ registerProcessor('sc-pcm',P)`;
     }
     async record(take, at) {
       if (!this.stream || (this.rec && this.rec.running)) return;
-      this.rec = new Recorder({ session: this.session, stream: this.stream, quality: this.quality, sink: this.sink, pid: this.pid, name: this.name });
+      this.rec = new Recorder({ session: this.session, stream: this.stream, quality: this.quality, sink: this.sink, pid: this.pid, name: this.name, keepVideo: true });
       this.rec.on('error', (e) => this.emit('error', e));
       await this.rec.start(take, at, this.part(take));
       this.emit('change', true);
@@ -489,14 +492,26 @@ registerProcessor('sc-pcm',P)`;
     try { const e = await navigator.storage.estimate(); return { free: (e.quota || 0) - (e.usage || 0), quota: e.quota || 0 }; } catch { return null; }
   }
   // the camera + mic at the room's quality (mic processing off unless they're on speakers)
-  async function openMedia({ quality, cam, mic, speakers }) {
-    const q = QUALITY[quality] || QUALITY['1080'];
-    const video = cam === 'off' ? false : { width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: 30 }, ...(cam ? { deviceId: { exact: cam } } : {}) };
+  // 1.1: a session's recording options (cfg): fps 24 | 25 | 30 | 60, high (twice the bitrate), audio (sound only: cameras
+  // are still seen in the call, but only the WAVs are recorded and uploaded)
+  const FPS = [24, 25, 30, 60];
+  const fpsOf = (cfg) => FPS.includes(Number(cfg && cfg.fps)) ? Number(cfg.fps) : 30;
+  const bitrate = (quality, cfg) => Math.round((QUALITY[quality] || QUALITY['1080']).vbps * (cfg && cfg.high ? 2 : 1) * (fpsOf(cfg) === 60 ? 1.5 : 1));
+  const videoAsk = (quality, cfg) => { const q = QUALITY[quality] || QUALITY['1080'], f = fpsOf(cfg); return { width: { ideal: q.w }, height: { ideal: q.h }, frameRate: { ideal: f, max: f } }; };
+  async function openMedia({ quality, cam, mic, speakers, cfg }) {
+    const video = cam === 'off' ? false : { ...videoAsk(quality, cfg), ...(cam ? { deviceId: { exact: cam } } : {}) };
     const audio = { channelCount: { ideal: 1 }, sampleRate: { ideal: RATE }, echoCancellation: !!speakers, noiseSuppression: false, autoGainControl: false, ...(mic ? { deviceId: { exact: mic } } : {}) };
     return navigator.mediaDevices.getUserMedia({ video, audio });
   }
   // GB an hour for one person at a quality (video + 48 kHz 24-bit WAV)
-  const gbPerHour = (q) => ((QUALITY[q] || QUALITY['1080']).vbps + 256000 + RATE * 24) * 3600 / 8 / 1e9;
+  const gbPerHour = (q, cfg) => ((cfg && cfg.audio ? 0 : bitrate(q, cfg) + 256000) + RATE * 24) * 3600 / 8 / 1e9;
 
-  root.SessionsCore = { QUALITY, PIECE_MS, RATE, PART, Session, Recorder, CloudSink, ScreenShare, freeSpace, openMedia, gbPerHour, rid, sha256, pickMime, Emitter };
+  // your own picture is mirrored like a mirror only for a camera pointed at you (a webcam); a capture input (Blackmagic,
+  // Elgato, a CT-4, NDI…) shows the real picture, the right way round. The recording is never mirrored.
+  const WEBCAM = /facetime|isight|built-?in|webcam|web cam|front|continuity|iphone|ipad|desk view|logi|brio|c9\d\d|insta360|obsbot|razer kiyo|anker|emeet|lifecam|hd pro|integrated/i;
+  const CAPTURE = /blackmagic|decklink|ultrastudio|intensity|elgato|cam link|game capture|magewell|aja|capture|hdmi|sdi|ndi|virtual|usb video|ct-?4|atem|avermedia/i;
+  const isWebcam = (stream) => { const t = stream && stream.getVideoTracks && stream.getVideoTracks()[0]; const l = (t && t.label) || ''; return !!t && !CAPTURE.test(l) && (WEBCAM.test(l) || !l); };
+  if (typeof document !== 'undefined') document.addEventListener('loadedmetadata', (e) => { const v = e.target; if (v && v.tagName === 'VIDEO') v.classList.toggle('mirror', isWebcam(v.srcObject)); }, true);
+
+  root.SessionsCore = { isWebcam, QUALITY, FPS, fpsOf, bitrate, videoAsk, PIECE_MS, RATE, PART, Session, Recorder, CloudSink, ScreenShare, freeSpace, openMedia, gbPerHour, rid, sha256, pickMime, Emitter };
 })(typeof window !== 'undefined' ? window : globalThis);
