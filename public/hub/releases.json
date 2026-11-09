@@ -1,20 +1,20 @@
 {
- "written": "2026-11-09T00:09:13.745Z",
+ "written": "2026-11-09T00:29:59.696Z",
  "apps": {
   "sessions": {
-   "version": "1.9.0",
+   "version": "2.0.0",
    "builds": {
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-1.9.0/Showcaller-Sessions-1.9.0-win-x64.exe",
-     "sha256": "54837066978ee91d9793b366bfa4a482e043d9f4f57b57925d449b4e04224d36",
-     "size": 163090507,
-     "version": "1.9.0"
-    },
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-1.4.1/Showcaller-Sessions-1.4.1-mac-arm64.zip",
-     "sha256": "1b70ff009ed5f7c25ac3a4ebd286a06ada3f271bab5ffd07216b593c534ad730",
-     "size": 160449406,
-     "version": "1.4.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-2.0.0/Showcaller-Sessions-2.0.0-mac-arm64.zip",
+     "sha256": "1708323ed5e1aa3b6baaa0e4b919c17ed06e45cb3d986b399712e76a92edfbba",
+     "size": 164949239,
+     "version": "2.0.0"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/sessions-2.0.0/Showcaller-Sessions-2.0.0-win-x64.exe",
+     "sha256": "d39e553ba178081e5df9bf54c41fd0938d799b52c398684fdaf25de7fc4fac7e",
+     "size": 163091258,
+     "version": "2.0.0"
     }
    }
   },
