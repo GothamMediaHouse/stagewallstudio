@@ -52,7 +52,7 @@ export default {
     // Showcaller Sessions: remote guests recorded for editing, pieces kept in cloud storage until the studio Mac downloads them (sessions.js)
     if (url.pathname === '/sessions' && request.method === 'GET') return Response.redirect(new URL('/sessions/account/', url), 302);
     if (url.pathname.startsWith('/sessions/') && !url.pathname.startsWith('/sessions/guest/')) return sessions(request, env);
-    if (/^\/s\/[a-z0-9]{8,24}(\/edit\/t\d{2,4})?\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
+    if (/^\/s\/[a-z0-9]{8,24}(\/edit\/t\d{2,4}|\/watch)?\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {

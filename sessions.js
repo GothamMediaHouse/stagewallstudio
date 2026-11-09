@@ -6,6 +6,7 @@
 //
 //   wss://…/sessions/host?r=R&secret=S&name=N        the Sessions app (the first computer to use a room owns it)
 //   wss://…/sessions/ws?r=R&pid=P&name=N             a guest page (…&prod=K: a producer, who runs the room but isn't recorded)
+//   wss://…/sessions/watch?r=R&pid=P&name=N          1.9 a viewer on the watch page (/s/R/watch) when the host opens the audience
 //   PUT  …/sessions/up?r&pid&tok&take&kind&seq       one recorded piece (kind v video, a sound, m the person's notes)
 //   GET  …/sessions/api/list|get|takes, POST …/del   the app's downloads (header X-Session-Secret)
 //   https://…/s/R                                    the guest page (public/sessions/guest/)
@@ -84,7 +85,7 @@ export async function sessions(request, env) {
   // what's switched on for this site (no secrets, just yes or no): open it in a browser to check the setup
   if (p === '/sessions/status' && request.method === 'GET') return j({ ai: !!env.ANTHROPIC_API_KEY, email: !!env.RESEND_API_KEY, billing: !!(env.STRIPE_SECRET_KEY && env.SESSIONS_STRIPE_PRICE && env.STRIPE_WEBHOOK_SECRET), storage: !!env.SESSIONS, keepDays: keepDays(env) });
   if (!ROOM.test(r)) return j({ error: 'No such session' }, 404);
-  if (p === '/sessions/host' || p === '/sessions/ws') {
+  if (p === '/sessions/host' || p === '/sessions/ws' || p === '/sessions/watch') {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Use a WebSocket', { status: 426 });
     return room(env, r).fetch(request);
   }
@@ -247,6 +248,7 @@ async function api(request, env, url, r) {
 // the guest page, for /s/<room>
 export function sessionsPage(request, env) {
   if (/\/edit\/t\d{2,4}\/?$/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(new Request(new URL('/sessions/edit/', request.url), request));
+  if (/\/watch\/?$/.test(new URL(request.url).pathname)) return env.ASSETS.fetch(new Request(new URL('/sessions/guest/watch', request.url), request));
   return env.ASSETS.fetch(new Request(new URL('/sessions/guest/', request.url), request));
 }
 
@@ -271,6 +273,8 @@ export class SessionRoom extends DurableObject {
   peers() { return this.open('in').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name, role: a.role }; }); }
   ctrls() { return [...this.open('host'), ...this.open('prod')]; }
   waiting() { return this.open('wait').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name }; }); }
+  audList() { return this.open('aud').map((w) => { const a = w.deserializeAttachment(); return { pid: a.pid, name: a.name, hand: !!a.hand }; }); }
+  audTell() { const o = { t: 'aud', list: this.audList() }; for (const w of this.ctrls()) this.send(w, o); }
 
   async fetch(request) {
     // an account (sessions-accounts.js), kept in an object of this class so the site needs no extra Durable Object class
@@ -393,6 +397,21 @@ export class SessionRoom extends DurableObject {
 
     const [client, server] = Object.values(new WebSocketPair());
     const name = clean(url.searchParams.get('name')) || 'Guest';
+    if (url.pathname === '/sessions/watch') {
+      // 1.9 audience: people watching the show (the host's program picture, sent from the studio computer), who can ask to
+      // come on. They aren't in the call ('in'), just this list; the host's app talks to each one directly.
+      const pid = url.searchParams.get('pid') || '';
+      const no = (code, why) => { this.ctx.acceptWebSocket(server, ['x']); server.close(code, why); return new Response(null, { status: 101, webSocket: client }); };
+      if (!PID.test(pid)) return no(4003, 'Bad page address');
+      if (!s.cfg.audience) return no(4004, 'This show isn’t open to watch right now');
+      for (const w of this.ctx.getWebSockets(`a:${pid}`)) { try { w.close(4000, 'Opened in another tab'); } catch {} }
+      if (this.open('aud').length >= Number(this.env.SESSIONS_AUDIENCE_MAX || 25)) return no(4002, 'The audience is full');
+      this.ctx.acceptWebSocket(server, ['aud', `a:${pid}`]);
+      server.serializeAttachment({ pid, name, role: 'viewer', hand: false });
+      this.send(server, { t: 'ahello', now: Date.now(), name: s.cfg.name, host: this.open('host').length > 0, ice: await this.ice(), brand: s.brand });
+      this.audTell();
+      return new Response(null, { status: 101, webSocket: client });
+    }
     if (url.pathname === '/sessions/host') {
       const secret = url.searchParams.get('secret') || '';
       const h = await sha(`showcaller-sessions:${secret}`);
@@ -404,6 +423,7 @@ export class SessionRoom extends DurableObject {
       this.hello(server, { pid: 'host', role: 'host' });
       this.each({ t: 'join', peer: { pid: 'host', name, role: 'host' } }, (a) => a.pid !== 'host');
       this.each({ t: 'host', online: true }, (a) => a.pid !== 'host');
+      for (const w of this.open('aud')) this.send(w, { t: 'host', online: true });
       return new Response(null, { status: 101, webSocket: client });
     }
     const pid = url.searchParams.get('pid') || '';
@@ -466,7 +486,7 @@ export class SessionRoom extends DurableObject {
     const s = await this.state();
     const solo = s.solo[you.pid] && s.takes.find((t) => t.id === s.solo[you.pid] && !t.end);
     const o = { t: 'hello', you, now: Date.now(), cfg: s.cfg, rec: solo ? { on: true, n: solo.n, take: solo.id, at: solo.at, solo: true } : s.rec, prompt: s.prompt, peers: this.peers().filter((p) => p.pid !== you.pid), ice: await this.ice(), host: this.open('host').length > 0 };
-    if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.takes = s.takes; o.board = s.board; o.plan = s.plan; }
+    if (you.role === 'host' || you.role === 'producer') { o.waiting = this.waiting(); o.aud = this.audList(); o.takes = s.takes; o.board = s.board; o.plan = s.plan; }
     else o.tok = s.admitted[you.pid]?.tok;
     this.send(w, o);
   }
@@ -477,6 +497,13 @@ export class SessionRoom extends DurableObject {
     const a = ws.deserializeAttachment(), tags = this.ctx.getTags(ws), s = await this.state();
     if (m.t === 'time') return this.send(ws, { t: 'time', c: m.c, s: Date.now() });
     if (tags.includes('ed')) return this.edMsg(ws, a, m);
+    if (tags.includes('aud')) {
+      // a viewer: talk to the host's app (the picture), put a hand up, or change their name
+      if (m.t === 'asig') { for (const w of this.open('host')) this.send(w, { t: 'asig', from: a.pid, data: m.data }); return; }
+      if (m.t === 'hand') { a.hand = !!m.on; ws.serializeAttachment(a); return this.audTell(); }
+      if (m.t === 'name') { a.name = clean(m.name) || a.name; ws.serializeAttachment(a); return this.audTell(); }
+      return;
+    }
     if (!tags.includes('in')) return;
     const isHost = tags.includes('host'), isProd = tags.includes('prod');
     if (m.t === 'sig' && typeof m.to === 'string') {
@@ -528,9 +555,19 @@ export class SessionRoom extends DurableObject {
       if (m.forget && s.admitted[m.pid]) { delete s.admitted[m.pid]; await this.save('admitted'); }
       return;
     }
+    if (m.t === 'asig' && isHost && typeof m.to === 'string') { for (const w of this.open(`a:${m.to}`)) this.send(w, { t: 'asig', data: m.data }); return; }
+    if ((m.t === 'callin' || m.t === 'adrop') && (isHost || isProd) && typeof m.pid === 'string') {
+      // bring a viewer on: let them straight in (no waiting room) and send them to the guest page; or send them away
+      const v = this.open(`a:${m.pid}`)[0]; if (!v) return;
+      if (m.t === 'callin') { await this.admit(m.pid, v.deserializeAttachment().name); this.send(v, { t: 'callin' }); }
+      else { try { v.close(4005, 'The host removed you from the audience'); } catch {} }
+      return;
+    }
     if (m.t === 'cfg' && m.cfg && typeof m.cfg === 'object' && isHost) {
-      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait, solo: m.cfg.solo === undefined ? !!s.cfg.solo : !!m.cfg.solo, ...recOpts(m.cfg, s.cfg) };
+      s.cfg = { name: clean(m.cfg.name ?? s.cfg.name, 60) || 'Session', quality: ['720', '1080', '4k'].includes(m.cfg.quality) ? m.cfg.quality : s.cfg.quality, wait: m.cfg.wait === undefined ? s.cfg.wait : !!m.cfg.wait, solo: m.cfg.solo === undefined ? !!s.cfg.solo : !!m.cfg.solo, audience: m.cfg.audience === undefined ? !!s.cfg.audience : !!m.cfg.audience, ...recOpts(m.cfg, s.cfg) };
       await this.save('cfg');
+      if (!s.cfg.audience) for (const w of this.open('aud')) { try { w.close(4004, 'The host closed the watch page'); } catch {} }
+      this.audTell();
       return this.each({ t: 'cfg', cfg: s.cfg });
     }
     if (m.t === 'rec') {
@@ -616,10 +653,11 @@ export class SessionRoom extends DurableObject {
   gone(ws) {
     const tags = this.ctx.getTags(ws), a = ws.deserializeAttachment?.() || {};
     if (tags.includes('ed')) { const ed = a.ed; setTimeout(() => this.edPeople(ed), 0); return; }
+    if (tags.includes('aud')) { setTimeout(() => this.audTell(), 0); return; }
     if (tags.includes('in')) {
       if (this.open(`p:${a.pid}`).some((w) => w !== ws)) return;
       this.each({ t: 'leave', pid: a.pid }, (b) => b.pid !== a.pid);
-      if (tags.includes('host')) this.each({ t: 'host', online: false }, (b) => b.pid !== 'host');
+      if (tags.includes('host')) { this.each({ t: 'host', online: false }, (b) => b.pid !== 'host'); for (const w of this.open('aud')) this.send(w, { t: 'host', online: false }); }
     } else if (tags.includes('wait') && !this.open(`p:${a.pid}`).some((w) => w !== ws)) for (const w of this.ctrls()) this.send(w, { t: 'unknock', pid: a.pid });
   }
 
