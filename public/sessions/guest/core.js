@@ -85,6 +85,7 @@
           if (m.board) { this.board = m.board; this.emit('board', m.board); }
           if (m.plan) { this.plan = m.plan; this.emit('plan', m.plan); }
           if (m.prompt) { this.prompt = m.prompt; this.emit('prompt', m.prompt); }
+          if (m.aud) { this.aud = m.aud; this.emit('aud', m.aud); }
           if (m.waiting) { this.waiting = new Map(m.waiting.map((w) => [w.pid, w])); this.emit('waiting', [...this.waiting.values()]); }
           for (const p of [...this.peers.keys()]) this.drop(p, true);
           for (const p of m.peers) this.add(p, true); // the newcomer calls everyone (no glare)
@@ -115,6 +116,9 @@
         case 'prompt': this.prompt = m.prompt; this.emit('prompt', m.prompt); break;
         case 'error': this.emit('notice', m.error); break;
         case 'sig': this.onsig(m.from, m.data); break;
+        // 1.9 audience: who's watching (host and producers) and the host app's line to each viewer
+        case 'aud': this.aud = m.list || []; this.emit('aud', this.aud); break;
+        case 'asig': this.emit('asig', m.from, m.data); break;
       }
     }
     // host controls

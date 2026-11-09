@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Watch · Showcaller Sessions</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="stylesheet" href="/sessions/guest/sessions.css">
+<style>
+.wwrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:14px}
+.wstage{position:relative;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden}
+.wstage video{width:100%;height:100%;object-fit:contain;display:block}
+.wover{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#e8e6ef;padding:20px}
+.wover .btn{font-size:16px}
+.wbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wbar .sp{flex:1}
+.wlive{background:#e5484d;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;letter-spacing:.04em}
+.wname{display:flex;gap:8px;align-items:center}.wname input{width:200px}
+</style>
+</head>
+<body>
+<header class="topnav">
+  <div class="brand"><div class="logo" id="blogo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b0c0e" stroke-width="2.4" stroke-linecap="round"><rect x="2.5" y="6" width="8" height="12" rx="2"/><rect x="13.5" y="6" width="8" height="12" rx="2"/></svg></div><div><b id="wtitle">Showcaller Sessions</b><small id="wsub">Watching</small></div></div>
+  <div class="sp"></div>
+  <button class="themeb" id="themeb" aria-label="Switch light or dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
+</header>
+<main class="wwrap">
+  <div class="wstage"><video id="wv" autoplay playsinline></video><div class="wover" id="wover"><div><div class="spin"></div><p id="wmsg">Connecting…</p></div></div></div>
+  <div class="wbar">
+    <span class="wlive" id="wlive" hidden>LIVE</span><b id="wshow"></b><span class="sp"></span>
+    <div class="wname"><input type="text" id="wn" maxlength="40" placeholder="Your name" autocomplete="name"><button class="btn" id="hand" disabled>Ask to come on</button></div>
+  </div>
+  <p class="muted" id="whint" style="margin:0">If the host brings you on, you’ll join the show with your camera and mic.</p>
+</main>
+<script src="/sessions/guest/core.js"></script>
+<script src="/sessions/guest/room-ui.js"></script>
+<script src="/sessions/guest/watch.js"></script>
+</body>
+</html>

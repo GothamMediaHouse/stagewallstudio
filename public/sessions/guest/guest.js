@@ -36,7 +36,7 @@
     const opts = { fps: i.fps, high: i.high, audio: i.audio };
     if ((i.quality && C.QUALITY[i.quality] && i.quality !== quality) || JSON.stringify(opts) !== JSON.stringify(rcfg)) {
       if (i.quality && C.QUALITY[i.quality]) quality = i.quality; rcfg = opts; recOptsNote();
-      const v = stream && stream.getVideoTracks()[0]; if (v) v.applyConstraints(C.videoAsk(quality, rcfg)).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {});
+      const v = fx ? fx.inTrack : stream && stream.getVideoTracks()[0]; if (v) v.applyConstraints(C.videoAsk(quality, rcfg)).then(() => { const st = v.getSettings(); recRes = `${st.height >= 2000 ? '4K' : `${st.height}p`}`; }).catch(() => {});
     }
     if (i.guest && i.guest.name && !$('#name').value) { $('#name').value = i.guest.name; $('#pvav').textContent = U.initials(i.guest.name); }
     if (i.at) {
@@ -213,7 +213,8 @@
           }
         } else { sink.tok = session.tok; sink.pump(); if (share) { share.sink.tok = session.tok; share.sink.pump(); } }
       }
-      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status, onSelfChange: tellStatus, onRename: (n) => store.set('sess-name', n) }); }
+      if (!ui) { show('room'); ui = new U.RoomUI({ el: $('#roomwin'), session, host: false, producer: !!session.producer, share, self: { stream }, onLeave: leave, selfStatus: status, onSelfChange: tellStatus, onRename: (n) => store.set('sess-name', n), onFx: window.SessionsFx ? setFx : null });
+        const fm0 = store.get('sess-fx'); if (window.SessionsFx && fm0 && fm0 !== 'off') setFx(fm0).then(() => ui.drawDock()).catch(() => {}); }
       $('#sessname').textContent = session.cfg.name || 'Remote recording';
     } else if (s === 'reconnecting') U.toast('Connection lost. Reconnecting… (your recording carries on)', 4000);
     else if (s === 'closed') {
@@ -274,6 +275,24 @@
     if (document.visibilityState === 'visible') { if (session && !session.closed) keepAwake(); if (rec && rec.running && phone) U.toast('Welcome back. Keep this page in front while recording: the camera pauses in other apps.', 5000); }
   });
 
+  // 1.8: background blur or a picture behind you (fx.js). Turning it on swaps the camera for the effect's picture
+  // (not mid-take: the recording uses it); after that, changing the effect is instant.
+  let fx = null;
+  async function setFx(mode, pic) {
+    if (mode !== 'off' && !fx) {
+      if (session.rec && session.rec.on) throw new Error('Wait until the recording stops, then turn on a background');
+      const v0 = stream && stream.getVideoTracks()[0]; if (!v0) throw new Error('Turn on a camera first');
+      const f = new window.SessionsFx.Fx(stream);
+      try { await f.set(mode, { image: pic || (mode === 'image' ? store.get('sess-fx-img') : '') }); } catch (e) { f.stop(); throw new Error(`The background effect didn’t start: ${e.message || e}`); }
+      if (session.rec && session.rec.on) { f.stop(); throw new Error('The recording started; turn the background on after it stops'); }
+      f.track.enabled = v0.enabled; fx = f;
+      session.replaceTrack('video', f.track);
+      stream = f.stream; session.stream = stream; ui.self.stream = stream; ui.attach(session.pid, stream);
+    } else if (fx) await fx.set(mode, { image: pic || (mode === 'image' ? store.get('sess-fx-img') : '') });
+    if (pic) try { store.set('sess-fx-img', pic); } catch {}
+    store.set('sess-fx', mode); ui.fxMode = mode;
+  }
+
   async function leave() {
     if (rec && rec.running) { if (!confirm('The recording is still running. Leave anyway? What you’ve recorded so far is kept and uploaded.')) return; await rec.stop(); }
     if (share) await share.stop();
@@ -290,7 +309,7 @@
       if (st.pending) setTimeout(draw, 1000);
     };
     draw();
-    if (stream && !(sink && sink.q.length)) for (const t of stream.getTracks()) t.stop();
+    if (stream && !(sink && sink.q.length)) { for (const t of stream.getTracks()) t.stop(); if (fx) fx.stop(); }
   }
   addEventListener('beforeunload', (e) => { if ((rec && rec.running) || (sink && sink.q.length) || (share && share.sink.q.length)) { e.preventDefault(); e.returnValue = ''; } });
 })();
