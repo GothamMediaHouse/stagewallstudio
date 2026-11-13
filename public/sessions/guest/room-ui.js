@@ -327,7 +327,7 @@
       this.applyVolume(pid);
     }
     applyVolume(pid) {
-      const t = this.tiles.get(pid); if (!t) return;
+      const t = this.tiles.get(pid); if (!t || (this.levelSpec && this.levelSpec(pid))) return;
       const db = this.listenLevel(pid), v = db <= -30 ? 0 : Math.min(1, Math.pow(10, db / 20));
       for (const el of [$('video', t.el), t.fs && $('video', t.fs)]) if (el) el.volume = v;
     }
@@ -613,10 +613,10 @@
       for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
       for (const x of el.querySelectorAll('.js-smute')) x.onclick = () => { const a = this.self.stream && this.self.stream.getAudioTracks()[0]; if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); this.drawTracks(); } };
       for (const x of el.querySelectorAll('.js-plv')) {
-        const pid = x.dataset.p, out = x.nextElementSibling, max = this.listenMax ? this.listenMax() : 0;
-        const show = (db) => { out.textContent = db <= -30 ? 'Off' : `${db > 0 ? '+' : ''}${db} dB`; };
+        const pid = x.dataset.p, out = x.nextElementSibling, sp = this.levelSpec && this.levelSpec(pid), max = sp ? sp.max : this.listenMax ? this.listenMax(pid) : 0;
+        const show = (db) => { out.textContent = !sp && db <= -30 ? 'Off' : `${db > 0 ? '+' : ''}${db} dB`; };
         if (x.max !== String(max)) x.max = String(max);
-        if (document.activeElement !== x) { const db = Math.min(max, this.listenLevel(pid)); x.value = String(db); show(db); }
+        if (document.activeElement !== x) { const db = Math.max(+x.min, Math.min(max, this.listenLevel(pid))); x.value = String(db); show(db); }
         if (!x.oninput) {
           x.oninput = () => { const db = +x.value; show(db); this.setListen(pid, db); };
           x.ondblclick = () => { x.value = '0'; x.oninput(); };
@@ -666,13 +666,15 @@
     }
     trackRow(pid, name, sub, pct, ok, kick, cam, change, acts, lvl) {
       const busy = this.session.rec && this.session.rec.on, me = pid === this.session.pid;
+      // a level slider: your own mic level or a studio input's trim (the app says which), or how loud a guest is in what you hear
+      const spec = (this.levelSpec && this.levelSpec(pid)) || (lvl ? { label: 'Level', min: -30, off: true, title: 'How loud they are in what you hear (their recording isn’t changed). Double-click for 0 dB.' } : null);
       const a = me && this.self.stream && this.self.stream.getAudioTracks()[0];
       // your own mic: mute here as well as in the dock
       const mute = a ? (a.enabled ? ib('js-smute', 'mic', 'Mute your mic (recorded silence)') : ib('js-smute warn', 'micoff', 'Unmute your mic')) : '';
       const btns = mute + (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'gear', 'Change your camera or microphone') : '')
         + (kick ? ib('js-kick', 'x', 'Remove them from the session', pid) : '')
         + (cam && cam !== 'screen' && this.host && !busy ? ib('js-xrm', 'x', 'Remove this source', pid) : '');
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}${lvl ? `<label class="tlv" title="How loud they are in what you hear (their recording isn’t changed). Double-click for 0 dB."><span>Level</span><input type="range" class="js-plv" data-p="${esc(pid)}" min="-30" step="1" aria-label="${esc(name)}: level in what you hear"><output class="num"></output></label>` : ''}${pct === null ? '' : `<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div>`}</div>`;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}${spec ? `<label class="tlv" title="${esc(spec.title)}"><span>${esc(spec.label)}</span><input type="range" class="js-plv" data-p="${esc(pid)}" min="${spec.min}" step="1" aria-label="${esc(name)}: ${esc(spec.label.toLowerCase())}"><output class="num"></output></label>` : ''}${pct === null ? '' : `<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div>`}</div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);
