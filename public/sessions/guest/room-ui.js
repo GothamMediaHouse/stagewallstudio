@@ -36,6 +36,7 @@
  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9.7 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></symbol>
  <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M10 9v6l5-3z"/></symbol>
+ <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M6 4v16M12 4v16M18 4v16"/><rect x="3.5" y="13" width="5" height="3" rx="1"/><rect x="9.5" y="7" width="5" height="3" rx="1"/><rect x="15.5" y="11" width="5" height="3" rx="1"/></symbol>
  <symbol id="i-fx" viewBox="0 0 24 24"><circle cx="10" cy="9" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6M18 3v4M16 5h4M19.5 10.5v2.5M18.25 11.75h2.5"/></symbol>
  <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></symbol>
  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -316,6 +317,9 @@
     // tell everyone about the private talk (or that it's over); late arrivals are told again when they join
     sendTalk() { for (const p of this.session.peers.values()) this.session.tell(p.pid, { ctl: 'talk', talk: this.talk }); }
     startTalk(pid) { const me = this.session.pid; this.talk = this.talk && this.talk.a === me && this.talk.b === pid ? null : { a: me, b: pid }; this.sendTalk(); this.applyTalk(); }
+    // 2.3: the host's Sound panel router plays the call's sound itself (tiles go quiet), and asks who is hushed
+    setQuiet(on) { this.quiet = !!on; this.applyTalk(); }
+    hushed(pid) { const t = this.talk, me = this.session.pid; return !!(t && t.a !== me && t.b !== me && (pid === t.a || pid === t.b)); }
     endTalk() { this.talk = null; this.sendTalk(); this.applyTalk(); }
     talkCheck() {
       const s = this.session, t = this.talk; if (!t) return;
@@ -329,7 +333,7 @@
       for (const [pid, tile] of this.tiles) {
         if (tile.el.classList.contains('local') || pid === me || pid.endsWith('~s')) continue;
         const v = $('video', tile.el), hush = !!(t && !inIt && (pid === t.a || pid === t.b));
-        v.muted = hush; tile.el.classList.toggle('pvt', !!(t && (pid === t.a || pid === t.b)));
+        v.muted = hush || !!this.quiet; tile.el.classList.toggle('pvt', !!(t && (pid === t.a || pid === t.b)));
       }
       if (this.asking) return;
       if (el.hidden !== !t) { el.hidden = !t; requestAnimationFrame(() => this.fit()); }
@@ -394,7 +398,7 @@
         if (!t) {
           t = { el: document.createElement('div'), fs: document.createElement('div') };
           t.el.className = `tl${p.self ? ' self' : ''}`;
-          t.el.innerHTML = `<video autoplay playsinline ${p.self || p.local ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><svg class="ico mi"><use href="#i-micoff"/></svg><span class="js-n"></span></span><span class="st" hidden></span><button class="tspot" title="Show just this person, full screen (or double-click)" aria-label="Show ${esc(p.name)} full screen">${ico('spot')}</button>`;
+          t.el.innerHTML = `<video autoplay playsinline ${p.self || p.local || this.quiet ? 'muted' : ''}></video><div class="off" hidden><span class="av"></span></div><span class="rectag" hidden></span><span class="nm"><i></i><svg class="ico mi"><use href="#i-micoff"/></svg><span class="js-n"></span></span><span class="st" hidden></span><button class="tspot" title="Show just this person, full screen (or double-click)" aria-label="Show ${esc(p.name)} full screen">${ico('spot')}</button>`;
           t.fs.className = `ft${p.self ? ' self' : ''}`;
           t.fs.innerHTML = `<video autoplay playsinline muted></video><div class="off" hidden><span class="av"></span></div><div class="fnm"><span class="js-n"></span><small></small></div>`;
           this.tiles.set(p.pid, t);
@@ -516,6 +520,7 @@
         ${this.onFx ? `<button class="rb js-fx ${this.fxMode && this.fxMode !== 'off' ? 'on' : ''}" aria-label="Background" title="Background: blur it or swap it for a picture (works on this computer; recorded as you see it)">${ico('fx')}</button>` : ''}
         ${this.onLive ? `<button class="rb js-live ${this.liveOn ? 'on live' : ''}" aria-label="Go live" title="${this.liveOn ? 'Live now: open the stream panel' : 'Go live: stream the call to YouTube, Facebook, LinkedIn or any RTMP server'}">${ico('live')}</button>` : ''}
         ${this.onMedia ? `<button class="rb js-media ${this.mediaOn ? 'on' : ''}" aria-label="Media board" title="Media board: play intros, stings and clips into the call (recorded)">${ico('play')}</button>` : ''}
+        ${this.onSound ? `<button class="rb js-sound ${this.soundOn ? 'on' : ''}" aria-label="Sound" title="Sound: trim, phase and high-pass for each studio input, stereo pairs, and a backup of every input">${ico('sliders')}</button>` : ''}
         ${this.share ? `<button class="rb js-share ${this.share.active ? 'on' : ''}" aria-label="${this.share.active ? 'Stop sharing your screen' : 'Share your screen'}" title="${this.share.active ? 'Stop sharing' : 'Share your screen (recorded as its own track)'}">${ico('screen')}</button>` : ''}
         ${!this.ctrl && s.cfg && s.cfg.solo && (on ? s.rec.solo : !s.hostOnline) ? `<button class="recb ${on ? '' : 'stopped'} js-solo" title="${on ? 'Stop recording' : 'Record yourself now. The host gets it like any other take.'}"><i></i>${on ? 'Stop' : 'Record on my own'}</button>` : ''}
         ${this.ctrl ? `<button class="recb ${on ? '' : 'stopped'} js-rec"><i></i>${on ? 'Stop' : 'Record'}</button>
@@ -530,6 +535,7 @@
         $('.js-cam', root).onclick = () => { if (v) { v.enabled = !v.enabled; this.drawDock(); this.everySecond(); } };
         if (this.onMedia) $('.js-media', root).onclick = () => this.onMedia();
         if (this.onLive) $('.js-live', root).onclick = () => this.onLive();
+        if (this.onSound) $('.js-sound', root).onclick = () => this.onSound();
         if (this.onFx) $('.js-fx', root).onclick = (ev) => this.fxMenu(ev.currentTarget);
         if (this.share) $('.js-share', root).onclick = () => { (this.share.active ? this.share.stop() : this.share.start()).catch((e) => { if (e && e.name !== 'NotAllowedError') toast(`Screen sharing didn’t start: ${e.message || e}`, 4000); }); };
         const so = $('.js-solo', root); if (so) so.onclick = () => s.solo(!on);
