@@ -319,6 +319,18 @@
     startTalk(pid) { const me = this.session.pid; this.talk = this.talk && this.talk.a === me && this.talk.b === pid ? null : { a: me, b: pid }; this.sendTalk(); this.applyTalk(); }
     // 2.3: the host's Sound panel router plays the call's sound itself (tiles go quiet), and asks who is hushed
     setQuiet(on) { this.quiet = !!on; this.applyTalk(); }
+    // 2.6.3: how loud each person is in what you hear, from their row in People (dB, 0 = as they arrive)
+    listenLevel(pid) { if (this.onListenGet) { const v = this.onListenGet(pid); if (v != null) return v; } return (this.lv || new Map()).get(pid) ?? 0; }
+    setListen(pid, db) {
+      if (!this.lv) this.lv = new Map(); this.lv.set(pid, db);
+      if (this.onListen) this.onListen(pid, db);
+      this.applyVolume(pid);
+    }
+    applyVolume(pid) {
+      const t = this.tiles.get(pid); if (!t) return;
+      const db = this.listenLevel(pid), v = db <= -30 ? 0 : Math.min(1, Math.pow(10, db / 20));
+      for (const el of [$('video', t.el), t.fs && $('video', t.fs)]) if (el) el.volume = v;
+    }
     hushed(pid) { const t = this.talk, me = this.session.pid; return !!(t && t.a !== me && t.b !== me && (pid === t.a || pid === t.b)); }
     endTalk() { this.talk = null; this.sendTalk(); this.applyTalk(); }
     talkCheck() {
@@ -403,6 +415,7 @@
           t.fs.innerHTML = `<video autoplay playsinline muted></video><div class="off" hidden><span class="av"></span></div><div class="fnm"><span class="js-n"></span><small></small></div>`;
           this.tiles.set(p.pid, t);
           t.el.dataset.pid = p.pid; t.fs.dataset.pid = p.pid;
+          if (this.lv && this.lv.has(p.pid) || this.onListenGet) queueMicrotask(() => this.applyVolume(p.pid));
           // one person full screen: double-click their tile (or its corner button); double-click again for everyone
           const spot = () => this.full(true, p.pid);
           t.el.ondblclick = spot; $('.tspot', t.el).onclick = (e) => { e.stopPropagation(); spot(); };
@@ -563,9 +576,9 @@
       const scrRow = () => this.share && this.share.active ? this.trackRow(`${s.pid}~s`, `${s.name} · screen`, this.share.recording ? `Recording your screen ${this.host ? 'to this Mac' : 'here'}` : on ? 'Starting…' : 'Shared. Recorded when the recording starts.', 100, true, false, 'screen') : '';
       if (this.ctrl) {
         const me = this.selfStatus ? this.selfStatus() : {};
-        if (this.host && me.producing) rows.push(this.trackRow(s.pid, `${s.name} (you)`, `Producer · not recorded${me.input ? ` · ${me.input}` : ''}`, 100, true, false, false, !!this.onChangeSelf));
-        else if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `${me.input ? `${me.input} · ` : ''}saves straight to this Mac`, 100, true, false, false, !!this.onChangeSelf));
-        else rows.push(this.trackRow(s.pid, `${s.name} (you)`, 'Producer · not recorded', 100, true));
+        if (this.host && me.producing) rows.push(this.trackRow(s.pid, `${s.name} (you)`, `Producer · not recorded${me.input ? ` · ${me.input}` : ''}`, null, true, false, false, !!this.onChangeSelf));
+        else if (this.host) rows.push(this.trackRow(s.pid, `${s.name} (you)`, me.rec ? 'Recording to this Mac' : on ? 'Starting…' : `${me.input ? `${me.input} · ` : ''}saves straight to this Mac`, null, true, false, false, !!this.onChangeSelf));
+        else rows.push(this.trackRow(s.pid, `${s.name} (you)`, 'Producer · not recorded', null, true));
         rows.push(scrRow());
         const onoff = (pid, off) => ib(`js-son${off ? ' warn' : ''}`, 'power', off ? 'Turn it on: seen and recorded' : 'Turn it off: not shown or recorded', pid, `data-on="${off ? 1 : 0}"`);
         for (const x of this.extras) rows.push(this.trackRow(x.pid, x.name, x.off ? 'Off · not recorded' : x.rec ? `Recording ${x.res || ''} to this Mac` : on ? 'Starting…' : `${x.iface ? `${x.iface} · input ${x.ch + 1}` : x.ndi ? `NDI · ${x.ndi}` : x.cam ? `Studio camera${x.audio ? ' + sound' : ''}` : 'Studio mic (sound only)'} · saves straight to this Mac`, x.off ? 0 : 100, true, false, x.cam || x.ndi ? true : 'mic', false, onoff(x.pid, x.off)));
@@ -576,12 +589,12 @@
           if (p.role === 'producer' || p.role === 'host') {
             const hs = p.role === 'host' ? st : {};
             const sub = p.role === 'producer' ? 'Producer · not recorded' : hs.producing ? 'Host computer · not recorded' : `Host · ${hs.rec ? 'recording' : 'records'} on the studio computer${hs.free ? ` · ${this.room(hs)}` : ''}`;
-            rows.push(this.trackRow(p.pid, p.name, sub, 100, !(hs.hours !== undefined && hs.hours < 1), false, false, false, this.acts(p.pid, st))); continue;
+            rows.push(this.trackRow(p.pid, p.name, sub, 100, !(hs.hours !== undefined && hs.hours < 1), false, false, false, this.acts(p.pid, st), true)); continue;
           }
           if (p.screen) rows.push(this.trackRow(`${p.pid}~s`, `${p.name} · screen`, st.scr ? 'Recording their screen' : 'Sharing their screen', 100, true, false, 'screen'));
           const sub = st.err ? st.err : st.rec ? `Recording ${st.res || ''} · ${st.pending ? `${mb(st.bytes)} to upload` : 'uploaded so far'}` : st.pending ? `Uploading · ${mb(st.bytes)} left` : st.sent ? 'All uploaded' : on ? 'Not recording yet' : 'Ready';
           const pct = st.pending ? Math.round(100 * st.sentBytes / Math.max(1, st.sentBytes + st.bytes)) : 100;
-          rows.push(this.trackRow(p.pid, p.name, `${!st.at ? (on ? 'Recording on their computer' : 'Ready') : sub}${st.free ? ` · ${this.room(st)}` : ''}`, pct, !st.pending, true, false, false, this.acts(p.pid, st)));
+          rows.push(this.trackRow(p.pid, p.name, `${!st.at ? (on ? 'Recording on their computer' : 'Ready') : sub}${st.free ? ` · ${this.room(st)}` : ''}`, pct, !st.pending, true, false, false, this.acts(p.pid, st), true));
         }
         const t = s.takes.find((x) => x.id === s.rec.take), ms = $('.js-marksec', this.el);
         ms.hidden = !(on && t && t.marks && t.marks.length);
@@ -598,6 +611,17 @@
       for (const x of el.querySelectorAll('.js-kick')) x.onclick = () => { if (confirm('Remove this person from the session?')) s.kick(x.dataset.p); };
       for (const x of el.querySelectorAll('.js-xrm')) x.onclick = () => this.onRemoveCamera && this.onRemoveCamera(x.dataset.p);
       for (const x of el.querySelectorAll('.js-chg')) x.onclick = () => this.onChangeSelf && this.onChangeSelf();
+      for (const x of el.querySelectorAll('.js-smute')) x.onclick = () => { const a = this.self.stream && this.self.stream.getAudioTracks()[0]; if (a) { a.enabled = !a.enabled; this.mutedBy = ''; this.drawDock(); this.onSelfChange && this.onSelfChange(); this.drawTracks(); } };
+      for (const x of el.querySelectorAll('.js-plv')) {
+        const pid = x.dataset.p, out = x.nextElementSibling, max = this.listenMax ? this.listenMax() : 0;
+        const show = (db) => { out.textContent = db <= -30 ? 'Off' : `${db > 0 ? '+' : ''}${db} dB`; };
+        if (x.max !== String(max)) x.max = String(max);
+        if (document.activeElement !== x) { const db = Math.min(max, this.listenLevel(pid)); x.value = String(db); show(db); }
+        if (!x.oninput) {
+          x.oninput = () => { const db = +x.value; show(db); this.setListen(pid, db); };
+          x.ondblclick = () => { x.value = '0'; x.oninput(); };
+        }
+      }
       for (const x of el.querySelectorAll('.js-ren')) x.onclick = () => this.startRename(x.closest('.trk'));
       for (const x of el.querySelectorAll('.js-pmute')) x.onclick = () => this.mutePeer(x.dataset.p, x.dataset.on === '1');
       for (const x of el.querySelectorAll('.js-ptalk')) x.onclick = () => this.startTalk(x.dataset.p);
@@ -640,12 +664,15 @@
       inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); fin(true); } else if (e.key === 'Escape') fin(false); };
       inp.onblur = () => fin(true);
     }
-    trackRow(pid, name, sub, pct, ok, kick, cam, change, acts) {
-      const busy = this.session.rec && this.session.rec.on;
-      const btns = (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'sliders', 'Change your camera or microphone') : '')
+    trackRow(pid, name, sub, pct, ok, kick, cam, change, acts, lvl) {
+      const busy = this.session.rec && this.session.rec.on, me = pid === this.session.pid;
+      const a = me && this.self.stream && this.self.stream.getAudioTracks()[0];
+      // your own mic: mute here as well as in the dock
+      const mute = a ? (a.enabled ? ib('js-smute', 'mic', 'Mute your mic (recorded silence)') : ib('js-smute warn', 'micoff', 'Unmute your mic')) : '';
+      const btns = mute + (acts || '') + (pid === this.session.pid && !busy ? ib('js-ren', 'pen', 'Change your name') : '') + (change && !busy ? ib('js-chg', 'gear', 'Change your camera or microphone') : '')
         + (kick ? ib('js-kick', 'x', 'Remove them from the session', pid) : '')
         + (cam && cam !== 'screen' && this.host && !busy ? ib('js-xrm', 'x', 'Remove this source', pid) : '');
-      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div></div>`;
+      return `<div class="trk"><span class="av" style="${avStyle(pid)}">${cam ? ico(cam === 'mic' ? 'mic' : cam === 'screen' ? 'screen' : 'cam') : esc(initials(name.replace(/\s*\(you\)$/, '')))}</span><div class="tinfo"><b>${esc(name)}</b><small>${esc(sub)}</small><span class="mtr js-mtr" data-p="${esc(pid)}" hidden><i></i><b></b></span></div>${btns ? `<div class="tbtns">${btns}</div>` : ''}${lvl ? `<label class="tlv" title="How loud they are in what you hear (their recording isn’t changed). Double-click for 0 dB."><span>Level</span><input type="range" class="js-plv" data-p="${esc(pid)}" min="-30" step="1" aria-label="${esc(name)}: level in what you hear"><output class="num"></output></label>` : ''}${pct === null ? '' : `<div class="bar"><i class="${ok ? 'ok' : ''}" style="width:${pct}%"></i></div>`}</div>`;
     }
     drawUploads() {
       const s = this.session, el = $('.js-uploads', this.el), fup = $('.js-fup', this.fsEl);

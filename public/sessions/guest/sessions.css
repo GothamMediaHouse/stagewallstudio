@@ -409,3 +409,8 @@ body:has(.drawer.floating) .fs .fup{display:none}
 .fxmenu b{font-size:13px;padding:2px 8px 6px}.fxmenu small{font-size:11px;padding:6px 8px 0;max-width:220px}
 .fxmenu .fxo{text-align:left;padding:7px 10px;border-radius:8px;font-size:13px;background:none;border:0;color:inherit;cursor:pointer}
 .fxmenu .fxo:hover{background:var(--vsoft)}.fxmenu .fxo.on{background:var(--v);color:#fff}
+/* 2.6.3: a level slider on each person's row (how loud they are in what you hear) */
+.trk .tlv{grid-column:2/-1;display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11.5px;color:var(--mute)}
+.trk .tlv input{flex:1;min-width:0;accent-color:var(--v);height:16px}
+.trk .tlv output{min-width:44px;text-align:right;color:var(--fg);font-weight:600;font-size:11.5px}
+.trk .tbtns .warn{color:var(--red)}
