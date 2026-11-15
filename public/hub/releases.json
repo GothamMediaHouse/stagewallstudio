@@ -1,6 +1,57 @@
 {
- "written": "2026-11-14T13:41:41.711Z",
+ "written": "2026-11-15T01:40:59.877Z",
  "apps": {
+  "studio": {
+   "version": "7.8.3",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.3/Showcaller-Screens-7.8.3-mac-arm64.zip",
+     "sha256": "d0369b9988ad4287f83178915226ac8d8ad3bd1329a3a752a9f20ab7d74554f3",
+     "size": 135776384,
+     "version": "7.8.3"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.2/Showcaller-Screens-7.8.2-win-x64.exe",
+     "sha256": "f205454358cf4abde7ed094f941a10d729a44b97ba1f94905dd3bd32178efb64",
+     "size": 117754225,
+     "version": "7.8.2"
+    }
+   }
+  },
+  "meters": {
+   "version": "1.1.0",
+   "builds": {
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.1.0/Showcaller-Meters-1.1.0-win-x64.exe",
+     "sha256": "349b59033d7737eaf97d03cd97acf01d06051186a08116bd4b0a6fede29b18b1",
+     "size": 156873599,
+     "version": "1.1.0"
+    },
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.1.0/Showcaller-Meters-1.1.0-mac-arm64.zip",
+     "sha256": "7e1cad31c6f7b95e26a31e7f01316708162bdc84ff3d595d4a650bb5cf940cf1",
+     "size": 159510121,
+     "version": "1.1.0"
+    }
+   }
+  },
+  "hub": {
+   "version": "1.15.1",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.15.1/Showcaller-Hub-1.15.1-mac-arm64.zip",
+     "sha256": "f881fe158d615bd18ef146a97547a0e114665eb91fcacddd593c20b057f69f55",
+     "size": 157954570,
+     "version": "1.15.1"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.15.1/Showcaller-Hub-1.15.1-win-x64.exe",
+     "sha256": "ad3041535fec96457ef589f312325d2ded1f0a3412f95df9ad8945a91f688072",
+     "size": 146561136,
+     "version": "1.15.1"
+    }
+   }
+  },
   "testkit": {
    "version": "1.5.0",
    "builds": {
@@ -69,23 +120,6 @@
     }
    }
   },
-  "hub": {
-   "version": "1.15.0",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.15.0/Showcaller-Hub-1.15.0-mac-arm64.zip",
-     "sha256": "cb4a3cbf451c37eb31a4185562b0335db89cc2d3e7ae2511ecbd18080746def9",
-     "size": 157941772,
-     "version": "1.15.0"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/hub-1.15.0/Showcaller-Hub-1.15.0-win-x64.exe",
-     "sha256": "0d016971fefbe0c7f37361692ee31c58225dda6ec0a9df6afa9c26f893e77cf0",
-     "size": 146549338,
-     "version": "1.15.0"
-    }
-   }
-  },
   "ndiwebcam": {
    "version": "1.4.2",
    "builds": {
@@ -128,23 +162,6 @@
      "sha256": "6b66e3ddc7fa9e856ae294fc6d7cda31ccf91273d5e065315665b77a66aae06b",
      "size": 112951079,
      "version": "1.7.14"
-    }
-   }
-  },
-  "studio": {
-   "version": "7.8.2",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.2/Showcaller-Screens-7.8.2-mac-arm64.zip",
-     "sha256": "474fcd93cddc839a32e5d747e3cc3b00c1f2ca2057bdd96e4d8d2186b097e31b",
-     "size": 135773282,
-     "version": "7.8.2"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.2/Showcaller-Screens-7.8.2-win-x64.exe",
-     "sha256": "f205454358cf4abde7ed094f941a10d729a44b97ba1f94905dd3bd32178efb64",
-     "size": 117754225,
-     "version": "7.8.2"
     }
    }
   },
