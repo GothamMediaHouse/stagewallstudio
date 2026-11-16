@@ -1,6 +1,23 @@
 {
- "written": "2026-11-16T17:12:10.513Z",
+ "written": "2026-11-16T17:32:11.394Z",
  "apps": {
+  "meters": {
+   "version": "1.4.2",
+   "builds": {
+    "mac-arm64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.2/Showcaller-Meters-1.4.2-mac-arm64.zip",
+     "sha256": "ba9907f51114cb1b35a45808975c79c97b347bcd5476c526e23bf66c67a09598",
+     "size": 159570669,
+     "version": "1.4.2"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.2/Showcaller-Meters-1.4.2-win-x64.exe",
+     "sha256": "7e329135471f9b9ad08ad08cc5c4351c426deaeefde36219aca69001b11e0b19",
+     "size": 156922332,
+     "version": "1.4.2"
+    }
+   }
+  },
   "studio": {
    "version": "7.8.3",
    "builds": {
@@ -15,23 +32,6 @@
      "sha256": "1a30134a0cf47ce002410f02967d08f0da7b10f4f71e90cca3e2274502e18f11",
      "size": 117756378,
      "version": "7.8.3"
-    }
-   }
-  },
-  "meters": {
-   "version": "1.4.0",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.0/Showcaller-Meters-1.4.0-mac-arm64.zip",
-     "sha256": "da0c757d4b31094d3b96ae76817735a6729acef3a009f5e93dad4832fd5bd279",
-     "size": 159568704,
-     "version": "1.4.0"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.0/Showcaller-Meters-1.4.0-win-x64.exe",
-     "sha256": "514165da3f59e96d3cf5838305c9e35468d1f42b8e5db5a3af83b652b353b6a2",
-     "size": 156920896,
-     "version": "1.4.0"
     }
    }
   },
