@@ -1,5 +1,5 @@
 {
- "written": "2026-11-15T01:52:39.954Z",
+ "written": "2026-11-16T17:12:10.513Z",
  "apps": {
   "studio": {
    "version": "7.8.3",
@@ -19,19 +19,19 @@
    }
   },
   "meters": {
-   "version": "1.1.1",
+   "version": "1.4.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.1.1/Showcaller-Meters-1.1.1-mac-arm64.zip",
-     "sha256": "0abdae6464e7495f1bf293d886dff717cde449e6091a02f78eb394ce7e44099b",
-     "size": 159513044,
-     "version": "1.1.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.0/Showcaller-Meters-1.4.0-mac-arm64.zip",
+     "sha256": "da0c757d4b31094d3b96ae76817735a6729acef3a009f5e93dad4832fd5bd279",
+     "size": 159568704,
+     "version": "1.4.0"
     },
     "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.1.1/Showcaller-Meters-1.1.1-win-x64.exe",
-     "sha256": "8deca15a6864631e3fea4f44d4813cbfba7b0bda74b833309e41bf3dd7f76852",
-     "size": 156876775,
-     "version": "1.1.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/meters-1.4.0/Showcaller-Meters-1.4.0-win-x64.exe",
+     "sha256": "514165da3f59e96d3cf5838305c9e35468d1f42b8e5db5a3af83b652b353b6a2",
+     "size": 156920896,
+     "version": "1.4.0"
     }
    }
   },
@@ -285,17 +285,6 @@
      "sha256": "371a504f6461cb44b72986dc5d41659d0473578cbf93833b44e0511c48240ba0",
      "size": 157607239,
      "version": "0.4.2"
-    }
-   }
-  },
-  "helios-hub": {
-   "version": "1.0.2",
-   "builds": {
-    "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/helios-hub-1.0.2/Showcaller-Helios-Hub-1.0.2-mac-arm64.zip",
-     "sha256": "4bd08efe39ec8830bd68d49bebdfef235bef2badacd3ba1cd0758752bea85661",
-     "size": 131362097,
-     "version": "1.0.2"
     }
    }
   }
