@@ -1,14 +1,14 @@
 {
- "written": "2026-11-16T23:07:20.440Z",
+ "written": "2026-11-17T20:58:07.638Z",
  "apps": {
   "intercom": {
-   "version": "3.18.0",
+   "version": "3.19.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.18.0/Showcaller-Helios-Remote-3.18.0-mac-arm64.zip",
-     "sha256": "25a1983491ecfd4a7dc9d382c597b4da87491e120e662841ee06cda61140a80f",
-     "size": 130220220,
-     "version": "3.18.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.19.0/Showcaller-Helios-Remote-3.19.0-mac-arm64.zip",
+     "sha256": "b4a22f935658219b789828f4b223b80963fec583eb986948a1bb8f8ba9d32a23",
+     "size": 130223125,
+     "version": "3.19.0"
     }
    }
   },
@@ -47,35 +47,35 @@
    }
   },
   "intercom-panel": {
-   "version": "3.18.0",
+   "version": "3.19.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-panel-3.18.0/Showcaller-Helios-Panel-3.18.0-mac-arm64.zip",
-     "sha256": "82da905c6ab0c7ec5aa96d787d19e7eb65c313354093c294452de6199db74d98",
-     "size": 129181041,
-     "version": "3.18.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-panel-3.19.0/Showcaller-Helios-Panel-3.19.0-mac-arm64.zip",
+     "sha256": "77389517f3f9f514d2aaae9b1f0769d44406865a65d8c83135940501262788b5",
+     "size": 129179161,
+     "version": "3.19.0"
     }
    }
   },
   "intercom-frame": {
-   "version": "3.18.0",
+   "version": "3.19.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-frame-3.18.0/Showcaller-Helios-Frame-3.18.0-mac-arm64.zip",
-     "sha256": "aa9ecabb01eb59cfd33abb58b87432259960899f8223d4384abfedfad80975e3",
-     "size": 130221636,
-     "version": "3.18.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-frame-3.19.0/Showcaller-Helios-Frame-3.19.0-mac-arm64.zip",
+     "sha256": "1c5e1842505a4aca6ba8f8ea880e4da27732e92f4986c128ff97107c120b5795",
+     "size": 130224483,
+     "version": "3.19.0"
     }
    }
   },
   "intercom-comms": {
-   "version": "3.18.0",
+   "version": "3.19.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-comms-3.18.0/Showcaller-Helios-Comms-Control-3.18.0-mac-arm64.zip",
-     "sha256": "00ce36408f474df8831b455caaa5af4ec795080bf14501a1028c1bd859a98065",
-     "size": 129209852,
-     "version": "3.18.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-comms-3.19.0/Showcaller-Helios-Comms-Control-3.19.0-mac-arm64.zip",
+     "sha256": "196f989c19090dd4d0c9ee9f0e2065306cba9d7b26cd1d177dc8e57c6bda977c",
+     "size": 129208104,
+     "version": "3.19.0"
     }
    }
   },
