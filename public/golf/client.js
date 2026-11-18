@@ -10,11 +10,11 @@ export async function post(op, body) {
 }
 
 // calls onState(state) now and after every change; onLink(true/false) when the live link comes and goes
-export function live(onState, onLink = () => {}) {
+export function live(onState, onLink = () => {}, opts = {}) {
   let ws, tries = 0, ping, stopped = false;
   const open = () => {
     if (stopped) return;
-    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${api('ws')}`);
+    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${api('ws')}${opts.screen ? `?screen=${encodeURIComponent(opts.screen)}` : ''}`);
     ws.onopen = () => { tries = 0; onLink(true); clearInterval(ping); ping = setInterval(() => { try { ws.send('ping'); } catch {} }, 25000); };
     ws.onmessage = (e) => { if (e.data === 'pong') return; try { const m = JSON.parse(e.data); if (m.t === 'state') onState(m.s); } catch {} };
     ws.onclose = () => { onLink(false); clearInterval(ping); setTimeout(open, Math.min(15000, 1000 * 2 ** tries++)); };

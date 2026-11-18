@@ -91,11 +91,32 @@ footer .run span { display: inline-block; padding-left: 100%; animation: tick 40
 .take small { display: block; font-size: 1.6vw; color: var(--dim); margin-top: 1vw; }
 .take.msg h2 { font-size: 6vw; color: var(--txt); text-transform: none; }
 .empty { display: grid; place-items: center; height: 100%; text-align: center; color: var(--dim); font-size: 1.8vw; }
+/* sponsor spots */
+header .tsp { font-family: var(--f-mono); font-size: 1vw; color: #a9bdb0; letter-spacing: .06em; white-space: nowrap; display: flex; align-items: center; gap: .6vw; }
+header .tsp img { height: 2.6vw; width: auto; max-width: 12vw; object-fit: contain; }
+header .tsp b { color: var(--txt); font-weight: 600; }
+.lbsp { position: absolute; right: 2.4vw; top: 1.8vw; display: flex; align-items: center; gap: .8vw; font-family: var(--f-mono); font-size: .95vw; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+.lbsp img { height: 3vw; max-width: 14vw; object-fit: contain; }
+.lbsp b { color: var(--txt); font-family: var(--f-body); text-transform: none; letter-spacing: 0; font-size: 1.2vw; }
+.cam .bug { position: absolute; right: 1vw; top: 1vw; z-index: 2; display: flex; align-items: center; gap: .5vw; background: rgba(7,16,12,.72); color: var(--flag); font-family: var(--f-mono); font-size: .8vw; letter-spacing: .08em; padding: .3vw .6vw; border-radius: .3vw; }
+.cam .bug img { height: 1.8vw; max-width: 8vw; object-fit: contain; }
+.spone { display: grid; place-items: center; height: 100%; text-align: center; }
+.spone .sub { margin-bottom: 1.4vw; }
+.spone img { max-width: 50vw; max-height: 22vw; object-fit: contain; }
+.spone b { display: block; font-family: var(--f-display); font-weight: 800; font-size: 7vw; text-transform: uppercase; line-height: .9; }
+.spone p { font-size: 2vw; color: var(--dim); margin: 1.4vw 0 0; }
+.tier { font-family: var(--f-mono); font-size: .95vw; letter-spacing: .14em; text-transform: uppercase; color: var(--flag); margin: 1.6vw 0 -.8vw; }
+.sched { margin-top: 2vw; display: grid; gap: .8vw; max-width: 70vw; }
+.sched div { display: grid; grid-template-columns: 14vw 1fr; gap: 2vw; align-items: baseline; background: var(--panel); border: 1px solid var(--rule); border-radius: .5vw; padding: 1.2vw 1.6vw; font-size: 2.2vw; font-weight: 600; }
+.sched time { font-family: var(--f-mono); color: var(--flag); font-size: 1.8vw; }
+.take .tsponsor { margin-top: 2vw; font-family: var(--f-mono); font-size: 1.2vw; letter-spacing: .14em; color: var(--dim); text-transform: uppercase; display: grid; justify-items: center; gap: .8vw; }
+.take .tsponsor img { max-height: 6vw; max-width: 24vw; object-fit: contain; }
+.take .tsponsor b { font-family: var(--f-body); font-size: 2vw; color: var(--txt); text-transform: none; letter-spacing: 0; }
 </style>
 </head>
 <body>
 <div class="frame">
-  <header><h1 id="title">Leaderboard</h1><div class="right"><span id="clock"></span><span class="pill live pulse" id="livepill">LIVE</span></div></header>
+  <header><h1 id="title">Leaderboard</h1><div class="tsp" id="tsp" hidden></div><div class="right"><span id="clock"></span><span class="pill live pulse" id="livepill">LIVE</span></div></header>
   <div class="stage" id="stage"><div class="empty">Loading the tournament…</div></div>
   <footer><span class="tag" id="tickTag">UPDATE</span><div class="run"><span id="ticker"></span></div><img class="brandlogo" src="/golf/brand/wide-on-dark.svg" alt="Sunday Pin"></footer>
 </div>
@@ -103,18 +124,51 @@ footer .run span { display: inline-block; padding-left: 100%; animation: tick 40
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
 <script type="module">
 import { leaderboard, holeStats, fmtPar, contestLeader, fmtDist, skins, FORMATS } from '/golf/core.js';
-import { live, esc } from '/golf/client.js';
+import { live, esc, post } from '/golf/client.js';
 
+// ?screen=grill (a screen from the Manager, with its own playlist)
 // ?show=leaderboard,par3,contests,skins,sponsors,fund  ?hole=7 (one par 3 only, e.g. a TV at that tee)  ?flight=A  ?mode=gross
 const q = new URLSearchParams(location.search);
 const only = (q.get('show') || '').split(',').filter(Boolean);
 const lockHole = Number(q.get('hole')) || 0;
-let S = null, curEl = null, slides = [], idx = -1, timer = null, lastPos = {}, moved = new Set(), seenAces = null, seenFlash = null, recent = [];
+// ?screen=<id>: this is one of the club's screens set up in the Manager; it plays that screen's playlist
+const screenId = (q.get('screen') || '').toLowerCase();
+let S = null, curEl = null, slides = [], idx = -1, timer = null, lastPos = {}, moved = new Set(), seenAces = null, seenFlash = null, seenTake = null, recent = [], forced = '';
 const $ = (id) => document.getElementById(id);
 
 setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }, 1000);
 
+const spot = (k, hole) => (S.sponsors || []).filter((x) => x.spot === k && (!hole || x.holes.includes(hole)));
+const spName = (x, cls = '') => x.logo ? `<img src="${esc(x.logo)}" alt="${esc(x.name)}"${cls}>` : `<b>${esc(x.name)}</b>`;
+const display = () => (S.displays || []).find((d) => d.id === screenId);
+
+// one playlist entry → the slides it makes (a leaderboard can be several pages)
+function pageSlides(it) {
+  const stab = S.format.type === 'stableford', rows = S.screens?.rows || 10, secs = it.secs;
+  if (it.k === 'lb') {
+    const lb = leaderboard(S, S.scores, { flight: it.fl || null, mode: q.get('mode') || undefined });
+    if (!lb.length) return [];
+    const pages = Math.max(1, Math.ceil(lb.length / rows)), out = [];
+    for (let p = 0; p < Math.min(pages, 4); p++) out.push({ k: 'lb', fl: it.fl || null, lb: lb.slice(p * rows, p * rows + rows), p, pages, stab, secs });
+    return out;
+  }
+  if (it.k === 'p3') { const h = S.course.holes.find((x) => x.n === it.hole) || S.course.holes.find((x) => x.par === 3); return h ? [{ k: 'p3', h, secs }] : []; }
+  if (it.k === 'sponsor') { const sp = (S.sponsors || []).find((x) => x.id === it.sponsor); return sp ? [{ k: 'sponsor', sp, secs }] : []; }
+  if (it.k === 'fund' && !S.fund?.on) return [];
+  if (it.k === 'skins' && !S.screens?.skins) return [];
+  if (it.k === 'sponsors' && !(S.sponsors || []).length) return [];
+  if (it.k === 'schedule' && !(S.schedule || []).length) return [];
+  if (it.k === 'contests' && !(S.contests || []).length) return [];
+  return [{ k: it.k, secs }];
+}
+
 function build() {
+  // a pro or the Manager switched this screen to one page
+  const f = screenId && S.live?.force?.[screenId];
+  forced = f ? `${f.k}|${f.at}` : '';
+  if (f) { const one = pageSlides({ ...f, secs: 3600 }); if (one.length) return one; }
+  const d = display();
+  if (d && d.playlist.length) { const out = d.playlist.flatMap(pageSlides); if (out.length) return out; }
   const out = [], want = (k) => !only.length || only.includes(k);
   const stab = S.format.type === 'stableford', flights = q.get('flight') ? [q.get('flight')] : (S.flights.length > 1 ? S.flights : [null]);
   const rows = S.screens?.rows || 10;
@@ -130,13 +184,14 @@ function build() {
   if (want('skins') && S.screens?.skins && !lockHole) out.push({ k: 'skins' });
   if (want('fund') && S.fund?.on && !lockHole) out.push({ k: 'fund' });
   if (want('sponsors') && S.sponsors.length && !lockHole) out.push({ k: 'sponsors' });
+  for (const sp of spot('slide')) if (want('sponsors') && !lockHole) out.push({ k: 'sponsor', sp });
   return out.length ? out : [{ k: 'empty' }];
 }
 
 function lbSlide(s) {
   const fname = s.fl ? `Flight ${esc(s.fl)}` : esc(FORMATS[S.format.type] || '');
   return `<div class="sub">${fname} · ${S.format.type === 'stableford' ? 'Points' : (q.get('mode') || S.format.show) === 'gross' ? 'Gross' : 'Net'}${S.locked ? ' · Final results' : ''}</div><h2>Leaderboard</h2>
-  ${s.pages > 1 ? `<div class="page">Page ${s.p + 1} of ${Math.min(s.pages, 4)}</div>` : ''}
+  ${spot('leaderboard')[0] ? `<div class="lbsp">Presented by ${spName(spot('leaderboard')[0])}</div>` : s.pages > 1 ? `<div class="page">Page ${s.p + 1} of ${Math.min(s.pages, 4)}</div>` : ''}
   <table class="lb"><thead><tr><th>Pos</th><th>${S.format.type === 'stroke' ? 'Player' : 'Team'}</th>${S.flights.length > 1 && !s.fl ? '<th class="fl">Flt</th>' : ''}<th class="num">${s.stab ? 'Points' : 'To par'}</th><th class="num">Thru</th></tr></thead>
   <tbody>${s.lb.map((l) => `<tr class="${moved.has(l.key) ? 'moved' : ''}"><td class="pos">${esc(l.pos)}</td><td class="name">${esc(l.name)}${l.sub && l.sub !== l.name ? `<small>${esc(l.sub)}</small>` : ''}</td>${S.flights.length > 1 && !s.fl ? `<td class="fl">${esc(l.flight)}</td>` : ''}
   <td class="num tp ${!s.stab && l.score < 0 && l.played ? 'under' : ''}">${l.played ? fmtPar(l.score, s.stab).replace(' pts', '') : '—'}</td><td class="num">${esc(l.thru.replace('Starts ', '#'))}</td></tr>`).join('')}</tbody></table>`;
@@ -149,6 +204,10 @@ function holeArt(h) {
 }
 
 function camHtml(url, n) {
+  const cs = spot('cam', n)[0], bug = cs ? `<span class="bug">CAM BY ${cs.logo ? `<img src="${esc(cs.logo)}" alt="${esc(cs.name)}">` : esc(cs.name).toUpperCase()}</span>` : '';
+  return camInner(url, n) + bug;
+}
+function camInner(url, n) {
   if (!url) return `${holeArt()}<span class="tag">HOLE ${n}</span>`;
   if (/\.m3u8(\?|$)/.test(url)) return `<video muted playsinline autoplay data-hls="${esc(url)}"></video><span class="tag">LIVE · HOLE ${n}</span>`;
   return `<iframe src="${esc(url)}" allow="autoplay; fullscreen" title="Hole ${n} camera"></iframe><span class="tag">LIVE · HOLE ${n}</span>`;
@@ -156,12 +215,12 @@ function camHtml(url, n) {
 
 function p3Slide(s) {
   const h = s.h, st = holeStats(S, S.scores, h.n);
-  const sp = S.sponsors.find((x) => x.holes.includes(h.n));
+  const sp = spot('hole', h.n)[0] || S.sponsors.find((x) => !x.spot && x.holes.includes(h.n));
   const cs = S.contests.filter((c) => c.hole === h.n);
   return `<div class="p3"><div class="cam">${camHtml(S.cams[h.n], h.n)}</div>
   <div class="p3info"><div><div class="sub">Par 3</div><div class="bignum">Hole ${h.n}</div><div class="facts">${h.yds ? `<b>${h.yds}</b> yds · ` : ''}Par <b>3</b> · SI ${h.hcp}${st.avg ? ` · Avg <b>${st.avg.toFixed(2)}</b>` : ''}</div></div>
   ${sp ? `<div class="presented">Presented by <b>${esc(sp.name)}</b>${sp.line ? `<br>${esc(sp.line)}` : ''}</div>` : ''}
-  ${cs.map((c) => { const l = contestLeader(c).slice(0, 3); return `<div class="box"><h3>${c.kind === 'ld' ? 'Long drive' : 'Closest to the pin'}${c.sponsor ? ` · ${esc(c.sponsor)}` : ''}</h3><div class="rows">${l.length ? l.map((e, i) => `<div><span>${i + 1}. ${esc(e.name)}</span><span>${fmtDist(c, e.dist)}</span></div>`).join('') : '<div><span>No one on the board yet</span><span></span></div>'}</div></div>`; }).join('')}
+  ${cs.map((c) => { const l = contestLeader(c).slice(0, 3), csp = c.sponsor || spot('contest', h.n)[0]?.name; return `<div class="box"><h3>${c.kind === 'ld' ? 'Long drive' : 'Closest to the pin'}${csp ? ` · ${esc(csp)}` : ''}</h3><div class="rows">${l.length ? l.map((e, i) => `<div><span>${i + 1}. ${esc(e.name)}</span><span>${fmtDist(c, e.dist)}</span></div>`).join('') : '<div><span>No one on the board yet</span><span></span></div>'}</div></div>`; }).join('')}
   <div class="box stats"><div><b>${st.aces.length}</b><span>Aces</span></div><div><b>${st.birdie + st.eagle - st.aces.length}</b><span>Birdies</span></div><div><b>${st.par0}</b><span>Pars</span></div><div><b>${st.bogey + st.worse}</b><span>Over</span></div></div>
   </div></div>`;
 }
@@ -182,8 +241,21 @@ function fundSlide() {
   ${f.goal ? `<div class="bar"><i style="width:${pct}%"></i></div><p>${pct}% of our $${Math.round(f.goal).toLocaleString()} goal${f.give ? ` · Give at ${esc(f.give.replace(/^https:\/\//, ''))}` : ''}</p>` : ''}</div></div>`;
 }
 
+const SPOT_NAMES = { title: 'Title sponsor', leaderboard: 'Leaderboard', cam: 'Par 3 cameras', contest: 'Contests', turn: 'The turn', ace: 'Hole in one', slide: '', hole: '' };
 function sponsorsSlide() {
-  return `<div class="sub">Thank you</div><h2>Our sponsors</h2><div class="sponsors">${S.sponsors.map((s) => `<div class="sp"><div>${s.logo ? `<img src="${esc(s.logo)}" alt="${esc(s.name)}">` : `<b>${esc(s.name)}</b>`}${s.holes.length ? `<small>Hole ${s.holes.join(', ')}</small>` : ''}</div></div>`).join('')}</div>`;
+  const card = (x) => `<div class="sp"><div>${spName(x)}<small>${x.spot === 'hole' && x.holes.length ? `Hole ${x.holes.join(', ')}` : esc(SPOT_NAMES[x.spot] || '')}</small></div></div>`;
+  const title = spot('title'), gold = S.sponsors.filter((x) => ['leaderboard', 'cam', 'contest', 'turn', 'ace'].includes(x.spot)), rest = S.sponsors.filter((x) => !['title', 'leaderboard', 'cam', 'contest', 'turn', 'ace'].includes(x.spot));
+  return `<div class="sub">Thank you</div><h2>Our sponsors</h2>
+  ${title.length ? `<div class="sponsors">${title.map(card).join('')}</div>` : ''}
+  ${gold.length ? `<div class="sponsors">${gold.map(card).join('')}</div>` : ''}
+  ${rest.length ? `<div class="sponsors">${rest.map(card).join('')}</div>` : ''}`;
+}
+function sponsorSlide(s) {
+  const x = s.sp;
+  return `<div class="spone"><div><div class="sub">${esc(SPOT_NAMES[x.spot] ? `${SPOT_NAMES[x.spot]} sponsor` : 'Thank you to our sponsor')}</div>${x.logo ? `<img src="${esc(x.logo)}" alt="${esc(x.name)}"><p>${esc(x.line || x.name)}</p>` : `<b>${esc(x.name)}</b>${x.line ? `<p>${esc(x.line)}</p>` : ''}`}</div></div>`;
+}
+function scheduleSlide() {
+  return `<div class="sub">${esc(S.name)}</div><h2>Today</h2><div class="sched">${(S.schedule || []).map((x) => `<div><time>${esc(x.time)}</time><span>${esc(x.what)}</span></div>`).join('')}</div>`;
 }
 
 function draw(s) {
@@ -193,6 +265,8 @@ function draw(s) {
   if (s.k === 'skins') return skinsSlide();
   if (s.k === 'fund') return fundSlide();
   if (s.k === 'sponsors') return sponsorsSlide();
+  if (s.k === 'sponsor') return sponsorSlide(s);
+  if (s.k === 'schedule') return scheduleSlide();
   return `<div class="empty">The leaderboard shows here as soon as the first scores come in.</div>`;
 }
 
@@ -204,7 +278,7 @@ function startVideo(root) {
   }
 }
 
-const sig = (s) => `${s.k}|${s.h ? s.h.n : ''}|${s.fl || ''}|${s.p || 0}`;
+const sig = (s) => `${s.k}|${s.h ? s.h.n : ''}|${s.fl || ''}|${s.p || 0}|${s.sp ? s.sp.id : ''}`;
 
 function show(next) {
   const stage = $('stage');
@@ -227,7 +301,8 @@ function advance() {
   clearTimeout(timer);
   slides = build();
   show((idx + 1) % slides.length);
-  timer = setTimeout(advance, (S.screens?.seconds || 12) * 1000 * (slides[idx].k === 'p3' ? 1.5 : 1));
+  const cur = slides[idx];
+  timer = setTimeout(advance, cur.secs ? cur.secs * 1000 : (S.screens?.seconds || 12) * 1000 * (cur.k === 'p3' ? 1.5 : 1));
 }
 
 // keep the slide on screen up to date without moving to the next one (scores change all the time)
@@ -277,10 +352,61 @@ function onState(s) {
     if (!lockHole || lockHole === a.hole) takeover(`<div><div class="k">HOLE ${a.hole}</div><h2>Hole in one!</h2><p>${esc(a.name)}</p><small>${esc(a.team)}</small></div>`, '', 25000); }
   if (seenFlash === null) seenFlash = s.flash?.at || 0;
   if (s.flash && s.flash.at > seenFlash) { seenFlash = s.flash.at; takeover(`<div><div class="k">ANNOUNCEMENT</div><h2>${esc(s.flash.text)}</h2></div>`, 'msg', 20000); }
-  if (first) advance(); else refresh();
+  // a take-over sent from the Golf pro app or the Manager
+  const tk = s.live?.take;
+  if (seenTake === null) seenTake = tk?.at || 0;
+  if (tk && tk.at > seenTake) { seenTake = tk.at; showTake(tk); }
+  if (!tk && !$('take').hidden && $('take').dataset.from === 'live') $('take').hidden = true;
+  // title sponsor in the header
+  const ts = spot('title')[0], tspEl = $('tsp');
+  tspEl.hidden = !ts; tspEl.innerHTML = ts ? `PRESENTED BY ${spName(ts)}` : '';
+  if (ts) seen(ts.id);
+  const wasForced = forced;
+  if (first) advance(); else { slides = build(); if (forced !== wasForced) { idx = -1; advance(); } else refresh(); }
 }
 
-live(onState, (on) => { const p = $('livepill'); p.textContent = on ? 'LIVE' : 'RECONNECTING'; p.className = `pill ${on ? 'live pulse' : 'off'}`; });
+function showTake(tk) {
+  const sp = (S.sponsors || []).find((x) => x.id === tk.sponsor);
+  const spHtml = (x, label) => x ? `<div class="tsponsor">${label}${spName(x)}</div>` : '';
+  let html = '';
+  if (tk.kind === 'ace') {
+    const a = (S.aces || []).slice(-1)[0], aceSp = sp || spot('ace', a?.hole)[0] || spot('ace')[0];
+    html = `<div>${a ? `<div class="k">HOLE ${a.hole}</div>` : ''}<h2>Hole in one!</h2>${a ? `<p>${esc(a.name)}</p><small>${esc(a.team)}</small>` : (tk.text ? `<p>${esc(tk.text)}</p>` : '')}${spHtml(aceSp, 'Ace presented by')}</div>`;
+    if (aceSp) seen(aceSp.id);
+  } else if (tk.kind === 'sponsor' && sp) {
+    html = `<div><div class="k">OUR SPONSOR</div>${sp.logo ? `<div class="tsponsor" style="margin-top:0">${spName(sp)}</div>` : `<h2>${esc(sp.name)}</h2>`}${sp.line ? `<p>${esc(sp.line)}</p>` : ''}${tk.text ? `<small>${esc(tk.text)}</small>` : ''}</div>`;
+    seen(sp.id);
+  } else html = `<div><div class="k">ANNOUNCEMENT</div><h2>${esc(tk.text || '')}</h2>${spHtml(sp, 'Brought to you by')}</div>`;
+  takeover(html, tk.kind === 'ace' ? '' : 'msg', (tk.secs || 25) * 1000);
+  $('take').dataset.from = 'live';
+}
+
+// sponsor screen time: count seconds each sponsor is on this screen, send once a minute
+const spSecs = {}, spViews = new Set();
+function seen(id) { if (id) spViews.add(id); }
+setInterval(() => {
+  if (!S || document.hidden) return;
+  const ids = new Set(spViews);
+  const cur = slides[idx];
+  if (cur) {
+    if (cur.k === 'sponsor' && cur.sp) ids.add(cur.sp.id);
+    if (cur.k === 'sponsors') (S.sponsors || []).forEach((x) => ids.add(x.id));
+    if (cur.k === 'lb') spot('leaderboard').forEach((x) => ids.add(x.id));
+    if (cur.k === 'p3') { spot('hole', cur.h.n).forEach((x) => ids.add(x.id)); spot('cam', cur.h.n).forEach((x) => ids.add(x.id)); }
+  }
+  spot('title').forEach((x) => ids.add(x.id));
+  if (!$('take').hidden) { const tk = S.live?.take; if (tk?.sponsor) ids.add(tk.sponsor); }
+  for (const id of ids) spSecs[id] = (spSecs[id] || 0) + 5;
+  spViews.clear();
+}, 5000);
+setInterval(() => {
+  const list = Object.entries(spSecs).filter(([, n]) => n > 0).map(([s, n]) => ({ s, k: 'secs', n }));
+  if (!list.length) return;
+  for (const k of Object.keys(spSecs)) delete spSecs[k];
+  post('hit', { list }).catch(() => {});
+}, 60000);
+
+live(onState, (on) => { const p = $('livepill'); p.textContent = on ? 'LIVE' : 'RECONNECTING'; p.className = `pill ${on ? 'live pulse' : 'off'}`; }, { screen: screenId });
 </script>
 </body>
 </html>
