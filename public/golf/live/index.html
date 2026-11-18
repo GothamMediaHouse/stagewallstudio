@@ -75,6 +75,8 @@ main { max-width: 720px; margin: 0 auto; padding: 14px max(16px, env(safe-area-i
 <script type="module">
 import { leaderboard, fmtPar, holeStats, contestLeader, fmtDist, skins, mark, FORMATS } from '/golf/core.js';
 import { live, esc } from '/golf/client.js';
+import { appBar, remember } from '/golf/appbar.js';
+appBar('live');
 
 let S = null, view = location.hash.startsWith('#hole-') ? 'p3' : 'lb', flight = '', openRow = null;
 const $ = (id) => document.getElementById(id);
@@ -160,7 +162,7 @@ document.addEventListener('click', (e) => {
   const r = e.target.closest('tr.r'); if (r) { openRow = openRow === r.dataset.k ? null : r.dataset.k; render(); }
 });
 
-live((s) => { const had = !!S; S = s; render(had); }, (on) => { $('pill').textContent = on ? 'LIVE' : 'RECONNECTING'; $('pill').className = `pill ${on ? 'live pulse' : 'off'}`; });
+live((s) => { const had = !!S; S = s; remember(s.name); render(had); }, (on) => { $('pill').textContent = on ? 'LIVE' : 'RECONNECTING'; $('pill').className = `pill ${on ? 'live pulse' : 'off'}`; });
 </script>
 </body>
 </html>
