@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>Flagcast Manager</title>
+<style>
+:root { --paper: #f2f4ef; --paper-2: #e6eae1; --card: #fff; --ink: #14201a; --muted: #56625a; --line: #d3dacf; --green: #123628; --green-2: #1c4a37; --on-green: #eef3ec; --on-green-muted: #a9bdb0; --flag: #e8c547; --red: #c8312b; }
+@media (prefers-color-scheme: dark) { :root { --paper: #0f1713; --paper-2: #16211b; --card: #17231d; --ink: #e7ece5; --muted: #9aa89f; --line: #2a3830; --green: #0b2219; --green-2: #143829; --flag: #f0cf55; --red: #f06a5e; color-scheme: dark; } }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { background: var(--green); color: var(--on-green); padding: 26px 32px 22px; display: flex; justify-content: space-between; align-items: center; gap: 20px; -webkit-app-region: drag; }
+header img { height: 46px; }
+header .sub { color: var(--on-green-muted); font-size: .85rem; margin-top: 4px; }
+header button { -webkit-app-region: no-drag; }
+main { max-width: 1060px; margin: 0 auto; padding: 26px 32px 60px; display: grid; grid-template-columns: 1fr 330px; gap: 24px; align-items: start; }
+h2 { font: 700 1.05rem system-ui; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: 8px 14px; font: 600 .9rem system-ui; cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--flag); border-color: var(--flag); color: #1a1a10; }
+.btn.dark { background: var(--green-2); border-color: var(--green-2); color: var(--on-green); }
+.btn.danger { color: var(--red); }
+.btn:disabled { opacity: .5; cursor: default; }
+.ev { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; display: grid; gap: 10px; }
+.ev .top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.ev b { font-size: 1.15rem; }
+.ev .meta { color: var(--muted); font-size: .85rem; }
+.ev .code { font-family: ui-monospace, Menlo, monospace; letter-spacing: .1em; font-size: .85rem; color: var(--muted); }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+label { display: grid; gap: 4px; font-size: .82rem; color: var(--muted); margin-bottom: 10px; }
+input, select { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
+.err { color: var(--red); font-size: .85rem; margin-top: 6px; }
+.help { color: var(--muted); font-size: .84rem; margin: 0 0 10px; }
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 12px; }
+.screens { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.screens .row { display: grid; grid-template-columns: 1fr 220px auto; gap: 8px; align-items: center; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 8px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div><img src="logo.svg" alt="Flagcast"><div class="sub">Manager · set up and run your tournaments</div></div>
+  <button class="btn" id="settingsBtn" title="Server">Settings</button>
+</header>
+<main>
+  <section>
+    <h2>Tournaments</h2>
+    <div id="list"></div>
+  </section>
+  <aside>
+    <div class="box">
+      <h2>New tournament</h2>
+      <form id="newForm">
+        <label>Tournament name<input id="nName" required placeholder="Member-Guest 2027"></label>
+        <label>Passcode<input id="nPass" type="password" autocomplete="off" placeholder="From Flagcast"></label>
+        <button class="btn primary" style="width:100%">Make tournament</button>
+        <div class="err" id="nErr" hidden></div>
+      </form>
+    </div>
+    <div class="box">
+      <h2>Add one you already have</h2>
+      <p class="help">Paste its desk link. It ends in a long key after a # sign.</p>
+      <form id="addForm"><input id="aLink" placeholder="https://flagcast.app/g/…/desk#…"><button class="btn" style="width:100%;margin-top:8px">Add</button><div class="err" id="aErr" hidden></div></form>
+    </div>
+    <div class="box" id="settings" hidden>
+      <h2>Server</h2>
+      <p class="help">Leave this as flagcast.app unless Flagcast support asks you to change it.</p>
+      <form id="baseForm"><input id="base"><button class="btn" style="width:100%;margin-top:8px">Save</button><div class="err" id="bErr" hidden></div></form>
+    </div>
+  </aside>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const msg = (e) => String(e && e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '');
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), 3000); }
+let monitors = [];
+
+async function draw() {
+  const { base, events } = await gl.list();
+  $('base').value = base;
+  monitors = await gl.monitors();
+  $('list').innerHTML = events.length ? events.map((e) => `<div class="ev" data-id="${e.id}">
+    <div class="top"><div><b>${esc(e.name)}</b><div class="meta" data-meta>${esc([e.club, e.date].filter(Boolean).join(' · '))}</div></div><span class="code">${e.id.toUpperCase()}</span></div>
+    <div class="acts"><button class="btn dark" data-desk>Open desk</button><button class="btn" data-screensbtn>Show screens on this computer</button><button class="btn" data-live>Live leaderboard</button><span style="flex:1"></span><button class="btn danger" data-remove>Remove from list</button></div>
+    <div class="screens" data-screens hidden></div></div>`).join('') : '<div class="empty">No tournaments yet. Make one on the right.</div>';
+  for (const e of events) gl.info(e.id).then((i) => { const el = document.querySelector(`[data-id="${e.id}"] [data-meta]`); if (el) el.textContent = [i.club, i.date, `${i.teams} teams`, i.locked ? 'results final' : ''].filter(Boolean).join(' · '); const b = document.querySelector(`[data-id="${e.id}"] b`); if (b) b.textContent = i.name; }).catch(() => {});
+}
+
+$('list').addEventListener('click', async (ev) => {
+  const b = ev.target.closest('button'); if (!b) return;
+  const box = b.closest('[data-id]'), id = box.dataset.id;
+  if (b.hasAttribute('data-desk')) gl.openDesk(id);
+  if (b.hasAttribute('data-live')) gl.openLive(id);
+  if (b.hasAttribute('data-remove')) {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Remove? Keep the desk link first'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Remove from list'; }, 4000); return; }
+    await gl.remove(id); draw();
+  }
+  if (b.hasAttribute('data-screensbtn')) {
+    const s = box.querySelector('[data-screens]');
+    if (!s.hidden) { s.hidden = true; return; }
+    s.hidden = false; s.innerHTML = '<span class="help">Loading…</span>';
+    try {
+      const i = await gl.info(id);
+      const opts = monitors.map((m) => `<option value="${m.id}" ${m.primary ? '' : 'selected'}>${esc(m.label)} (${m.w}×${m.h})${m.primary ? ' · main' : ''}</option>`).join('');
+      const list = [{ id: '', name: 'Everything (no playlist)' }, ...i.displays];
+      s.innerHTML = `<p class="help" style="margin:0">Pick a screen and the monitor it’s plugged into. Press Esc on that monitor to close it.</p>` + list.map((d) => `<div class="row"><span>${esc(d.name)}</span><select data-mon>${opts}</select><button class="btn primary" data-open="${esc(d.id)}">Show</button></div>`).join('');
+    } catch (e) { s.innerHTML = `<span class="err">${esc(msg(e))}</span>`; }
+  }
+  if (b.dataset.open !== undefined) {
+    const mon = Number(b.parentElement.querySelector('[data-mon]').value);
+    await gl.openScreen({ id, screenId: b.dataset.open, monitor: mon }); toast('Showing on that monitor.');
+  }
+});
+
+$('newForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); $('nErr').hidden = true;
+  try { const ev = await gl.create({ name: $('nName').value.trim(), pass: $('nPass').value }); $('nName').value = ''; await draw(); gl.openDesk(ev.id); }
+  catch (x) { $('nErr').textContent = msg(x); $('nErr').hidden = false; }
+});
+$('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); $('aErr').hidden = true;
+  try { await gl.add($('aLink').value); $('aLink').value = ''; draw(); toast('Added.'); }
+  catch (x) { $('aErr').textContent = msg(x); $('aErr').hidden = false; }
+});
+$('settingsBtn').onclick = () => { $('settings').hidden = !$('settings').hidden; };
+$('baseForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); $('bErr').hidden = true;
+  try { await gl.setBase($('base').value); draw(); toast('Saved.'); } catch (x) { $('bErr').textContent = msg(x); $('bErr').hidden = false; }
+});
+draw();
+</script>
+</body>
+</html>

@@ -98,7 +98,7 @@ the app (`renderer/` in the Showcaller Sessions folder); keep the copies identic
 objects after 90 days, as a safety net for sessions nobody downloads (the app deletes its own takes once they're down).
 Pieces live at `r/<room>/<take>/<pid>/<v|a|m>/<000000>`.
 
-## Greenside Live (live tournament scoring)
+## Flagcast (live tournament scoring)
 
 Live scoring for golf tournaments run by Gotham Media House: member-guests, charity outings, corporate days. One Durable Object per tournament (`GolfEvent` in `golf.js`) holds the setup and every score and pushes each change to the open pages over a WebSocket. The scoring math is in `public/golf/core.js` and runs in the pages.
 
