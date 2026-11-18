@@ -3,424 +3,418 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Sunday Pin: live cameras on the par 3s, live scoring and leaderboard screens for member-guests and charity golf outings.">
-<link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
+<title>Sunday Pin · Live golf for your tournament</title>
+<meta name="description" content="Sunday Pin brings live par 3 cameras, live scoring and big-screen leaderboards to member-guests, charity outings and club events.">
+<meta property="og:title" content="Sunday Pin · Live golf for your tournament">
+<meta property="og:description" content="Live par 3 cameras, live scoring and big-screen leaderboards for golf tournaments.">
+<meta property="og:image" content="https://sundaypin.live/sundaypin/img/course-wide.jpg">
+<meta property="og:url" content="https://sundaypin.live/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
-<title>Sunday Pin</title>
+<link rel="icon" href="/sundaypin/brand/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
-/* Layout: a tournament-day program. Full-width bands alternate paper and fairway green; a live leaderboard and a phone scorecard are drawn in HTML as the hero proof. */
 :root{
-  --paper:#f2f4ef; --paper-2:#e6eae1; --ink:#14201a; --muted:#56625a;
-  --green:#123628; --green-2:#1c4a37; --on-green:#eef3ec; --on-green-muted:#a9bdb0;
-  --flag:#e8c547; --red:#c8312b; --line:#cfd6cb; --card:#ffffff;
+  --paper:#f4f1e6; --paper-2:#ebe6d6; --ink:#14201a; --muted:#56625a; --line:#d8d2bf; --card:#fffdf6;
+  --green:#123628; --green-2:#1c4a37; --deep:#0b1a13; --on-green:#f4f1e6; --on-green-muted:#a9bcae;
+  --flag:#e8c547; --red:#c8312b;
   --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#0f1713; --paper-2:#16211b; --ink:#e7ece5; --muted:#9aa89f;
-  --green:#0b2219; --green-2:#143829; --on-green:#eef3ec; --on-green-muted:#a3b8aa;
-  --flag:#f0cf55; --red:#f06a5e; --line:#2a3830; --card:#17231d; color-scheme:dark }}
-:root[data-theme="dark"]{
-  --paper:#0f1713; --paper-2:#16211b; --ink:#e7ece5; --muted:#9aa89f;
-  --green:#0b2219; --green-2:#143829; --on-green:#eef3ec; --on-green-muted:#a3b8aa;
-  --flag:#f0cf55; --red:#f06a5e; --line:#2a3830; --card:#17231d; color-scheme:dark }
-
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f1713;--paper-2:#16211b;--ink:#e9eee6;--muted:#9fb0a5;--line:#2a3830;--card:#17231d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f1713;--paper-2:#16211b;--ink:#e9eee6;--muted:#9fb0a5;--line:#2a3830;--card:#17231d;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
-.wrap{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
-section{padding-block:72px}
-h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.01em;line-height:.98;margin:0;text-wrap:balance}
-h2{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:800}
-h3{font-size:1.45rem;font-weight:700;letter-spacing:.02em}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--f-body)}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.01em;line-height:.96;margin:0;text-wrap:balance}
+h2{font-size:clamp(2.3rem,5.4vw,3.8rem);font-weight:800}
+h3{font-size:1.4rem;font-weight:700}
 p{margin:0}
-.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:block}
-.lede{font-size:1.15rem;max-width:62ch;color:var(--muted)}
-.band{background:var(--green);color:var(--on-green)}
-.band .eyebrow,.band .lede{color:var(--on-green-muted)}
+.eyebrow{display:block;font:600 .76rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.lede{font-size:1.15rem;color:var(--muted);max-width:60ch;margin-top:16px}
+section{padding-block:88px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.06em;padding:13px 22px;border-radius:6px;text-decoration:none;border:0;cursor:pointer}
+.btn.primary{background:var(--flag);color:#1a1a10}
+.btn.ghost{border:1.5px solid currentColor;background:transparent;color:inherit}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(18,54,40,.96);backdrop-filter:blur(8px);color:var(--on-green)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:66px}
+.nav .logo img{height:40px;width:auto}
+.nav ul{display:flex;gap:22px;list-style:none;margin:0 0 0 auto;padding:0;font-weight:500;font-size:.95rem}
+.nav ul a{text-decoration:none;color:var(--on-green-muted)}
+.nav ul a:hover{color:var(--on-green)}
+.nav .btn{padding:9px 16px;font-size:.95rem}
+.menu{display:none;margin-left:auto;background:none;border:1.5px solid var(--on-green-muted);color:var(--on-green);border-radius:6px;padding:7px 12px;font:600 .9rem var(--f-body)}
 
 /* Hero */
-.hero{background:var(--green);color:var(--on-green);padding-block:56px 72px;overflow:hidden}
-.brandrow{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--on-green-muted);margin-bottom:48px}
-.brandrow b{color:var(--on-green);font-weight:600}
-.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
-.hero h1{font-size:clamp(3.2rem,8.5vw,6.4rem);font-weight:800}
-.hero h1 .flag{color:var(--flag)}
-.hero p.lede{color:var(--on-green-muted);margin-top:22px;font-size:1.2rem}
-.hero-cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1.05rem;padding:12px 22px;border-radius:4px;text-decoration:none}
-.btn.primary{background:var(--flag);color:#1a1a10}
-.btn.ghost{border:1.5px solid var(--on-green-muted);color:var(--on-green)}
-.btn:focus-visible{outline:3px solid var(--flag);outline-offset:3px}
+.hero{background:radial-gradient(1200px 500px at 85% 10%,#1d5a41 0,transparent 60%),var(--green);color:var(--on-green);padding-block:72px 96px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(3.4rem,8.6vw,6.8rem);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--flag)}
+.hero .lede{color:var(--on-green-muted)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.code{margin-top:34px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;max-width:470px}
+.code label{font-size:.9rem;color:var(--on-green-muted);flex:1 1 150px}
+.code label b{display:block;color:var(--on-green);font-weight:600}
+.code input{width:9.5em;background:var(--deep);border:1px solid #2d4a3b;border-radius:6px;color:var(--on-green);font:600 1rem var(--f-mono);letter-spacing:.14em;padding:9px 10px;text-transform:uppercase}
+.code button{background:var(--on-green);color:var(--green);border:0;border-radius:6px;font:700 .95rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;cursor:pointer}
+.stage{position:relative;padding:0 34px 40px 0}
+.tv{background:#050a07;border-radius:12px;padding:10px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);border:1px solid #26332b}
+.tv img{border-radius:5px}
+.tv-stand{width:30%;height:12px;margin:0 auto;background:#050a07;border-radius:0 0 8px 8px}
+.ph{position:absolute;right:-10px;bottom:-14px;width:24%;background:#050a07;border-radius:26px;padding:7px;box-shadow:0 30px 50px -20px rgba(0,0,0,.8)}
+.ph img{border-radius:20px;aspect-ratio:9/17;object-fit:cover;object-position:top}
+.livepill{position:absolute;left:18px;top:-14px;background:var(--red);color:#fff;font:600 .72rem var(--f-mono);letter-spacing:.12em;padding:5px 10px;border-radius:4px;display:flex;gap:7px;align-items:center}
+.livepill i{width:7px;height:7px;border-radius:50%;background:#fff}
+@media (prefers-reduced-motion:no-preference){.livepill i{animation:p 1.6s ease-in-out infinite}@keyframes p{50%{opacity:.3}}}
 
-/* Leaderboard screen mock (always a dark "screen", in both themes) */
-.screen{background:#0a0f0c;border-radius:10px;padding:10px;box-shadow:0 30px 60px -20px rgba(0,0,0,.55);border:1px solid #26332b;min-width:0}
-.screen-in{background:#0d1a14;border-radius:5px;overflow:hidden;color:#eef3ec}
-.lb-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#123628;font-family:var(--f-display);text-transform:uppercase;font-weight:700;letter-spacing:.06em}
-.lb-head .live{font-family:var(--f-mono);font-size:.7rem;color:#0d1a14;background:var(--flag);padding:2px 8px;border-radius:2px;letter-spacing:.1em}
-.lb{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
-.lb th{font-weight:500;color:#8fa596;text-align:left;padding:6px 12px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid #1f3328}
-.lb td{padding:7px 12px;border-bottom:1px solid #16271e}
-.lb td.team{font-family:var(--f-body);font-weight:600;font-size:.86rem}
-.lb .num{text-align:right}
-.under{color:#ff6b5e;font-weight:600}
-.even{color:#eef3ec}
-.lb tr.up td.team::after{content:"▲";color:#59c98a;font-size:.6rem;margin-left:6px;vertical-align:2px}
-.ticker{display:flex;gap:10px;align-items:center;padding:9px 14px;background:#0a120e;font-size:.78rem;color:#c8d6cc;border-top:1px solid #1f3328}
-.ticker .tag{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;background:#c8312b;color:#fff;padding:2px 6px;border-radius:2px;white-space:nowrap}
-.ticker span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Made for strip */
+.strip{background:var(--deep);color:var(--on-green-muted);padding-block:20px}
+.strip .wrap{display:flex;gap:10px 28px;flex-wrap:wrap;align-items:center;justify-content:center;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.08em}
+.strip b{color:var(--flag)}
 
-/* Feature trio */
-.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:44px}
-.trio article{border-top:3px solid var(--ink);padding-top:18px;min-width:0}
-.trio p{margin-top:10px;color:var(--muted)}
-.trio ul{margin:14px 0 0;padding-left:18px;color:var(--muted)}
-.trio li{margin-top:4px}
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px;counter-reset:s}
+.steps article{border-top:3px solid var(--ink);padding-top:16px;min-width:0}
+.steps article::before{counter-increment:s;content:"0" counter(s);display:block;font:600 .8rem var(--f-mono);letter-spacing:.12em;color:var(--red);margin-bottom:10px}
+.steps time{font:600 .78rem var(--f-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.steps p{color:var(--muted);margin-top:8px}
 
-/* App section */
-.app-grid{display:grid;grid-template-columns:320px 1fr;gap:56px;align-items:center;margin-top:8px}
-.phone{width:300px;max-width:100%;margin:0 auto;background:#0a0f0c;border-radius:38px;padding:12px;box-shadow:0 30px 60px -24px rgba(0,0,0,.6)}
-.phone-in{background:#f7f8f4;color:#14201a;border-radius:28px;overflow:hidden}
-.ph-top{background:#123628;color:#eef3ec;padding:22px 16px 12px}
-.ph-top small{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.12em;color:#a9bdb0;text-transform:uppercase}
-.ph-top b{display:block;font-family:var(--f-display);font-size:1.5rem;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;margin-top:2px}
-.hole{padding:16px}
-.hole-row{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-mono);font-size:.74rem;color:#56625a;text-transform:uppercase;letter-spacing:.08em}
-.hole-big{font-family:var(--f-display);font-size:2.4rem;font-weight:800;line-height:1;color:#14201a}
-.players{margin-top:12px;display:grid;gap:8px}
-.pl{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #dde3d8;border-radius:10px;padding:8px 10px;font-size:.85rem;font-weight:500}
-.step{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-weight:600}
-.step i{font-style:normal;width:26px;height:26px;border-radius:50%;border:1px solid #c9d1c5;display:grid;place-items:center;color:#56625a}
-.sc{width:30px;height:30px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
-.sc.birdie{border:1.5px solid #c8312b;border-radius:50%;color:#c8312b}
-.sc.bogey{border:1.5px solid #14201a}
-.ph-cam{margin:4px 16px 16px;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;background:linear-gradient(180deg,#9cc7e6 0 38%,#5f9b57 38% 70%,#3f7a3c 70%)}
-.ph-cam::before{content:"";position:absolute;left:58%;top:30%;width:2px;height:28%;background:#fff}
-.ph-cam::after{content:"";position:absolute;left:calc(58% + 2px);top:30%;width:16px;height:10px;background:#c8312b}
-.ph-cam span{position:absolute;left:8px;top:8px;font-family:var(--f-mono);font-size:.6rem;letter-spacing:.1em;background:#c8312b;color:#fff;padding:2px 6px;border-radius:2px}
-.ph-cam em{position:absolute;right:8px;bottom:8px;font-style:normal;font-family:var(--f-mono);font-size:.62rem;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:2px}
-.feat{display:grid;grid-template-columns:1fr 1fr;gap:22px 32px;margin-top:30px}
-.feat div{min-width:0}
-.feat h3{font-size:1.2rem}
-.feat p{color:var(--muted);margin-top:6px;font-size:.96rem}
-.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:28px;font-size:.85rem;color:var(--muted);align-items:center}
-.legend .sc{width:26px;height:26px;font-family:var(--f-mono);font-size:.8rem;color:var(--ink);display:inline-grid;place-items:center;line-height:1;gap:0;flex:none}
-.legend .sc.birdie{color:var(--red);border-color:var(--red)}
-.legend .sc.bogey{border-color:var(--ink)}
-.legend span{display:inline-flex;align-items:center;gap:8px}
+/* Screens */
+.screens{background:var(--green);color:var(--on-green)}
+.screens .eyebrow,.screens .lede{color:var(--on-green-muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:36px}
+.tabs button{background:transparent;color:var(--on-green-muted);border:1.5px solid #2f5c48;border-radius:999px;padding:8px 16px;font:600 .95rem var(--f-body);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--flag);border-color:var(--flag);color:#1a1a10}
+.show{display:grid;grid-template-columns:1.6fr 1fr;gap:40px;align-items:center;margin-top:24px}
+.show .tv{padding:8px}
+.show h3{font-size:2rem}
+.show p{color:var(--on-green-muted);margin-top:12px}
+.show ul{margin:16px 0 0;padding-left:18px;color:var(--on-green-muted)}
+.show li{margin-top:6px}
 
-/* Course map: par-3 coverage */
-.course{margin-top:40px;display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
-.h{border:1px solid rgba(238,243,236,.18);border-radius:6px;padding:10px 8px;text-align:center;font-family:var(--f-mono);font-size:.72rem;color:var(--on-green-muted);min-width:0}
-.h b{display:block;font-family:var(--f-display);font-size:1.6rem;color:var(--on-green);line-height:1.1}
-.h.p3{background:var(--flag);border-color:var(--flag);color:#3a3410}
-.h.p3 b{color:#1a1a10}
-.cov{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:44px}
-.cov div{min-width:0}
-.cov h3{color:var(--on-green);font-size:1.2rem}
-.cov p{color:var(--on-green-muted);margin-top:8px;font-size:.95rem}
-.kicker{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.12em;color:var(--flag);display:block;margin-bottom:8px}
-
-/* Run of show */
-.ros{margin-top:36px;border-top:1px solid var(--line)}
-.ros-row{display:grid;grid-template-columns:110px 220px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.ros-row time{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums}
-.ros-row b{font-family:var(--f-display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em}
-.ros-row p{color:var(--muted)}
+/* App */
+.app-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.phones{display:flex;gap:18px;justify-content:center;align-items:flex-end}
+.phones .ph2{width:46%;background:#0a0f0c;border-radius:30px;padding:8px;box-shadow:0 30px 60px -24px rgba(0,0,0,.55)}
+.phones .ph2:first-child{transform:translateY(-28px)}
+.phones .ph2 img{border-radius:23px;aspect-ratio:9/17;object-fit:cover;object-position:top}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+.mode .tag{display:inline-block;font:600 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--on-green);padding:3px 8px;border-radius:3px}
+.mode h3{margin-top:10px}
+.mode ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:.95rem}
+.stores{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;align-items:center}
+.store{display:flex;align-items:center;gap:10px;background:#0a0f0c;color:#fff;border-radius:10px;padding:8px 14px;text-decoration:none;min-width:160px}
+.store svg{width:22px;height:22px;flex:none}
+.store small{display:block;font-size:.66rem;opacity:.75;line-height:1.1}
+.store b{display:block;font-weight:600;font-size:1rem;line-height:1.15}
+.soon{font-size:.85rem;color:var(--muted)}
 
 /* Packages */
-.pk{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:26px;min-width:0}
-.card.feature{border:2px solid var(--ink)}
-.card .score{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.card h3{font-size:2rem;margin-top:6px}
-.card .for{margin-top:8px;color:var(--muted);font-size:.95rem}
-.card ul{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:9px;font-size:.95rem}
-.card li{padding-left:22px;position:relative}
-.card li::before{content:"";position:absolute;left:2px;top:.55em;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--red)}
-.card .price{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--f-display);text-transform:uppercase;font-weight:700;letter-spacing:.04em;font-size:1.1rem}
-.badge{display:inline-block;background:var(--flag);color:#1a1a10;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;padding:3px 8px;border-radius:2px;text-transform:uppercase;margin-bottom:8px}
-.addons{margin-top:26px;color:var(--muted);font-size:.95rem;max-width:80ch}
+.pk{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px;align-items:stretch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:28px;min-width:0;display:flex;flex-direction:column}
+.card.feature{border:2px solid var(--green);box-shadow:0 20px 40px -26px rgba(18,54,40,.6)}
+.card .lvl{font:600 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card h3{font-size:2.4rem;margin-top:6px}
+.card .for{color:var(--muted);margin-top:8px}
+.card ul{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:9px;flex:1}
+.card li{padding-left:24px;position:relative}
+.card li::before{content:"";position:absolute;left:2px;top:.5em;width:10px;height:10px;border-radius:50%;border:2px solid var(--red)}
+.card .q{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.card .q a{color:var(--green);text-decoration:none;border-bottom:2px solid var(--flag)}
+.badge{align-self:flex-start;background:var(--flag);color:#1a1a10;font:600 .66rem var(--f-mono);letter-spacing:.12em;padding:3px 8px;border-radius:3px;text-transform:uppercase;margin-bottom:10px}
+.addons{margin-top:26px;color:var(--muted);max-width:85ch}
 .addons b{color:var(--ink)}
 
-/* Sponsors / charity */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px}
-.two div{min-width:0}
-.two ul{margin:14px 0 0;padding-left:18px;color:var(--muted)}
-.two li{margin-top:6px}
-.thermo{margin-top:22px;background:var(--paper-2);border-radius:6px;padding:16px}
-.thermo-bar{height:14px;background:var(--line);border-radius:7px;overflow:hidden;margin-top:10px}
-.thermo-bar i{display:block;height:100%;width:72%;background:var(--red)}
-.thermo-row{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.8rem;font-variant-numeric:tabular-nums;gap:8px;flex-wrap:wrap}
+/* Sponsors + charity */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:44px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:30px;min-width:0}
+.panel ul{margin:16px 0 0;padding-left:18px;color:var(--muted)}
+.panel li{margin-top:7px}
+.thermo{margin-top:24px;background:var(--paper-2);border-radius:8px;padding:16px}
+.thermo-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font:600 .85rem var(--f-mono);font-variant-numeric:tabular-nums}
+.bar{height:14px;background:var(--line);border-radius:7px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:72%;background:var(--red)}
+.sp-demo{margin-top:22px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
 
-/* Events strip */
-.events{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
-.events span{border:1.5px solid var(--ink);border-radius:999px;padding:6px 14px;font-family:var(--f-display);text-transform:uppercase;font-weight:600;letter-spacing:.05em}
+/* FAQ */
+.faq{margin-top:36px;border-top:1px solid var(--line);max-width:860px}
+.faq details{border-bottom:1px solid var(--line);padding:18px 0}
+.faq summary{cursor:pointer;font-weight:600;font-size:1.08rem;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::after{content:"+";font:600 1.4rem/1 var(--f-mono);color:var(--red)}
+.faq details[open] summary::after{content:"−"}
+.faq p{color:var(--muted);margin-top:10px;max-width:70ch}
 
-/* Contact */
-.contact{background:var(--green);color:var(--on-green)}
-.contact-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:end}
-.contact h2{font-size:clamp(2.4rem,6vw,4.2rem)}
-.contact dl{margin:0;display:grid;gap:14px}
-.contact dt{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--on-green-muted)}
-.contact dd{margin:2px 0 0;font-size:1.1rem;user-select:all}
-.foot{padding-block:22px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+/* Book */
+.book{background:var(--green);color:var(--on-green)}
+.book-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:start}
+.book .lede{color:var(--on-green-muted)}
+.book dl{margin:32px 0 0;display:grid;gap:14px}
+.book dt{font:600 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--on-green-muted)}
+.book dd{margin:2px 0 0;font-size:1.1rem}
+.book dd a{color:var(--on-green)}
+form{background:var(--card);color:var(--ink);border-radius:14px;padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+form label{display:grid;gap:5px;font-size:.86rem;font-weight:600;color:var(--muted);min-width:0}
+form .full{grid-column:1/-1}
+form input,form select,form textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:11px 12px;width:100%}
+form textarea{min-height:96px;resize:vertical}
+form .btn{justify-self:start}
+.sent{grid-column:1/-1;background:#e5f1e8;color:#1c4a37;border-radius:8px;padding:14px;font-weight:600;display:none}
+form.done .sent{display:block}
 
-@media (max-width:900px){
-  .hero-grid,.app-grid,.two,.contact-grid{grid-template-columns:1fr}
-  .trio,.pk{grid-template-columns:1fr}
-  .cov{grid-template-columns:1fr 1fr}
-  .ros-row{grid-template-columns:90px 1fr}
-  .ros-row p{grid-column:2}
+footer{background:var(--deep);color:var(--on-green-muted);padding-block:44px;font-size:.92rem}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px}
+footer img{height:44px;width:auto}
+footer h4{font:700 1rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--on-green);margin:0 0 10px}
+footer ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+footer a{text-decoration:none}
+footer a:hover{color:var(--on-green)}
+.legal{margin-top:28px;font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+
+@media (max-width:960px){
+  .nav ul{display:none}
+  .nav ul.open{display:grid;position:absolute;top:66px;left:0;right:0;background:var(--green);padding:14px 16px 20px;gap:14px}
+  .menu{display:block}
+  .nav .btn{display:none}
+  .hero-grid,.show,.app-grid,.book-grid,.split{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .pk{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr 1fr}
 }
 @media (max-width:560px){
-  section{padding-block:52px}
-  .course{grid-template-columns:repeat(6,1fr)}
-  .cov,.feat{grid-template-columns:1fr}
-  .lb .hide-s{display:none}
+  section{padding-block:60px}
+  .steps,.modes,form{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr}
+  .ph{width:30%}
 }
-@media (prefers-reduced-motion:no-preference){
-  .live{animation:pulse 2s ease-in-out infinite}
-  @keyframes pulse{50%{opacity:.55}}
-}
-</style>
 
-<header class="hero">
+.hero{background:linear-gradient(90deg,rgba(11,26,19,.94) 0,rgba(18,54,40,.86) 48%,rgba(18,54,40,.55) 100%),url(/sundaypin/img/course-sunset.jpg) center/cover;}
+.photo-band{position:relative;min-height:clamp(260px,42vw,520px);background:center/cover no-repeat;display:flex;align-items:flex-end;color:#fff}
+.photo-band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(11,26,19,.75))}
+.photo-band .wrap{position:relative;z-index:1;padding-block:32px;width:100%}
+.photo-band p{margin:0;font:700 clamp(1.4rem,3.4vw,2.4rem)/1.15 var(--f-display);max-width:22ch;text-wrap:balance}
+.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px}
+.photo-pair img{width:100%;height:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px;display:block}
+@media (max-width:640px){.photo-pair{grid-template-columns:1fr}}
+.book{background:linear-gradient(rgba(11,26,19,.84),rgba(18,54,40,.9)),url(/sundaypin/img/course-green.jpg) center/cover}
+.scr{position:relative;line-height:0}
+.scr .cam{position:absolute;left:2.375%;top:12.78%;width:58.69%;height:78.33%;border-radius:.5%/.9%;overflow:hidden;background:#123628}
+.scr .cam video{width:100%;height:100%;object-fit:cover;display:block}
+.scr .cam .bug{position:absolute;left:1.7%;top:2.2%;font:600 clamp(5px,.72vw,9px)/1 var(--f-mono);letter-spacing:.1em;color:#fff;background:#c8302c;padding:.5em .7em;border-radius:3px}
+.scr .cam .bug.r{left:auto;right:1.7%;background:rgba(0,0,0,.55)}
+.scr .cam .bug.r i{display:inline-block;width:.6em;height:.6em;border-radius:50%;background:#e5483f;margin-right:.45em;vertical-align:-.02em;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.scr .cam .bug.r i{animation:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
   <div class="wrap">
-    <div class="brandrow"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMTUgMjk4IDg2IiB3aWR0aD0iNTk2IiBoZWlnaHQ9IjE3MiI+PHBhdGggZD0iTTE2LjUzMTI1IDU3LjQwNjI1IDE2LjEyNSA1OC4yNVExNi4xMjUgNTkuMTU2MjUgMTguNjcxODc1IDU5Ljk4NDM3NVEyMS4yMTg3NSA2MC44MTI1IDI0LjI2NTYyNSA2MC44MTI1UTI3LjMxMjUgNjAuODEyNSAzMC45Njg3NSA1OS45MDYyNVEzNC42MjUgNTkuMCAzNy4zMjgxMjUgNTcuNjg3NVE0MC4wMzEyNSA1Ni4zNzUgNDEuNzk2ODc1IDU0LjkzNzVRNDMuNTYyNSA1My41IDQzLjU2MjUgNTIuNDM3NVE0My41NjI1IDUxLjA5Mzc1IDQwLjQzNzUgNDkuOTM3NVEzNy4zMTI1IDQ4Ljc4MTI1IDMxLjM1OTM3NSA0Ny4zOTA2MjVRMjUuNDA2MjUgNDYuMCAyMi42NDA2MjUgNDMuODc1UTE5Ljg3NSA0MS43NSAxOS44NzUgMzguNzAzMTI1UTE5Ljg3NSAzNS42NTYyNSAyMi4wNjI1IDMyLjg3NVEyNC4yNSAzMC4wOTM3NSAyNy43NjU2MjUgMjcuOTM3NVEzMS4yODEyNSAyNS43ODEyNSAzNS40Mzc1IDI0LjA5Mzc1UTQ0LjAzMTI1IDIwLjYyNSA1MS4zNzUgMjAuNjI1UTU0LjE4NzUgMjAuNjI1IDU2LjM0Mzc1IDIxLjEyNVE2MC40Njg3NSAyMi4wOTM3NSA2MC40Njg3NSAyMy42ODc1UTYwLjQ2ODc1IDI1LjI4MTI1IDYwLjE4NzUgMjUuODU5Mzc1UTU5LjkwNjI1IDI2LjQzNzUgNTkuNzM0Mzc1IDI2LjYyNVE1OS41NjI1IDI2LjgxMjUgNTkuMjk2ODc1IDI3LjBRNTkuMDMxMjUgMjcuMTg3NSA1OC45MDYyNSAyNy4yODEyNVE1Ny41MzEyNSAyOC40Mzc1IDUxLjM3NSAyOC43MTg3NVE0OS4yNSAyOC44MTI1IDQ5LjA2MjUgMjguOTM3NVE0OC44NzUgMjkuMDYyNSA0OC43MzQzNzUgMjkuMDYyNVE0OC41OTM3NSAyOS4wNjI1IDQ4LjQwNjI1IDI4LjgxMjVRNDguMjE4NzUgMjguNTYyNSA0OC4yMTg3NSAyOC4wUTQ4LjIxODc1IDI3LjQzNzUgNDkuNDM3NSAyNS45Mzc1UTQ1LjYyNSAyNi4xNTYyNSA0MS4yOTY4NzUgMjcuNjg3NVEzNi45Njg3NSAyOS4yMTg3NSAzMy43ODEyNSAzMS4xNDA2MjVRMzAuNTkzNzUgMzMuMDYyNSAyOC40Njg3NSAzNC45MjE4NzVRMjYuMzQzNzUgMzYuNzgxMjUgMjYuMzQzNzUgMzcuNTQ2ODc1UTI2LjM0Mzc1IDM4LjMxMjUgMjYuODEyNSAzOC44MTI1UTI4LjEyNSA0MC4yMTg3NSAzNC4wOTM3NSA0MS43NVE0MC4yODEyNSA0My4zNDM3NSA0Mi4zNDM3NSA0NC4zMTI1UTQ0LjQwNjI1IDQ1LjI4MTI1IDQ1Ljc2NTYyNSA0Ni4xNTYyNVE0Ny4xMjUgNDcuMDMxMjUgNDcuOTM3NSA0Ny45Mzc1UTQ5Ljg0Mzc1IDUwLjEyNSA0OS44NDM3NSA1Mi4zNzVRNDkuODQzNzUgNTQuNjI1IDQ4LjY0MDYyNSA1Ni41OTM3NVE0Ny40Mzc1IDU4LjU2MjUgNDUuMDE1NjI1IDYwLjQwNjI1UTQyLjU5Mzc1IDYyLjI1IDM5LjMxMjUgNjMuNjg3NVEzMi4xMjUgNjYuOTA2MjUgMjIuMTg3NSA2Ni45MDYyNVExNC45Mzc1IDY2LjkwNjI1IDEyLjkzNzUgNjMuMDYyNVExMi40MDYyNSA2Mi4wOTM3NSAxMi40MDYyNSA2MS4wNDY4NzVRMTIuNDA2MjUgNjAuMCAxMi44OTA2MjUgNTkuMTU2MjVRMTMuMzc1IDU4LjMxMjUgMTQuMDYyNSA1Ny44NzVRMTUuNDA2MjUgNTcuMDMxMjUgMTUuOTY4NzUgNTcuMDMxMjVRMTYuNTMxMjUgNTcuMDMxMjUgMTYuNTMxMjUgNTcuNDA2MjVaIE03OS4xODc1IDU2LjE4NzVRNzkuNzgxMjUgNTYuMTg3NSA3OS45MDYyNSA1Ny4wOTM3NVE4MC4wMzEyNSA1OC4wIDgwLjAzMTI1IDU4Ljk2ODc1UTgwLjAzMTI1IDU5LjkzNzUgNzkuODQzNzUgNjAuMzEyNVE3OC45Mzc1IDYyLjA2MjUgNzUuODc1IDY0LjU3ODEyNVE3Mi44MTI1IDY3LjA5Mzc1IDcwLjA2MjUgNjcuMDkzNzVRNjguMzc1IDY3LjA5Mzc1IDY2LjkzNzUgNjYuMDc4MTI1UTY1LjUgNjUuMDYyNSA2NS41IDYyLjUzMTI1UTY1LjUgNjAuMCA2Ni44NDM3NSA1Ny41NjI1UTU5LjA5Mzc1IDY3LjI4MTI1IDU0LjY4NzUgNjcuMjgxMjVRNTIuOTM3NSA2Ny4yODEyNSA1MS44NTkzNzUgNjYuMDMxMjVRNTAuNzgxMjUgNjQuNzgxMjUgNTAuNzgxMjUgNjMuNDUzMTI1UTUwLjc4MTI1IDYyLjEyNSA1MS4xNTYyNSA2MC43MDMxMjVRNTEuNTMxMjUgNTkuMjgxMjUgNTEuOTUzMTI1IDU4LjE1NjI1UTUyLjM3NSA1Ny4wMzEyNSA1My4yMDMxMjUgNTUuMzc1UTU0LjAzMTI1IDUzLjcxODc1IDU0LjQzNzUgNTIuOTY4NzVRNTQuODQzNzUgNTIuMjE4NzUgNTUuNzM0Mzc1IDUwLjcwMzEyNVE1Ni42MjUgNDkuMTg3NSA1OC4wNzgxMjUgNDYuNjI1UTU5LjUzMTI1IDQ0LjA2MjUgNjAuNDg0Mzc1IDQyLjgyODEyNVE2MS40Mzc1IDQxLjU5Mzc1IDYyLjM0Mzc1IDQxLjU3ODEyNVE2My4yNSA0MS41NjI1IDYzLjkzNzUgNDIuMzEyNVE2NC42MjUgNDMuMDYyNSA2NC42MjUgNDMuNTMxMjVRNjQuNjI1IDQ0LjAgNjIuNTMxMjUgNDcuNzVRNTYuMzQzNzUgNTguOTM3NSA1Ni4zNDM3NSA2MC43ODEyNVE1Ni4zNDM3NSA2MS4yNSA1Ni42ODc1IDYxLjI1UTU4LjE4NzUgNjEuMjUgNjQuMTU2MjUgNTQuNzVRNzAuMTI1IDQ4LjI1IDcxLjA2MjUgNDYuNDIxODc1UTcyLjAgNDQuNTkzNzUgNzIuODkwNjI1IDQzLjM0Mzc1UTczLjc4MTI1IDQyLjA5Mzc1IDc0LjIxODc1IDQxLjgxMjVRNzUuNTYyNSA0MC45Mzc1IDc3LjY4NzUgNDAuODc1UTc4LjAzMTI1IDQwLjg3NSA3OC4yMTg3NSA0MC45MDYyNVE3OC40MDYyNSA0MC45Mzc1IDc4LjY1NjI1IDQxLjQzNzVRNzguOTA2MjUgNDEuOTM3NSA3OC45MDYyNSA0Mi4yMTg3NVE3OC42MjUgNDMuMDkzNzUgNzYuNDIxODc1IDQ2Ljg3NVE3NC4yMTg3NSA1MC42NTYyNSA3My45Njg3NSA1MS4xNTYyNVE3MC4yODEyNSA1OC43ODEyNSA3MC4yODEyNSA2MS4wOTM3NVE3MC4yODEyNSA2Mi40MDYyNSA3MS4yODEyNSA2Mi40MDYyNVE3My4wOTM3NSA2Mi4xNTYyNSA3NS42NTYyNSA1OS41UTc2LjU5Mzc1IDU4LjUzMTI1IDc3LjUxNTYyNSA1Ny41MzEyNVE3OC40Mzc1IDU2LjUzMTI1IDc4LjY1NjI1IDU2LjM1OTM3NVE3OC44NzUgNTYuMTg3NSA3OS4xODc1IDU2LjE4NzVaIE05NC4zNDM3NSA2MS4xODc1UTk0LjM0Mzc1IDYyLjU2MjUgOTYuMjE4NzUgNjIuNTYyNVE5Ny4yMTg3NSA2Mi41NjI1IDk4LjczNDM3NSA2MS41NjI1UTEwMC4yNSA2MC41NjI1IDEwMS40Njg3NSA1OS4zNzVRMTA0LjcxODc1IDU2LjE1NjI1IDEwNS4xNTYyNSA1Ni4xNTYyNVExMDUuOTY4NzUgNTYuMTU2MjUgMTA1Ljk2ODc1IDU4LjVRMTA1Ljk2ODc1IDYwLjg0Mzc1IDEwNC41IDYxLjcxODc1UTEwMC4wMzEyNSA2NS43NSA5Ny41OTM3NSA2Ni42MjVROTYuMjE4NzUgNjcuMDkzNzUgOTQuNTYyNSA2Ny4wNjI1UTkyLjkwNjI1IDY3LjAzMTI1IDkxLjI4MTI1IDY1LjYyNVE4OS42NTYyNSA2NC4yMTg3NSA4OS42NTYyNSA2Mi4yMDMxMjVRODkuNjU2MjUgNjAuMTg3NSA5MC43MTg3NSA1Ny42MjVROTEuNzgxMjUgNTUuMDYyNSA5Mi44OTA2MjUgNTMuMjM0Mzc1UTk0LjAgNTEuNDA2MjUgOTUuNjI1IDQ4Ljk4NDM3NVE5Ny4yNSA0Ni41NjI1IDk3LjM0Mzc1IDQ1Ljk2ODc1TDk3LjI4MTI1IDQ1LjkwNjI1UTk2LjI1IDQ2LjAgOTIuMTcxODc1IDQ5Ljk2ODc1UTg4LjA5Mzc1IDUzLjkzNzUgODUuNDM3NSA1Ni44NzVRODIuNzgxMjUgNTkuODEyNSA3OS4wOTM3NSA2NC43MTg3NVE3OC4wNjI1IDY2LjA2MjUgNzcuNDA2MjUgNjYuMDYyNVE3Ni43NSA2Ni4wNjI1IDc1LjY0MDYyNSA2NS42NDA2MjVRNzQuNTMxMjUgNjUuMjE4NzUgNzQuMjgxMjUgNjUuMDMxMjVRNzQuMDMxMjUgNjQuODQzNzUgNzQuMDMxMjUgNjQuNDY4NzVRNzQuMDMxMjUgNjQuMDkzNzUgNzQuMjUgNjMuNTQ2ODc1UTc0LjQ2ODc1IDYzLjAgNzQuNjcxODc1IDYyLjY0MDYyNVE3NC44NzUgNjIuMjgxMjUgNzUuMzQzNzUgNjEuNTMxMjVRNzUuODEyNSA2MC43ODEyNSA3Ny4yMDMxMjUgNTguMzU5Mzc1UTc4LjU5Mzc1IDU1LjkzNzUgODEuNDY4NzUgNTEuMTI1UTg0LjM0Mzc1IDQ2LjMxMjUgODQuOTA2MjUgNDUuMzEyNVE4Ni4wOTM3NSA0My4yNSA4Ni44NDM3NSA0Mi4zMTI1UTg4LjI1IDQwLjUzMTI1IDkxLjU5Mzc1IDQwLjUzMTI1UTkyLjM0Mzc1IDQwLjUzMTI1IDkyLjM0Mzc1IDQxLjQ2ODc1UTkyLjM0Mzc1IDQyLjkzNzUgODkuNjI1IDQ3LjBMODguMzEyNSA0OC45Njg3NVE5My43MTg3NSA0Mi45Njg3NSA5Ny40Mzc1IDQxLjM3NVE5OS4yNSA0MC41OTM3NSAxMDAuNzAzMTI1IDQwLjU5Mzc1UTEwMi4xNTYyNSA0MC41OTM3NSAxMDMuMDE1NjI1IDQxLjM3NVExMDMuODc1IDQyLjE1NjI1IDEwMy44NzUgNDMuMTA5Mzc1UTEwMy44NzUgNDQuMDYyNSAxMDMuMjE4NzUgNDUuMzkwNjI1UTEwMi41NjI1IDQ2LjcxODc1IDEwMS44OTA2MjUgNDcuNzY1NjI1UTEwMS4yMTg3NSA0OC44MTI1IDEwMC4xMjUgNTAuNDA2MjVROTkuMDMxMjUgNTIuMCA5OC45Mzc1IDUyLjE0MDYyNVE5OC44NDM3NSA1Mi4yODEyNSA5OC40NTMxMjUgNTIuODkwNjI1UTk4LjA2MjUgNTMuNSA5Ny44NzUgNTMuNzgxMjVROTcuNjg3NSA1NC4wNjI1IDk3LjI1IDU0Ljc2NTYyNVE5Ni44MTI1IDU1LjQ2ODc1IDk2LjU0Njg3NSA1NS45Mzc1UTk2LjI4MTI1IDU2LjQwNjI1IDk1Ljg5MDYyNSA1Ny4wOTM3NVE5NS41IDU3Ljc4MTI1IDk1LjI2NTYyNSA1OC4yODEyNVE5NS4wMzEyNSA1OC43ODEyNSA5NC43ODEyNSA1OS4zNzVROTQuMzQzNzUgNjAuNDY4NzUgOTQuMzQzNzUgNjEuMTg3NVogTTEzNi43NSAzMS44MTI1UTEyOS42NTYyNSA0My4zNDM3NSAxMjUuNjI1IDUxLjMxMjVRMTIxLjU5Mzc1IDU5LjI4MTI1IDEyMS41OTM3NSA2MC45Mzc1VjYxLjE4NzVRMTIxLjU5Mzc1IDYyLjQ2ODc1IDEyMi41MzEyNSA2Mi40Njg3NVExMjMuNDY4NzUgNjIuNDY4NzUgMTI0Ljc5Njg3NSA2MS41OTM3NVExMjYuMTI1IDYwLjcxODc1IDEyNy4xMjUgNTkuNzE4NzVRMTI4LjEyNSA1OC43MTg3NSAxMjkuMTQwNjI1IDU3LjY0MDYyNVExMzAuMTU2MjUgNTYuNTYyNSAxMzAuMzc1IDU2LjM3NVExMzAuNTkzNzUgNTYuMTg3NSAxMzAuOTM3NSA1Ni4xODc1UTEzMS40Njg3NSA1Ni4xODc1IDEzMS42MjUgNTYuODU5Mzc1UTEzMS43ODEyNSA1Ny41MzEyNSAxMzEuNzgxMjUgNTguNzM0Mzc1UTEzMS43ODEyNSA1OS45Mzc1IDEzMS41OTM3NSA2MC4zMTI1UTEzMC42ODc1IDYyLjA2MjUgMTI3LjYwOTM3NSA2NC41NzgxMjVRMTI0LjUzMTI1IDY3LjA5Mzc1IDEyMS43ODEyNSA2Ny4wOTM3NVExMTcuMDkzNzUgNjcuMDkzNzUgMTE3LjA5Mzc1IDYzLjEyNVExMTcuMDkzNzUgNjAuNjU2MjUgMTE4Ljk2ODc1IDU2LjY1NjI1UTExNi40Mzc1IDU5LjkzNzUgMTEzLjgxMjUgNjIuMjVRMTA4LjkzNzUgNjYuNSAxMDUuMzQzNzUgNjYuNVExMDMuMzQzNzUgNjYuNSAxMDIuMzkwNjI1IDY1LjA5Mzc1UTEwMS40Mzc1IDYzLjY4NzUgMTAxLjQzNzUgNjEuMDQ2ODc1UTEwMS40Mzc1IDU4LjQwNjI1IDEwMy41IDU0LjcxODc1UTEwNS41NjI1IDUxLjAzMTI1IDEwOC42NDA2MjUgNDguMDc4MTI1UTExMS43MTg3NSA0NS4xMjUgMTE1LjQ2ODc1IDQzLjE0MDYyNVExMTkuMjE4NzUgNDEuMTU2MjUgMTIyLjM3NSA0MS4xNTYyNVExMjMuMzc1IDQxLjE1NjI1IDEyNC43MTg3NSA0Mi4zNzVRMTI1LjYyNSA0MC45Mzc1IDEyOC4wNjI1IDM2LjYyNVExMzUuNzE4NzUgMjMuNzE4NzUgMTM4LjE4NzUgMjAuODc1UTEzOS41IDE5LjE1NjI1IDE0Mi4yODEyNSAxOS4xNTYyNVExNDIuODc1IDE5LjE1NjI1IDE0My4yMTg3NSAxOS41MzEyNVExNDMuNTYyNSAxOS45MDYyNSAxNDMuNTYyNSAyMC4yOTY4NzVRMTQzLjU2MjUgMjAuNjg3NSAxNDIuOTUzMTI1IDIxLjczNDM3NVExNDIuMzQzNzUgMjIuNzgxMjUgMTQwLjE1NjI1IDI2LjI5Njg3NVExMzcuOTY4NzUgMjkuODEyNSAxMzYuNzUgMzEuODEyNVpNMTIyLjgxMjUgNDUuMzEyNVExMTguMzEyNSA0Ni4zMTI1IDExNC40Mzc1IDQ5LjVRMTEwLjU2MjUgNTIuNjg3NSAxMDguNjI1IDU2LjE3MTg3NVExMDYuNjg3NSA1OS42NTYyNSAxMDYuNjg3NSA2MC42ODc1UTEwNi42ODc1IDYxLjcxODc1IDEwNy4xMjUgNjEuNzE4NzVRMTA5LjAgNjEuNzE4NzUgMTE2LjQwNjI1IDUzLjM0Mzc1UTEyMC4wOTM3NSA0OS4yMTg3NSAxMjIuODEyNSA0NS4zMTI1WiBNMTUzLjIxODc1IDQyLjI1UTE1NS41OTM3NSA0Mi4yNSAxNTUuNTkzNzUgNDMuODc1UTE1NS41OTM3NSA0NC43NSAxNTUuMTg3NSA0NS4xNTYyNVExNTQuNzgxMjUgNDUuNTYyNSAxNTMuNDUzMTI1IDQ3Ljg1OTM3NVExNTIuMTI1IDUwLjE1NjI1IDE1MC41MTU2MjUgNTMuNzM0Mzc1UTE0OC45MDYyNSA1Ny4zMTI1IDE0OC40Mzc1IDU5Ljg0Mzc1UTE0OC4zNDM3NSA2MC4xNTYyNSAxNDguMzQzNzUgNjAuNzE4NzVRMTQ4LjM0Mzc1IDYyLjQzNzUgMTQ5LjI4MTI1IDYyLjQzNzVRMTUwLjIxODc1IDYyLjQzNzUgMTUxLjUgNjEuNTQ2ODc1UTE1Mi43ODEyNSA2MC42NTYyNSAxNTMuNzgxMjUgNTkuNjQwNjI1UTE1NC43ODEyNSA1OC42MjUgMTU1LjczNDM3NSA1Ny41NjI1UTE1Ni42ODc1IDU2LjUgMTU2Ljg3NSA1Ni4zNDM3NVExNTcuMDYyNSA1Ni4xODc1IDE1Ny40Mzc1IDU2LjE4NzVRMTU4LjAzMTI1IDU2LjE4NzUgMTU4LjE1NjI1IDU3LjA5Mzc1UTE1OC4yODEyNSA1OC4wIDE1OC4yODEyNSA1OC45Njg3NVExNTguMjgxMjUgNTkuOTM3NSAxNTguMDkzNzUgNjAuMzEyNVExNTcuMTg3NSA2Mi4wOTM3NSAxNTQuMTA5Mzc1IDY0LjU5Mzc1UTE1MS4wMzEyNSA2Ny4wOTM3NSAxNDguNTE1NjI1IDY3LjA5Mzc1UTE0Ni4wIDY3LjA5Mzc1IDE0NC44MTI1IDY1LjU2MjVRMTQzLjYyNSA2NC4wMzEyNSAxNDMuNjI1IDYyLjE3MTg3NVExNDMuNjI1IDYwLjMxMjUgMTQ0LjI1IDU4LjkwNjI1UTE0MS42NTYyNSA2Mi4yODEyNSAxMzguMjk2ODc1IDY0LjYyNVExMzQuOTM3NSA2Ni45Njg3NSAxMzIuODEyNSA2Ni45Njg3NVExMzAuNjg3NSA2Ni45Njg3NSAxMjkuMzQzNzUgNjUuNjg3NVExMjcuNjI1IDY0LjA5Mzc1IDEyNy42MjUgNjEuMjY1NjI1UTEyNy42MjUgNTguNDM3NSAxMjguODkwNjI1IDU1LjU3ODEyNVExMzAuMTU2MjUgNTIuNzE4NzUgMTMyLjIxODc1IDUwLjM1OTM3NVExMzQuMjgxMjUgNDguMCAxMzYuNzUgNDYuMDYyNVExNDEuOTM3NSA0Mi4wIDE0Ni4zMTI1IDQyLjBRMTQ4LjAgNDIuMCAxNDkuMDYyNSA0Mi41NjI1UTE1MC4xMjUgNDMuMTI1IDE1MC40MDYyNSA0My45Njg3NVExNTEuMTU2MjUgNDIuODQzNzUgMTUxLjY3MTg3NSA0Mi41NDY4NzVRMTUyLjE4NzUgNDIuMjUgMTUzLjIxODc1IDQyLjI1Wk0xNDkuMDYyNSA0NS43MTg3NVExNDMuNzE4NzUgNDUuNzE4NzUgMTM4LjAgNTEuNjU2MjVRMTM1Ljk2ODc1IDUzLjc4MTI1IDEzNC4yNjU2MjUgNTYuNzVRMTMyLjU2MjUgNTkuNzE4NzUgMTMyLjU2MjUgNjAuODEyNVExMzIuNTYyNSA2MS45MDYyNSAxMzMuMTg3NSA2MS45MDYyNVExMzQuMDYyNSA2MS45MDYyNSAxMzguMDYyNSA1OC40NTMxMjVRMTQyLjA2MjUgNTUuMCAxNDMuMzc1IDUzLjM3NVExNDQuODEyNSA1MS41NjI1IDE0OS4wNjI1IDQ1LjcxODc1WiBNMTY0LjkwNjI1IDc2LjM3NVExNjQuNzUgNzYuNTMxMjUgMTYzLjk1MzEyNSA3Ny45NTMxMjVRMTYzLjE1NjI1IDc5LjM3NSAxNjIuMjUgODAuODI4MTI1UTE2MS4zNDM3NSA4Mi4yODEyNSAxNjAuMDE1NjI1IDgzLjU5Mzc1UTE1OC42ODc1IDg0LjkwNjI1IDE1Ny43OTY4NzUgODUuMDE1NjI1UTE1Ni45MDYyNSA4NS4xMjUgMTU2LjY1NjI1IDg1LjEyNVExNTMuNzgxMjUgODUuMTI1IDE1My43ODEyNSA4Mi4yMTg3NVExNTMuNzgxMjUgNzguODEyNSAxNTcuMzEyNSA3NC4yNVExNTguNjU2MjUgNzIuNTMxMjUgMTYwLjY4NzUgNzAuNTQ2ODc1UTE2Mi43MTg3NSA2OC41NjI1IDE2Mi45MDYyNSA2OC4yOTY4NzVRMTYzLjA5Mzc1IDY4LjAzMTI1IDE2Ny41OTM3NSA1OS41MzEyNVExNjQuNTkzNzUgNjIuODEyNSAxNjIuMDMxMjUgNjQuODU5Mzc1UTE1OS40Njg3NSA2Ni45MDYyNSAxNTcuMDkzNzUgNjcuMTU2MjVIMTU2Ljg3NVExNTUuNjU2MjUgNjcuMTU2MjUgMTU0LjQ2ODc1IDY2LjM1OTM3NVExNTMuMjgxMjUgNjUuNTYyNSAxNTMuMjgxMjUgNjMuNTYyNVExNTMuMjgxMjUgNjAuNTkzNzUgMTU0Ljg3NSA1Ny44MTI1UTE1NS40Mzc1IDU2Ljg0Mzc1IDE1Ni44MjgxMjUgNTQuNTMxMjVRMTU4LjIxODc1IDUyLjIxODc1IDE1OS40MDYyNSA1MC4wNjI1UTE2MC41MzEyNSA0OC4zNDM3NSAxNjEuNzE4NzUgNDYuMDYyNVExNjIuOTA2MjUgNDMuNzgxMjUgMTYzLjUzMTI1IDQyLjc5Njg3NVExNjQuMTU2MjUgNDEuODEyNSAxNjQuNzE4NzUgNDEuODEyNVExNjUuMjgxMjUgNDEuODEyNSAxNjYuMTcxODc1IDQyLjUxNTYyNVExNjcuMDYyNSA0My4yMTg3NSAxNjcuMDYyNSA0NC4xODc1UTE2Ny4wNjI1IDQ1LjE1NjI1IDE2Mi45Njg3NSA1Mi41OTM3NVExNTguODc1IDYwLjAzMTI1IDE1OC44NzUgNjEuMDYyNVExNTguODc1IDYxLjMxMjUgMTU5LjEyNSA2MS4zMTI1UTE1OS45Njg3NSA2MS4zMTI1IDE2Mi44NTkzNzUgNTguOTIxODc1UTE2NS43NSA1Ni41MzEyNSAxNjkuMjUgNTIuNzgxMjVRMTczLjE1NjI1IDQ4LjYyNSAxNzUuMzc1IDQ1LjE4NzVRMTc1LjY1NjI1IDQ0Ljc1IDE3NS44MjgxMjUgNDQuNTE1NjI1UTE3Ni4wIDQ0LjI4MTI1IDE3Ni4yNjU2MjUgNDMuODkwNjI1UTE3Ni41MzEyNSA0My41IDE3Ni43MDMxMjUgNDMuMjgxMjVRMTc2Ljg3NSA0My4wNjI1IDE3Ny4xMDkzNzUgNDIuNzY1NjI1UTE3Ny4zNDM3NSA0Mi40Njg3NSAxNzcuNTMxMjUgNDIuMzEyNVExNzcuNzE4NzUgNDIuMTU2MjUgMTc3LjkzNzUgNDIuMFExNzguMjgxMjUgNDEuNjg3NSAxNzguNzAzMTI1IDQxLjY4NzVRMTc5LjEyNSA0MS42ODc1IDE3OS45ODQzNzUgNDEuODc1UTE4MC44NDM3NSA0Mi4wNjI1IDE4MS4wMTU2MjUgNDIuMjgxMjVRMTgxLjE4NzUgNDIuNSAxODEuMzc1IDQyLjY4NzVRMTgxLjY4NzUgNDMuMDMxMjUgMTgxLjY4NzUgNDMuMzI4MTI1UTE4MS42ODc1IDQzLjYyNSAxODEuNDM3NSA0NC4xMDkzNzVRMTgxLjE4NzUgNDQuNTkzNzUgMTc4LjUzMTI1IDQ5LjA2MjVRMTcwLjcxODc1IDYyLjI1IDE2Ny43ODEyNSA2OC4zMTI1UTE3Mi41MzEyNSA2NC4zMTI1IDE4MS4xNTYyNSA1Ni40Njg3NVExODEuNSA1Ni4xODc1IDE4MS44NDM3NSA1Ni4xODc1UTE4Mi44MTI1IDU2LjE4NzUgMTgyLjgxMjUgNTkuMTU2MjVRMTgyLjgxMjUgNjAuMDMxMjUgMTgyLjUgNjAuMzEyNVExNzMuMTU2MjUgNjcuNSAxNjQuOTA2MjUgNzYuMzc1WiAiIGZpbGw9IiNmNGYxZTYiLz48cGF0aCBkPSJNMjExLjAzMTI1IDMyLjQ2ODc1UTIxMC4wIDMzLjIxODc1IDIxMC4wIDM0LjE0MDYyNVEyMTAuMCAzNS4wNjI1IDIxMS4zNzUgMzUuMDYyNVEyMTEuOTY4NzUgMzUuMDYyNSAyMTIuOTA2MjUgMzQuNzE4NzVIMjEyLjkzNzVRMjEzLjA5Mzc1IDM0LjcxODc1IDIxMy4wOTM3NSAzNS4zNTkzNzVRMjEzLjA5Mzc1IDM2LjAgMjEyLjk2ODc1IDM2LjEyNVEyMDkuNzUgMzguNDA2MjUgMjA3LjUzMTI1IDM4LjQwNjI1UTIwNS4zMTI1IDM4LjQwNjI1IDIwNC4zMTI1IDM3LjE1NjI1UTIwMy4zMTI1IDM1LjkwNjI1IDIwMy4zMTI1IDMzLjg5MDYyNVEyMDMuMzEyNSAzMS44NzUgMjA1LjUzMTI1IDI5LjYwOTM3NVEyMDcuNzUgMjcuMzQzNzUgMjExLjUgMjUuNDIxODc1UTIxNS4yNSAyMy41IDIyMC43OTY4NzUgMjIuMjVRMjI2LjM0Mzc1IDIxLjAgMjMzLjI2NTYyNSAyMS4wUTI0MC4xODc1IDIxLjAgMjQ0Ljg0Mzc1IDIzLjcwMzEyNVEyNDkuNSAyNi40MDYyNSAyNDkuNSAyOS44NTkzNzVRMjQ5LjUgMzMuMzEyNSAyNDcuMDc4MTI1IDM2Ljg3NVEyNDQuNjU2MjUgNDAuNDM3NSAyNDEuMDE1NjI1IDQzLjA3ODEyNVEyMzcuMzc1IDQ1LjcxODc1IDIzMi45Mzc1IDQ3LjQwNjI1UTIyOC41IDQ5LjA5Mzc1IDIyNS4wIDQ5LjA5Mzc1UTIyMS41IDQ5LjA5Mzc1IDIxOS41NjI1IDQ2LjI4MTI1UTIxNC44MTI1IDUzLjc1IDIxMy4xMjUgNTYuNDg0Mzc1UTIxMS40Mzc1IDU5LjIxODc1IDIxMC4yNjU2MjUgNjEuMDc4MTI1UTIwOS4wOTM3NSA2Mi45Mzc1IDIwOC40NTMxMjUgNjQuMFEyMDcuODEyNSA2NS4wNjI1IDIwNy43ODEyNSA2NS4wOTM3NVEyMDcuMTI1IDY1LjgxMjUgMjA2LjM3NSA2NS44MTI1TDIwNC44NDM3NSA2Ni4wOTM3NUwyMDQuMDkzNzUgNjYuMDMxMjVIMjAzLjU2MjVRMjAxLjcxODc1IDY2LjAzMTI1IDIwMS43MTg3NSA2NC44NzVRMjAxLjcxODc1IDYzLjQwNjI1IDIwNy44NzUgNTMuODEyNVEyMTQuMDMxMjUgNDQuMjE4NzUgMjE5LjQ4NDM3NSAzNi40MDYyNVEyMjQuOTM3NSAyOC41OTM3NSAyMjUuODQzNzUgMjcuNjI1UTIyNi43NSAyNi42NTYyNSAyMjcuNDUzMTI1IDI2LjQ4NDM3NVEyMjguMTU2MjUgMjYuMzEyNSAyMjkuNzE4NzUgMjYuMzEyNUgyMzEuMjgxMjVRMjMxLjY4NzUgMjYuMzEyNSAyMzEuNjg3NSAyNi45NTMxMjVRMjMxLjY4NzUgMjcuNTkzNzUgMjMxLjUzMTI1IDI3Ljg0Mzc1UTIyOC43ODEyNSAzMS42ODc1IDIyMS41OTM3NSA0My4wMzEyNVEyMjEuODQzNzUgNDMuNTMxMjUgMjIyLjQyMTg3NSA0My42NTYyNVEyMjMuMCA0My43ODEyNSAyMjMuNjU2MjUgNDMuNzgxMjVIMjI0LjU2MjVRMjI3LjQzNzUgNDMuNzgxMjUgMjMwLjc4MTI1IDQyLjM5MDYyNVEyMzQuMTI1IDQxLjAgMjM2LjY1NjI1IDM5LjA2MjVRMjM5LjE4NzUgMzcuMTI1IDI0MC44OTA2MjUgMzUuMDE1NjI1UTI0Mi41OTM3NSAzMi45MDYyNSAyNDIuNTkzNzUgMzEuNDA2MjVRMjQyLjU5Mzc1IDI5LjkwNjI1IDI0MS42NTYyNSAyOC43MTg3NVEyNDAuNzE4NzUgMjcuNTMxMjUgMjM5LjA5Mzc1IDI2Ljg0Mzc1UTIzNS45MDYyNSAyNS41IDIzMS4zNTkzNzUgMjUuNVEyMjYuODEyNSAyNS41IDIyMC4zOTA2MjUgMjcuODU5Mzc1UTIxMy45Njg3NSAzMC4yMTg3NSAyMTEuMDMxMjUgMzIuNDY4NzVaIE0yNjAuMjE4NzUgMzEuNjg3NVEyNjAuMjE4NzUgMzMuNDY4NzUgMjU4LjU2MjUgMzUuMjY1NjI1UTI1Ni45MDYyNSAzNy4wNjI1IDI1NS4xMDkzNzUgMzcuMDYyNVEyNTMuMzEyNSAzNy4wNjI1IDI1My4zMTI1IDM1LjE4NzVRMjUzLjMxMjUgMzMuMzEyNSAyNTQuODkwNjI1IDMxLjYwOTM3NVEyNTYuNDY4NzUgMjkuOTA2MjUgMjU4LjM3NSAyOS45MDYyNVEyNTkuMjE4NzUgMjkuOTA2MjUgMjU5LjcxODc1IDMwLjM3NVEyNjAuMjE4NzUgMzAuODQzNzUgMjYwLjIxODc1IDMxLjY4NzVaTTI1NS4xNTYyNSA1OC45Njg3NVEyNTUuMTU2MjUgNTkuOTA2MjUgMjU0Ljk2ODc1IDYwLjMxMjVRMjUzLjQzNzUgNjMuNDM3NSAyNTAuMDkzNzUgNjUuMzU5Mzc1UTI0Ni43NSA2Ny4yODEyNSAyNDQuMjgxMjUgNjcuMjgxMjVRMjQxLjgxMjUgNjcuMjgxMjUgMjQwLjAzMTI1IDY1LjYyNVEyMzguMjUgNjMuOTY4NzUgMjM4LjI1IDYyLjI1UTIzOC4yNSA2MC41MzEyNSAyMzkuOTY4NzUgNTcuMjVRMjQxLjY4NzUgNTMuOTY4NzUgMjQzLjQwNjI1IDUxLjE4NzVRMjQ1LjEyNSA0OC40MDYyNSAyNDUuMTI1IDQ4LjE3MTg3NVEyNDUuMTI1IDQ3LjkzNzUgMjQ0LjQ4NDM3NSA0Ny4yNVEyNDMuODQzNzUgNDYuNTYyNSAyNDMuODQzNzUgNDYuMjM0Mzc1UTI0My44NDM3NSA0NS45MDYyNSAyNDUuMTQwNjI1IDQ0LjUxNTYyNVEyNDYuNDM3NSA0My4xMjUgMjQ4LjI5Njg3NSA0MS43NjU2MjVRMjUwLjE1NjI1IDQwLjQwNjI1IDI1MS4xNDA2MjUgNDAuNDA2MjVRMjUyLjEyNSA0MC40MDYyNSAyNTIuOTA2MjUgNDEuMjgxMjVRMjUzLjY4NzUgNDIuMTU2MjUgMjUzLjY4NzUgNDIuODc1UTI1My42ODc1IDQzLjU5Mzc1IDI0Ni4yNSA1Ni40MDYyNVEyNDYuMTU2MjUgNTYuNTkzNzUgMjQ1LjczNDM3NSA1Ny4yMzQzNzVRMjQ1LjMxMjUgNTcuODc1IDI0NS4wNzgxMjUgNTguMjk2ODc1UTI0NC44NDM3NSA1OC43MTg3NSAyNDQuNTMxMjUgNTkuMzEyNVEyNDMuOTA2MjUgNjAuNTYyNSAyNDMuOTA2MjUgNjEuNDA2MjVRMjQzLjkwNjI1IDYyLjQ2ODc1IDI0NS4zNDM3NSA2Mi40Njg3NVEyNDYuNzgxMjUgNjIuNDY4NzUgMjQ4LjMyODEyNSA2MS40ODQzNzVRMjQ5Ljg3NSA2MC41IDI1MS4wIDU5LjMxMjVRMjUzLjkzNzUgNTYuMTU2MjUgMjU0LjM0Mzc1IDU2LjE1NjI1UTI1NS4xNTYyNSA1Ni4xNTYyNSAyNTUuMTU2MjUgNTguOTY4NzVaIE0yNjkuMTU2MjUgNjEuMTg3NVEyNjkuMTU2MjUgNjIuNTYyNSAyNzEuMDMxMjUgNjIuNTYyNVEyNzIuMDMxMjUgNjIuNTYyNSAyNzMuNTQ2ODc1IDYxLjU2MjVRMjc1LjA2MjUgNjAuNTYyNSAyNzYuMjgxMjUgNTkuMzc1UTI3OS41MzEyNSA1Ni4xNTYyNSAyNzkuOTY4NzUgNTYuMTU2MjVRMjgwLjc4MTI1IDU2LjE1NjI1IDI4MC43ODEyNSA1OC41UTI4MC43ODEyNSA2MC44NDM3NSAyNzkuMzEyNSA2MS43MTg3NVEyNzQuODQzNzUgNjUuNzUgMjcyLjQwNjI1IDY2LjYyNVEyNzEuMDMxMjUgNjcuMDkzNzUgMjY5LjM3NSA2Ny4wNjI1UTI2Ny43MTg3NSA2Ny4wMzEyNSAyNjYuMDkzNzUgNjUuNjI1UTI2NC40Njg3NSA2NC4yMTg3NSAyNjQuNDY4NzUgNjIuMjAzMTI1UTI2NC40Njg3NSA2MC4xODc1IDI2NS41MzEyNSA1Ny42MjVRMjY2LjU5Mzc1IDU1LjA2MjUgMjY3LjcwMzEyNSA1My4yMzQzNzVRMjY4LjgxMjUgNTEuNDA2MjUgMjcwLjQzNzUgNDguOTg0Mzc1UTI3Mi4wNjI1IDQ2LjU2MjUgMjcyLjE1NjI1IDQ1Ljk2ODc1TDI3Mi4wOTM3NSA0NS45MDYyNVEyNzEuMDYyNSA0Ni4wIDI2Ni45ODQzNzUgNDkuOTY4NzVRMjYyLjkwNjI1IDUzLjkzNzUgMjYwLjI1IDU2Ljg3NVEyNTcuNTkzNzUgNTkuODEyNSAyNTMuOTA2MjUgNjQuNzE4NzVRMjUyLjg3NSA2Ni4wNjI1IDI1Mi4yMTg3NSA2Ni4wNjI1UTI1MS41NjI1IDY2LjA2MjUgMjUwLjQ1MzEyNSA2NS42NDA2MjVRMjQ5LjM0Mzc1IDY1LjIxODc1IDI0OS4wOTM3NSA2NS4wMzEyNVEyNDguODQzNzUgNjQuODQzNzUgMjQ4Ljg0Mzc1IDY0LjQ2ODc1UTI0OC44NDM3NSA2NC4wOTM3NSAyNDkuMDYyNSA2My41NDY4NzVRMjQ5LjI4MTI1IDYzLjAgMjQ5LjQ4NDM3NSA2Mi42NDA2MjVRMjQ5LjY4NzUgNjIuMjgxMjUgMjUwLjE1NjI1IDYxLjUzMTI1UTI1MC42MjUgNjAuNzgxMjUgMjUyLjAxNTYyNSA1OC4zNTkzNzVRMjUzLjQwNjI1IDU1LjkzNzUgMjU2LjI4MTI1IDUxLjEyNVEyNTkuMTU2MjUgNDYuMzEyNSAyNTkuNzE4NzUgNDUuMzEyNVEyNjAuOTA2MjUgNDMuMjUgMjYxLjY1NjI1IDQyLjMxMjVRMjYzLjA2MjUgNDAuNTMxMjUgMjY2LjQwNjI1IDQwLjUzMTI1UTI2Ny4xNTYyNSA0MC41MzEyNSAyNjcuMTU2MjUgNDEuNDY4NzVRMjY3LjE1NjI1IDQyLjkzNzUgMjY0LjQzNzUgNDcuMEwyNjMuMTI1IDQ4Ljk2ODc1UTI2OC41MzEyNSA0Mi45Njg3NSAyNzIuMjUgNDEuMzc1UTI3NC4wNjI1IDQwLjU5Mzc1IDI3NS41MTU2MjUgNDAuNTkzNzVRMjc2Ljk2ODc1IDQwLjU5Mzc1IDI3Ny44MjgxMjUgNDEuMzc1UTI3OC42ODc1IDQyLjE1NjI1IDI3OC42ODc1IDQzLjEwOTM3NVEyNzguNjg3NSA0NC4wNjI1IDI3OC4wMzEyNSA0NS4zOTA2MjVRMjc3LjM3NSA0Ni43MTg3NSAyNzYuNzAzMTI1IDQ3Ljc2NTYyNVEyNzYuMDMxMjUgNDguODEyNSAyNzQuOTM3NSA1MC40MDYyNVEyNzMuODQzNzUgNTIuMCAyNzMuNzUgNTIuMTQwNjI1UTI3My42NTYyNSA1Mi4yODEyNSAyNzMuMjY1NjI1IDUyLjg5MDYyNVEyNzIuODc1IDUzLjUgMjcyLjY4NzUgNTMuNzgxMjVRMjcyLjUgNTQuMDYyNSAyNzIuMDYyNSA1NC43NjU2MjVRMjcxLjYyNSA1NS40Njg3NSAyNzEuMzU5Mzc1IDU1LjkzNzVRMjcxLjA5Mzc1IDU2LjQwNjI1IDI3MC43MDMxMjUgNTcuMDkzNzVRMjcwLjMxMjUgNTcuNzgxMjUgMjcwLjA3ODEyNSA1OC4yODEyNVEyNjkuODQzNzUgNTguNzgxMjUgMjY5LjU5Mzc1IDU5LjM3NVEyNjkuMTU2MjUgNjAuNDY4NzUgMjY5LjE1NjI1IDYxLjE4NzVaIiBmaWxsPSIjZThjNTQ3Ii8+PHBhdGggZD0iTTE0LjQgOTAuMUMxMDIuNCA5OC4xIDE5MC44IDk3LjEgMjgyLjggODEuMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzgzMTJiIiBzdHJva2Utd2lkdGg9IjMuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iMjg4LjgiIGN5PSI3OS4xMjUiIHI9IjUiIGZpbGw9IiNmNGYxZTYiIHN0cm9rZT0iI2Y0ZjFlNiIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48L3N2Zz4=" alt="Sunday Pin" style="height:58px;width:auto;display:block"><span>sundaypin.live</span></div>
-    <div class="hero-grid">
-      <div>
-        <h1>Every par 3<br>on the <span class="flag">big screen.</span></h1>
-        <p class="lede">Sunday Pin turns your member-guest or charity outing into a show. Live cameras on the par 3s, a leaderboard everyone can follow from the cart or the clubhouse, and a highlight reel ready for the awards dinner.</p>
-        <div class="hero-cta">
-          <a class="btn primary" href="#packages">See packages</a>
-          <a class="btn ghost" href="#contact">Book your date</a>
-        </div>
+    <a class="logo" href="#top" aria-label="Sunday Pin home"><img src="/sundaypin/brand/wide-on-dark.svg" alt="Sunday Pin"></a>
+    <button class="menu" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    <ul id="navlinks">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#screens">The screens</a></li>
+      <li><a href="#app">The app</a></li>
+      <li><a href="#packages">Packages</a></li>
+      <li><a href="#sponsors">Sponsors</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a class="btn primary" href="#contact">Contact</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow" style="color:var(--on-green-muted)">Live golf for your tournament</span>
+      <h1>Every shot.<br>Every score.<br><em>On the big screen.</em></h1>
+      <p class="lede">Sunday Pin turns your member-guest, charity outing or club championship into a live event: cameras on the par 3s, scores from every cart, and leaderboards on every screen at the club.</p>
+      <div class="cta">
+        <a class="btn primary" href="#contact">Get in touch</a>
+        <a class="btn ghost" href="#how">See how it works</a>
       </div>
-      <div class="screen" aria-label="Example clubhouse leaderboard screen">
-        <div class="screen-in">
-          <div class="lb-head"><span>Member-Guest · Net Best Ball</span><span class="live">LIVE</span></div>
-          <table class="lb">
-            <thead><tr><th>Pos</th><th>Team</th><th class="num">To par</th><th class="num">Thru</th><th class="num hide-s">Flight</th></tr></thead>
-            <tbody>
-              <tr class="up"><td>1</td><td class="team">Reilly / Okafor</td><td class="num under">−9</td><td class="num">15</td><td class="num hide-s">A</td></tr>
-              <tr><td>T2</td><td class="team">Castellano / Burke</td><td class="num under">−7</td><td class="num">16</td><td class="num hide-s">A</td></tr>
-              <tr class="up"><td>T2</td><td class="team">Nguyen / Halloran</td><td class="num under">−7</td><td class="num">14</td><td class="num hide-s">B</td></tr>
-              <tr><td>4</td><td class="team">Marsh / DeLuca</td><td class="num under">−6</td><td class="num">F</td><td class="num hide-s">A</td></tr>
-              <tr><td>5</td><td class="team">Price / Feldman</td><td class="num under">−4</td><td class="num">13</td><td class="num hide-s">C</td></tr>
-              <tr><td>6</td><td class="team">Abrams / Vance</td><td class="num even">E</td><td class="num">12</td><td class="num hide-s">B</td></tr>
-            </tbody>
-          </table>
-          <div class="ticker"><span class="tag">HOLE 7</span><span>Closest to the pin: J. Halloran, 4 ft 2 in. Presented by your hole sponsor.</span></div>
-        </div>
-      </div>
+    </div>
+    <div class="stage">
+      <div class="livepill"><i></i>LIVE</div>
+      <div class="tv"><img src="/sundaypin/img/board-leaderboard.jpg" alt="Clubhouse screen showing a live leaderboard" width="1600" height="900"></div>
+      <div class="tv-stand"></div>
+      <div class="ph"><img src="/sundaypin/img/phone-live.jpg" alt="The live leaderboard on a phone"></div>
     </div>
   </div>
 </header>
 
-<section>
+<div class="strip" aria-label="Made for">
+  <div class="wrap"><span>Member-guests</span><b>·</b><span>Charity outings</span><b>·</b><span>Club championships</span><b>·</b><span>Corporate days</span><b>·</b><span>Pro-ams</span></div>
+</div>
+
+<div class="photo-band" style="background-image:url(/sundaypin/img/course-wide.jpg)" role="img" aria-label="A golf course fairway at sunrise">
+  <div class="wrap"><p>Your course, your players, live on every screen.</p></div>
+</div>
+
+<section id="how">
   <div class="wrap">
-    <span class="eyebrow">What your players get</span>
-    <h2>Three things that change the day</h2>
-    <div class="trio">
-      <article>
-        <h3>Par 3s, live</h3>
-        <p>A camera on every par 3 tee and green. Each shot plays live on screens around the club and in the app, so nobody misses the ace.</p>
-        <ul><li>Instant replay of every tee shot</li><li>Closest-to-the-pin measured and posted on the spot</li><li>Hole-in-one moments saved for the dinner</li></ul>
-      </article>
-      <article>
-        <h3>A live leaderboard</h3>
-        <p>Scores go in on the course and the board updates in seconds, by flight, net and gross. No more waiting on a whiteboard at the turn.</p>
-        <ul><li>Big screens in the clubhouse, tent and halfway house</li><li>The same board on every phone</li><li>Results ready the moment the last group finishes</li></ul>
-      </article>
-      <article>
-        <h3>A show for the dinner</h3>
-        <p>We cut the day into a highlight reel while you play. It runs at awards, along with winners, sponsors and your fundraising total.</p>
-        <ul><li>2 to 3 minute highlight reel</li><li>Winner graphics for every flight and contest</li><li>Clips sent to players to share the next day</li></ul>
-      </article>
+    <span class="eyebrow">How it works</span>
+    <h2>You run the tournament.<br>We run the show.</h2>
+    <p class="lede">One call to plan it, and our crew handles the rest on the day. Nothing for your staff to set up or learn.</p>
+    <div class="steps">
+      <article><time>Weeks before</time><h3>Plan it</h3><p>Send us your format, field and sponsors. We map the camera spots, screens and run of show with your pro shop.</p></article>
+      <article><time>Morning of</time><h3>We set up</h3><p>Cameras on the par 3s, screens in the clubhouse and tent, a QR card on every cart. Done before the first group arrives.</p></article>
+      <article><time>On the course</time><h3>Play live</h3><p>One player per cart keeps score on their phone. Leaderboards update in seconds, and every par 3 shot plays on the screens.</p></article>
+      <article><time>Awards dinner</time><h3>The big finish</h3><p>Final results, contest winners, your sponsors, your fundraising total and a highlight reel of the day.</p></article>
     </div>
   </div>
 </section>
 
-<section style="background:var(--paper-2)">
+<section class="screens" id="screens">
   <div class="wrap">
-    <div class="app-grid">
-      <div class="phone" aria-label="Example scoring app screen">
-        <div class="phone-in">
-          <div class="ph-top"><small>Cart 14 · Shotgun start</small><b>Hole 7 · Par 3</b></div>
-          <div class="hole">
-            <div class="hole-row"><span>168 yds · Hdcp 15</span><span>Enter scores</span></div>
-            <div class="players">
-              <div class="pl"><span>J. Halloran</span><span class="step"><i>−</i><span class="sc birdie">2</span><i>+</i></span></div>
-              <div class="pl"><span>T. Nguyen</span><span class="step"><i>−</i><span class="sc">3</span><i>+</i></span></div>
-              <div class="pl"><span>R. Castillo (guest)</span><span class="step"><i>−</i><span class="sc bogey">4</span><i>+</i></span></div>
-            </div>
-          </div>
-          <div class="ph-cam"><span>LIVE</span><em>Hole 7 tee cam</em></div>
-        </div>
-      </div>
-      <div>
-        <span class="eyebrow">The app</span>
-        <h2>Scoring that players actually use</h2>
-        <p class="lede" style="margin-top:16px">Each cart scans a QR code at check-in. No downloads, no passwords. One player keeps score for the group, and the leaderboard does the math, handicaps included.</p>
-        <div class="feat">
-          <div><h3>Any format</h3><p>Stroke play, best ball, scramble, shamble, Stableford and match play, with full or percentage handicaps.</p></div>
-          <div><h3>Flights and nines</h3><p>Shotgun or tee-time starts, multiple flights, front and back nine leaders, member-guest match brackets.</p></div>
-          <div><h3>Watch the par 3s</h3><p>Every par 3 cam lives in the app. Players see the group ahead tee off and catch replays at the turn.</p></div>
-          <div><h3>Contests built in</h3><p>Closest to the pin, long drive, hole-in-one prizes and skins, posted to the screens as they happen.</p></div>
-          <div><h3>For the committee</h3><p>A tournament desk to fix a score, settle a tie with a card-off, and lock final results.</p></div>
-          <div><h3>Keeps the field moving</h3><p>See which groups are on which hole, and spot a slow group before it backs up the course.</p></div>
-        </div>
-        <div class="legend" aria-label="Scorecard marks">
-          <span><span class="sc birdie">2</span> Birdie</span>
-          <span><span class="sc">3</span> Par</span>
-          <span><span class="sc bogey">4</span> Bogey</span>
-          <span>Under par shown in red, the way a real leaderboard does it.</span>
-        </div>
+    <span class="eyebrow">The screens</span>
+    <h2>Something to watch at every turn</h2>
+    <p class="lede">Big screens around the club rotate through the leaderboard, the par 3 cams and your sponsors, and break in when something big happens.</p>
+    <div class="tabs" role="tablist" aria-label="Screen types">
+      <button role="tab" aria-selected="true" data-i="0">Leaderboard</button>
+      <button role="tab" aria-selected="false" data-i="1">Par 3 cam</button>
+      <button role="tab" aria-selected="false" data-i="2">Hole-in-one</button>
+    </div>
+    <div class="show" role="tabpanel">
+      <div class="tv"><div class="scr"><img id="showimg" src="/sundaypin/img/board-leaderboard.jpg" alt="" width="1600" height="900"><div id="showcam" hidden><div class="cam"><video src="/sundaypin/img/par3-cam.mp4" poster="/sundaypin/img/par3-cam.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Live tee shot on the par 3"></video><span class="bug">HOLE 7</span><span class="bug r"><i></i>LIVE</span></div></div></div></div>
+      <div><h3 id="showh">Live leaderboard</h3><p id="showp"></p><ul id="showl"></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="app">
+  <div class="wrap app-grid">
+    <div class="phones">
+      <div class="ph2"><img src="/sundaypin/img/phone-score.jpg" alt="Scorecard on a phone"></div>
+      <div class="ph2"><img src="/sundaypin/img/phone-live.jpg" alt="Live leaderboard on a phone"></div>
+    </div>
+    <div>
+      <span class="eyebrow">The Sunday Pin app</span>
+      <h2>Scoring players actually use</h2>
+      <p class="lede">Scan the card on the cart and you're in. No accounts and no passwords. It works in the phone's browser too, so nobody is left out.</p>
+      <div class="modes">
+        <div class="mode"><span class="tag">For players</span><h3>Player</h3><ul><li>Enter scores hole by hole</li><li>Live leaderboard by flight</li><li>Watch the par 3 cams</li><li>Sponsor offers on each hole</li></ul></div>
+        <div class="mode"><span class="tag">For the pro shop</span><h3>Golf pro</h3><ul><li>See every cart live</li><li>Fix a score in a tap</li><li>Post news to the screens</li><li>Final results file for the club</li></ul></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="band">
+<div class="photo-band" style="background-image:url(/sundaypin/img/course-flag.jpg);background-position:center 60%" role="img" aria-label="A green with a red flag and bunkers">
+  <div class="wrap"><p>Every par 3 shot, on camera.</p></div>
+</div>
+
+<section id="packages" style="background:var(--paper-2)">
   <div class="wrap">
-    <span class="eyebrow">Coverage on a typical par 72</span>
-    <h2>Four par 3s. Four live cameras.</h2>
-    <p class="lede" style="margin-top:16px">We place a camera on each par 3, sent back over our own wireless link or cellular bonding, so there are no cables across your fairways. Holes shown in yellow are covered on a typical course.</p>
-    <div class="course" aria-label="Example course with par 3 holes highlighted">
-      <div class="h"><b>1</b>Par 4</div><div class="h"><b>2</b>Par 5</div><div class="h"><b>3</b>Par 4</div>
-      <div class="h p3"><b>4</b>Par 3</div><div class="h"><b>5</b>Par 4</div><div class="h"><b>6</b>Par 4</div>
-      <div class="h p3"><b>7</b>Par 3</div><div class="h"><b>8</b>Par 5</div><div class="h"><b>9</b>Par 4</div>
-      <div class="h"><b>10</b>Par 4</div><div class="h p3"><b>11</b>Par 3</div><div class="h"><b>12</b>Par 4</div>
-      <div class="h"><b>13</b>Par 5</div><div class="h"><b>14</b>Par 4</div><div class="h"><b>15</b>Par 4</div>
-      <div class="h p3"><b>16</b>Par 3</div><div class="h"><b>17</b>Par 4</div><div class="h"><b>18</b>Par 5</div>
+    <span class="eyebrow">Packages</span>
+    <h2>Pick your coverage</h2>
+    <p class="lede">Every event is different, so every quote is too. Every package is quoted for your day.</p>
+    <div class="pk">
+      <div class="card"><span class="lvl">Package 1</span><h3>Par</h3><p class="for">Live scoring and leaderboards, no cameras. Great for smaller outings.</p>
+        <ul><li>Scoring app for every cart, any format</li><li>Live leaderboard on up to 2 screens</li><li>Contest results and sponsor slides</li><li>Final results file for your club</li><li>1 operator on site</li></ul>
+        <div class="q">Quote on request</div></div>
+      <div class="card feature"><span class="lvl">Package 2</span><h3>Birdie</h3><p class="for">The full experience for a member-guest or charity outing.</p>
+        <ul><li>Everything in Par</li><li>Live cameras on 2 par 3s, with instant replay</li><li>Up to 4 screens around the club</li><li>Par 3 cams in the app</li><li>Highlight reel at the awards</li><li>2 crew on site</li></ul>
+        <div class="q">Quote on request</div></div>
+      <div class="card"><span class="lvl">Package 3</span><h3>Eagle</h3><p class="for">Every par 3 covered, plus a stream for everyone who couldn’t make it.</p>
+        <ul><li>Everything in Birdie</li><li>Cameras on every par 3, tee and green</li><li>LED wall for the tent or dinner</li><li>Live stream of the par 3s and awards</li><li>Edited event film within a week</li><li>Full production crew</li></ul>
+        <div class="q">Quote on request</div></div>
     </div>
-    <div class="cov">
-      <div><span class="kicker">ON THE TEE</span><h3>Tee and green cams</h3><p>Weatherproof cameras frame the swing and the flight to the green. Remote control lets us follow the ball.</p></div>
-      <div><span class="kicker">IN THE CLUBHOUSE</span><h3>The screens</h3><p>An LED wall or large TVs in the grill room, the tent and at the turn, each showing the cams, the board or sponsors.</p></div>
-      <div><span class="kicker">CONTROL</span><h3>Our production cart</h3><p>Our operator switches the cameras, runs replays and posts contest results all day.</p></div>
-      <div><span class="kicker">AFTER</span><h3>Your footage</h3><p>Every par 3 shot recorded. You get the highlight reel and all the clips to use for next year’s sign-ups.</p></div>
-    </div>
+    <p class="addons"><b>Add-ons:</b> an extra par 3 or long drive camera, drone flyovers of each hole, player interviews at the turn, a photo booth with an instant leaderboard print, and multi-day member-guest coverage.</p>
   </div>
 </section>
 
-<section>
+<section id="sponsors">
   <div class="wrap">
-    <span class="eyebrow">Run of show</span>
-    <h2>How the day runs</h2>
-    <div class="ros">
-      <div class="ros-row"><time>6:00 AM</time><b>We set up</b><p>Cameras go out to the par 3s, screens go up in the clubhouse. Nothing for your staff to do.</p></div>
-      <div class="ros-row"><time>8:00 AM</time><b>Check-in</b><p>Each cart gets its QR card. The screens show pairings, start holes and a welcome from your sponsors.</p></div>
-      <div class="ros-row"><time>9:00 AM</time><b>Shotgun start</b><p>Scores flow in. Par 3 shots play live and in replay, contest leaders post as they change.</p></div>
-      <div class="ros-row"><time>1:30 PM</time><b>Last putt</b><p>Final results lock as soon as the committee signs off. No hand tallying.</p></div>
-      <div class="ros-row"><time>3:00 PM</time><b>Awards</b><p>Highlight reel, winners for every flight and contest, the fundraising total and a thank-you to every sponsor.</p></div>
-    </div>
-  </div>
-</section>
-
-<section style="background:var(--paper-2)">
-  <div class="wrap">
-    <span class="eyebrow">Charity outings and sponsors</span>
-    <h2>More for sponsors. More raised.</h2>
-    <div class="two">
-      <div>
+    <span class="eyebrow">Sponsors and charities</span>
+    <h2>More for sponsors.<br>More for the cause.</h2>
+    <div class="split">
+      <div class="panel">
         <h3>Sponsors get seen, not just a sign on a stake</h3>
         <ul>
           <li>“Hole 7 presented by” on the camera feed every time someone tees off</li>
           <li>Sponsor slides between leaderboard updates on every screen</li>
-          <li>Logos on the app, the contest results and the highlight reel</li>
-          <li>A camera sponsorship is a new item you can sell, and it often covers the cost of the coverage</li>
+          <li>Logo and offer on their hole in the app, with taps counted</li>
+          <li>A report after the event: screen time, views and taps</li>
         </ul>
+        <div class="sp-demo"><div class="scr"><img src="/sundaypin/img/board-par3.jpg" alt="Par 3 screen with a hole sponsor credit"><div class="cam"><video src="/sundaypin/img/par3-cam.mp4" poster="/sundaypin/img/par3-cam.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Live tee shot on the par 3"></video><span class="bug">HOLE 7</span><span class="bug r"><i></i>LIVE</span></div></div></div>
       </div>
-      <div>
-        <h3>Fundraising on the screens</h3>
+      <div class="panel">
+        <h3>Raise more for your charity</h3>
         <ul>
-          <li>A live total on every screen, updated as gifts come in</li>
-          <li>Pledge per birdie, mulligan sales and par 3 challenges</li>
-          <li>A QR code on screen so guests can give from their phone</li>
+          <li>A live fundraising total on every screen</li>
+          <li>Text-to-give and QR codes on the leaderboard</li>
+          <li>Challenge holes and mulligans tracked in the app</li>
+          <li>The total revealed live at the dinner</li>
         </ul>
         <div class="thermo" aria-label="Example fundraising total">
-          <div class="thermo-row"><span>Spring Charity Classic</span><span><b>$86,400</b> of $120,000</span></div>
-          <div class="thermo-bar"><i></i></div>
+          <div class="thermo-row"><span>Raised so far</span><span>$36,200 of $50,000</span></div>
+          <div class="bar"><i></i></div>
         </div>
       </div>
     </div>
+    <div class="photo-pair"><img src="/sundaypin/img/course-aerial.jpg" alt="Aerial view of a fairway and green with bunkers" width="1800" height="1199"><img src="/sundaypin/img/course-sunset.jpg" alt="A putting green at sunset" width="2000" height="1334"></div>
   </div>
 </section>
 
-<section id="packages">
+<section id="faq" style="background:var(--paper-2)">
   <div class="wrap">
-    <span class="eyebrow">Packages</span>
-    <h2>Pick your coverage</h2>
-    <div class="pk">
-      <div class="card">
-        <span class="score">Package 1</span>
-        <h3>Par</h3>
-        <p class="for">The live scoring app and leaderboard, without cameras. Good for smaller outings.</p>
-        <ul>
-          <li>Scoring app for every cart, any format</li>
-          <li>Live leaderboard on up to 2 screens we supply</li>
-          <li>Contest results and sponsor slides</li>
-          <li>Final results file for your club</li>
-          <li>1 operator on site</li>
-        </ul>
-        <div class="price">Quote on request</div>
-      </div>
-      <div class="card feature">
-        <span class="badge">Recommended</span><br>
-        <span class="score">Package 2</span>
-        <h3>Birdie</h3>
-        <p class="for">The full experience for a member-guest or a charity outing.</p>
-        <ul>
-          <li>Everything in Par</li>
-          <li>Live cameras on 2 par 3s, with instant replay</li>
-          <li>Up to 4 screens around the club</li>
-          <li>Par 3 cams in the app</li>
-          <li>Highlight reel at the awards</li>
-          <li>2 crew on site</li>
-        </ul>
-        <div class="price">Quote on request</div>
-      </div>
-      <div class="card">
-        <span class="score">Package 3</span>
-        <h3>Eagle</h3>
-        <p class="for">Every par 3 covered, plus a stream for people who couldn’t make it.</p>
-        <ul>
-          <li>Everything in Birdie</li>
-          <li>Cameras on every par 3, tee and green</li>
-          <li>LED wall for the tent or dinner</li>
-          <li>Live stream of the par 3s and awards</li>
-          <li>Edited event film delivered in a week</li>
-          <li>Full production crew</li>
-        </ul>
-        <div class="price">Quote on request</div>
-      </div>
-    </div>
-    <p class="addons"><b>Add-ons:</b> extra par 3 or long drive camera, drone flyovers of each hole for the screens, player interviews at the turn, photo booth with an instant leaderboard print, and multi-day member-guest coverage.</p>
-    <span class="eyebrow" style="margin-top:44px">Made for</span>
-    <div class="events"><span>Member-guests</span><span>Charity outings</span><span>Corporate outings</span><span>Club championships</span><span>Pro-ams</span><span>Fundraiser scrambles</span></div>
-  </div>
-</section>
-
-<section class="contact" id="contact">
-  <div class="wrap">
-    <div class="contact-grid">
-      <div>
-        <span class="eyebrow" style="color:var(--on-green-muted)">Booking the season</span>
-        <h2>Put your tournament<br>on the big screen.</h2>
-        <p class="lede" style="margin-top:18px;color:var(--on-green-muted)">Spring and summer dates fill first. Tell us your course, your date and your field size, and we will send a plan with camera spots and a quote.</p>
-      </div>
-      <dl>
-        <div><dt>Web</dt><dd>sundaypin.live</dd></div>
-        <div><dt>Email</dt><dd>hello@sundaypin.live</dd></div>
-        <div><dt>Based in</dt><dd>Pearl River, NY. Serving the tri-state area, D.C. and Florida.</dd></div>
-      </dl>
+    <span class="eyebrow">Questions</span>
+    <h2>Good to know</h2>
+    <div class="faq">
+      <details><summary>Do players need to download anything?</summary><p>No. Players scan the QR code on their cart card and score in the phone's browser. </p></details>
+      <details><summary>What formats and handicaps do you handle?</summary><p>Stroke play, best ball, scramble, shamble, Stableford and match play, with full or percentage handicaps, multiple flights, net and gross.</p></details>
+      <details><summary>What if the course has poor cell signal?</summary><p>Scores are saved on the phone and sent as soon as there is signal, so nothing is lost. We bring our own network for the cameras and screens.</p></details>
+      <details><summary>Do you bring the screens?</summary><p>Yes. We bring TVs, stands and an LED wall on the Eagle package, or we can use the club’s own screens.</p></details>
+      <details><summary>Where do you work?</summary><p>We’re based in Pearl River, New York, and cover the tri-state area, Washington D.C. and Florida. Ask us about anywhere else.</p></details>
+      <details><summary>How far ahead should we book?</summary><p>Spring and summer weekends fill first, so two to three months ahead is best. We can sometimes do it with a couple of weeks’ notice.</p></details>
     </div>
   </div>
 </section>
-<div class="wrap foot">Sunday Pin · sundaypin.live · Names and numbers on this page are examples</div>
 
+<section class="book" id="contact">
+  <div class="wrap" style="text-align:center;max-width:760px">
+    <span class="eyebrow" style="color:var(--on-green-muted)">Get in touch</span>
+    <h2>Put your tournament on the big screen</h2>
+    <p class="lede" style="margin-left:auto;margin-right:auto">Questions, dates or a quote: send us a note and we’ll get back to you.</p>
+    <dl style="display:flex;justify-content:center;gap:24px 56px;flex-wrap:wrap;text-align:left">
+      <div><dt>Email</dt><dd><a href="mailto:hello@sundaypin.live">hello@sundaypin.live</a></dd></div>
+      <div><dt>Based in</dt><dd>Pearl River, NY. Serving the tri-state area, D.C. and Florida.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><img src="/sundaypin/brand/wide-on-dark.svg" alt="Sunday Pin"><p style="margin-top:14px;max-width:34ch">Live cameras, live scoring and big-screen leaderboards for golf tournaments.</p></div>
+    <div><h4>Sunday Pin</h4><ul><li><a href="#how">How it works</a></li><li><a href="#packages">Packages</a></li><li><a href="#sponsors">Sponsors</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+    <div><h4>Contact</h4><ul><li><a href="mailto:hello@sundaypin.live">hello@sundaypin.live</a></li><li>Pearl River, NY</li></ul></div>
+  </div>
+  <div class="wrap legal">© 2026 Sunday Pin</div>
+</footer>
+
+<script>
+const S=[
+ {img:'/sundaypin/img/board-leaderboard.jpg',h:'Live leaderboard',p:'Scores land seconds after they’re entered on the course. Split by flight, net and gross.',l:['Movers marked as they climb','Rotates with sponsor slides','The same board on every phone']},
+ {img:'/sundaypin/img/board-par3.jpg',cam:1,h:'Par 3 cam',p:'Every tee shot on the par 3s plays live, with closest to the pin posted the moment it’s measured.',l:['Instant replay of every shot','Hole sponsor credit on screen','Hole stats: aces, birdies, average']},
+ {img:'/sundaypin/img/board-ace.jpg',h:'Hole-in-one',p:'When someone makes an ace, every screen at the club stops for it. Then it goes in the highlight reel.',l:['Take-over on every screen','Replay ready in seconds','Saved for the awards dinner']},
+];
+const tabs=[...document.querySelectorAll('.tabs button')];
+function show(i){const s=S[i];tabs.forEach((b,j)=>b.setAttribute('aria-selected',j===i));document.getElementById('showimg').src=s.img;document.getElementById('showimg').alt=s.h;const sc=document.getElementById('showcam');sc.hidden=!s.cam;const v=sc.querySelector('video');if(s.cam){v.play().catch(()=>{})}else v.pause();document.getElementById('showh').textContent=s.h;document.getElementById('showp').textContent=s.p;document.getElementById('showl').innerHTML=s.l.map(x=>'<li>'+x+'</li>').join('');}
+tabs.forEach((b,i)=>b.onclick=()=>show(i));show(0);
+const m=document.querySelector('.menu'),ul=document.getElementById('navlinks');
+m.onclick=()=>{const o=ul.classList.toggle('open');m.setAttribute('aria-expanded',o)};
+ul.querySelectorAll('a').forEach(a=>a.onclick=()=>{ul.classList.remove('open');m.setAttribute('aria-expanded',false)});
+</script>
 </body>
 </html>

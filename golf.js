@@ -42,6 +42,9 @@ export async function golf(request, env) {
   if (url.pathname === '/golf/api/new') {
     if (request.method !== 'POST') return json({ error: 'Use POST' }, 405);
     let b = {}; try { b = await request.json(); } catch {}
+    // live sites need the GOLF_CREATE_PASS secret; without it only local dev (localhost) can make tournaments
+    const local = /^(localhost|127\.0\.0\.1)$/.test(new URL(request.url).hostname);
+    if (!env.GOLF_CREATE_PASS && !local) return json({ error: 'New tournaments are not open yet. Ask Sunday Pin to set one up.' }, 403);
     if (env.GOLF_CREATE_PASS && b.pass !== env.GOLF_CREATE_PASS) return json({ error: 'That passcode is not right.' }, 403);
     const id = newId();
     const r = await env.GOLF.get(env.GOLF.idFromName(id)).fetch(new Request(`https://golf/init?id=${id}`, { method: 'POST', body: JSON.stringify({ name: String(b.name || '').slice(0, 80) }) }));
