@@ -1,4 +1,4 @@
-// Showcaller Golf (Gotham Golf Live): live scoring for golf tournaments. One Durable Object per tournament holds the
+// Clubhouse Live (golf): live scoring for golf tournaments. One Durable Object per tournament holds the
 // setup and every score, and pushes each change to the open pages over a WebSocket. The scoring math lives in
 // public/golf/core.js and runs in the pages, so this file only checks who may change what and stores it.
 //
