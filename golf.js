@@ -1,4 +1,4 @@
-// Sunday Pin (golf): live scoring for golf tournaments. One Durable Object per tournament holds the
+// Greenside Live (golf): live scoring for golf tournaments. One Durable Object per tournament holds the
 // setup and every score, and pushes each change to the open pages over a WebSocket. The scoring math lives in
 // public/golf/core.js and runs in the pages, so this file only checks who may change what and stores it.
 //
@@ -21,7 +21,7 @@ const rand = (n, abc) => { const b = crypto.getRandomValues(new Uint8Array(n)); 
 const newId = () => rand(8, 'abcdefghijkmnpqrstuvwxyz23456789');
 export const newCode = () => rand(6, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
-// the Sunday Pin phone app runs its pages from the phone itself, so the API answers those origins too
+// the Greenside Live phone app runs its pages from the phone itself, so the API answers those origins too
 const APP_ORIGINS = new Set(['capacitor://localhost', 'https://localhost', 'http://localhost', 'ionic://localhost']);
 const cors = (request, r) => {
   const o = request.headers.get('Origin');
@@ -44,7 +44,7 @@ export async function golf(request, env) {
     let b = {}; try { b = await request.json(); } catch {}
     // live sites need the GOLF_CREATE_PASS secret; without it only local dev (localhost) can make tournaments
     const local = /^(localhost|127\.0\.0\.1)$/.test(new URL(request.url).hostname);
-    if (!env.GOLF_CREATE_PASS && !local) return json({ error: 'New tournaments are not open yet. Ask Sunday Pin to set one up.' }, 403);
+    if (!env.GOLF_CREATE_PASS && !local) return json({ error: 'New tournaments are not open yet. Ask Greenside Live to set one up.' }, 403);
     if (env.GOLF_CREATE_PASS && b.pass !== env.GOLF_CREATE_PASS) return json({ error: 'That passcode is not right.' }, 403);
     const id = newId();
     const r = await env.GOLF.get(env.GOLF.idFromName(id)).fetch(new Request(`https://golf/init?id=${id}`, { method: 'POST', body: JSON.stringify({ name: String(b.name || '').slice(0, 80) }) }));

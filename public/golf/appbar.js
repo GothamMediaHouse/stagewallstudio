@@ -1,10 +1,10 @@
-// Sunday Pin phone app: when a page runs inside the app (its user agent says SundayPinApp), add a small bar
+// Greenside Live phone app: when a page runs inside the app (its user agent says GreensideLiveApp), add a small bar
 // to get home and switch between the scorecard and the leaderboard. Every page also remembers the tournament
 // so the app's home screen can list it.
 import { eventId, esc } from '/golf/client.js';
 
-export const inApp = /SundayPinApp/.test(navigator.userAgent);
-const RKEY = 'sundaypin:recent';
+export const inApp = /GreensideLiveApp/.test(navigator.userAgent);
+const RKEY = 'greenside:recent';
 
 export function remember(name, code = '') {
   const id = eventId(); if (!id) return;

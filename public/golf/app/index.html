@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sunday Pin</title>
+<title>Greenside Live</title>
 <meta name="theme-color" content="#123628">
 <link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
@@ -41,7 +41,7 @@ main { max-width: 480px; margin: -18px auto 0; padding: 0 16px calc(40px + env(s
 </head>
 <body>
 <header class="hero">
-  <img src="/golf/brand/wide-on-dark.svg" alt="Sunday Pin">
+  <img src="/golf/brand/wide-on-dark.svg" alt="Greenside Live">
   <p>Live scoring, leaderboards and par 3 cams for your tournament.</p>
 </header>
 <main>
@@ -77,7 +77,7 @@ main { max-width: 480px; margin: -18px auto 0; padding: 0 16px calc(40px + env(s
       <div class="err" id="proErr" role="alert" hidden></div>
     </form>
   </section>
-  <p class="foot"><a href="https://sundaypin.live/">sundaypin.live</a></p>
+  <p class="foot"><a href="https://greensidelive.com/">greensidelive.com</a></p>
 </main>
 
 <div class="scan" id="scan" hidden>
@@ -90,7 +90,7 @@ main { max-width: 480px; margin: -18px auto 0; padding: 0 16px calc(40px + env(s
 import { esc } from '/golf/client.js';
 const $ = (id) => document.getElementById(id);
 const ID = /^[a-z0-9]{8}$/, CODE = /^[A-Z0-9]{6}$/;
-const RKEY = 'sundaypin:recent';
+const RKEY = 'greenside:recent';
 const recent = () => { try { return JSON.parse(localStorage.getItem(RKEY)) || []; } catch { return []; } };
 
 // remember where this phone has played, so it can go straight back in
@@ -101,7 +101,7 @@ function drawRecent() {
 }
 drawRecent();
 
-// any Sunday Pin link or code → where to go
+// any Greenside Live link or code → where to go
 function route(text) {
   const t = String(text || '').trim();
   let m = t.match(/\/g\/([a-z0-9]{8})(?:\/s\/([A-Z0-9]{6}))?/i);
@@ -136,8 +136,8 @@ $('proForm').addEventListener('submit', async (e) => {
     const r = await fetch(`/golf/api/${id}/pro`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin, op: 'hello' }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || 'That didn’t work. Try again.');
-    sessionStorage.setItem(`sundaypin:pin:${id}`, pin);
-    try { localStorage.setItem(`sundaypin:pin:${id}`, pin); } catch {}
+    sessionStorage.setItem(`greenside:pin:${id}`, pin);
+    try { localStorage.setItem(`greenside:pin:${id}`, pin); } catch {}
     location.href = `/golf/app/pro/?e=${id}`;
   } catch (x) { err.textContent = x.message; err.hidden = false; }
 });
@@ -164,7 +164,7 @@ async function startScan() {
       if (hit && hit.data) {
         const to = route(hit.data);
         if (to) { stopScan(); location.href = to; return; }
-        $('scanMsg').textContent = 'That QR code isn’t a Sunday Pin card.';
+        $('scanMsg').textContent = 'That QR code isn’t a Greenside Live card.';
       }
     }
     requestAnimationFrame(tick);

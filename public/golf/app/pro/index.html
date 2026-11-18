@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Golf pro · Sunday Pin</title>
+<title>Golf pro · Greenside Live</title>
 <meta name="theme-color" content="#123628">
 <link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -72,7 +72,7 @@ import { leaderboard, fmtPar, contestLeader, fmtDist } from '/golf/core.js';
 import { eventId, post, live, esc } from '/golf/client.js';
 const $ = (id) => document.getElementById(id);
 const id = eventId();
-const pin = sessionStorage.getItem(`sundaypin:pin:${id}`) || (() => { try { return localStorage.getItem(`sundaypin:pin:${id}`); } catch { return null; } })();
+const pin = sessionStorage.getItem(`greenside:pin:${id}`) || (() => { try { return localStorage.getItem(`greenside:pin:${id}`); } catch { return null; } })();
 let S = null, me = null, tab = 'live', fixTeam = null, log = [];
 const ICON = {
   live: '<path d="M3 12h4l3-8 4 16 3-8h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
@@ -87,7 +87,7 @@ async function op(body, ok) {
   try { const r = await post('pro', { pin, ...body }); if (ok) toast(ok); return r; }
   catch (e) { toast(e.message); if (e.status === 403 && /PIN/.test(e.message)) signOut(); throw e; }
 }
-function signOut() { sessionStorage.removeItem(`sundaypin:pin:${id}`); try { localStorage.removeItem(`sundaypin:pin:${id}`); } catch {} location.href = '/golf/app/'; }
+function signOut() { sessionStorage.removeItem(`greenside:pin:${id}`); try { localStorage.removeItem(`greenside:pin:${id}`); } catch {} location.href = '/golf/app/'; }
 
 function drawTabs() {
   const tabs = me.role === 'pro' ? TABS_PRO : [['contests', 'Contests']];
