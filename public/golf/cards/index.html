@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cart cards · Showcaller Golf</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/golf/golf.css">
+<style>
+/* Printed on letter paper, four cards a page; cut along the dashed lines and clip one to each cart. Always light, for paper. */
+:root { color-scheme: light; --paper: #fff; --ink: #14201a; --muted: #56625a; --line: #c9d1c5; }
+body { background: #e9ece6; color: var(--ink); }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; background: var(--green); color: var(--on-green); }
+.bar p { margin: 0; color: var(--on-green-muted); font-size: .9rem; }
+.sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 3.9in), 1fr)); gap: 16px; padding: 16px; max-width: 8.5in; margin: 0 auto; }
+.card { background: #fff; border: 1.5px dashed var(--line); border-radius: 6px; padding: .3in; display: grid; grid-template-columns: 1fr auto; gap: .2in; break-inside: avoid; min-height: 4.6in; align-content: start; }
+.card .ev { grid-column: 1 / -1; font-family: var(--f-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: .08in; }
+.card h2 { font-size: 1.9rem; line-height: 1; }
+.card ul { list-style: none; padding: 0; margin: .1in 0 0; font-size: .92rem; }
+.card li { padding: 2px 0; }
+.card .start { margin-top: .12in; font-family: var(--f-display); font-size: 1.2rem; text-transform: uppercase; font-weight: 700; }
+.card .qr svg { width: 1.6in; height: 1.6in; display: block; }
+.card .code { text-align: center; font-family: var(--f-mono); font-size: 1rem; font-weight: 600; letter-spacing: .14em; margin-top: 4px; }
+.card .how { grid-column: 1 / -1; font-size: .82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: .1in; }
+.card .how b { color: var(--ink); }
+@media print {
+  @page { size: letter; margin: .25in; }
+  body { background: #fff; }
+  .bar { display: none; }
+  .sheet { grid-template-columns: 1fr 1fr; gap: 0; padding: 0; max-width: none; }
+  .card { border-radius: 0; min-height: 5.1in; }
+}
+</style>
+</head>
+<body>
+<div class="bar"><div><h1 style="font-size:1.4rem">Cart cards</h1><p id="sub">Loading…</p></div><button class="btn primary" onclick="print()">Print</button></div>
+<div class="sheet" id="sheet"></div>
+<script src="/golf/qrcode.js"></script>
+<script type="module">
+import { post, eventId, esc } from '/golf/client.js';
+const key = location.hash.slice(1).split('&')[0];
+const sheet = document.getElementById('sheet');
+try {
+  const ev = await post('desk', { key, op: 'get' });
+  const title = ev.screens?.title || ev.name;
+  document.getElementById('sub').textContent = `${ev.teams.length} team${ev.teams.length === 1 ? '' : 's'} · ${title}. Cut along the dashed lines and clip one to each cart.`;
+  sheet.innerHTML = ev.teams.map((t) => {
+    const url = `${location.origin}/g/${eventId()}/s/${t.code}`;
+    const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    return `<div class="card"><div class="ev">${esc(title)}${ev.date ? ` · ${esc(ev.date)}` : ''}</div>
+      <div><h2>${esc(t.name || t.players.map((p) => p.name.split(' ').pop()).join(' / '))}</h2>
+      <ul>${t.players.map((p) => `<li>${esc(p.name)}</li>`).join('')}</ul>
+      <div class="start">Start: hole ${t.start || 1}${t.flight ? ` · Flight ${esc(t.flight)}` : ''}</div></div>
+      <div><div class="qr">${qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div><div class="code">${esc(t.code)}</div></div>
+      <div class="how"><b>Keep score on your phone.</b> Point your camera at the code and tap the link. No app, no sign-in. One person per cart keeps score, and the leaderboard and big screens update as you play.</div></div>`;
+  }).join('') || '<p>No teams yet. Add them on the desk’s Teams tab and save.</p>';
+} catch (e) {
+  sheet.innerHTML = `<p>${esc(e.message)}</p>`;
+}
+</script>
+</body>
+</html>

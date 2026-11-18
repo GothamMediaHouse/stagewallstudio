@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#123628">
+<title>Leaderboard · Showcaller Golf</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/golf/golf.css">
+<style>
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.hdr h1 { font-size: 1.7rem; }
+.hdr .label { margin-top: 4px; display: block; }
+nav.tabs { display: flex; gap: 2px; background: var(--green); padding: 0 max(12px, env(safe-area-inset-left, 0px)); overflow-x: auto; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--green); }
+nav.tabs button { background: none; border: 0; color: var(--on-green-muted); padding: 10px 12px; font-weight: 600; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button[aria-pressed="true"] { color: var(--on-green); border-color: var(--flag); }
+main { max-width: 720px; margin: 0 auto; padding: 14px max(16px, env(safe-area-inset-left, 0px)) 40px max(16px, env(safe-area-inset-right, 0px)); }
+.fund { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.fund .row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .9rem; }
+.fund .amt { font-family: var(--f-display); font-size: 1.6rem; font-weight: 800; }
+.fund .bar { height: 10px; background: var(--paper-2); border-radius: 5px; overflow: hidden; margin-top: 8px; }
+.fund .bar i { display: block; height: 100%; background: var(--red); }
+.flights { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.flights button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 12px; font-size: .85rem; }
+.flights button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.lb { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; font-variant-numeric: tabular-nums; }
+.lb th { text-align: left; font-family: var(--f-mono); font-weight: 500; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.lb td { padding: 10px; border-bottom: 1px solid var(--line); }
+.lb tr.r { cursor: pointer; }
+.lb .pos { font-family: var(--f-mono); color: var(--muted); width: 3em; }
+.lb .nm b { display: block; font-weight: 600; }
+.lb .nm span { font-size: .78rem; color: var(--muted); }
+.lb .num { text-align: right; font-family: var(--f-mono); font-weight: 600; white-space: nowrap; }
+.lb .tp { font-size: 1.15rem; }
+.lb tr.open td { background: var(--paper-2); }
+.cardrow td { padding: 0 !important; background: var(--paper-2); }
+.cardrow .wrap { overflow-x: auto; padding: 8px 10px 12px; }
+.cardrow table { border-collapse: collapse; font-family: var(--f-mono); font-size: .74rem; }
+.cardrow th, .cardrow td { padding: 3px 3px; text-align: center; border: 0 !important; }
+.cardrow th:first-child, .cardrow td:first-child { text-align: left; font-family: var(--f-body); padding-right: 8px; white-space: nowrap; }
+.cardrow .sc { min-width: 1.7em; height: 1.7em; }
+.p3 { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 16px; scroll-margin-top: 60px; }
+.p3 .cam { position: relative; aspect-ratio: 16 / 9; background: #0a120e; }
+.p3 .cam video, .p3 .cam iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.p3 .cam .none { position: absolute; inset: 0; display: grid; place-items: center; color: #a9bdb0; font-size: .9rem; background: linear-gradient(180deg, #1d4a35, #123628); }
+.p3 .cam .tag { position: absolute; left: 8px; top: 8px; background: #c8312b; color: #fff; font-family: var(--f-mono); font-size: .62rem; letter-spacing: .1em; padding: 2px 6px; border-radius: 2px; z-index: 2; }
+.p3 .body { padding: 14px; }
+.p3 h2 { font-size: 1.8rem; }
+.p3 .facts { font-family: var(--f-mono); font-size: .8rem; color: var(--muted); margin-top: 4px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.stats b { display: block; font-family: var(--f-display); font-size: 1.6rem; }
+.stats span { font-family: var(--f-mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.ct { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+.ct h3 { font-size: 1.15rem; }
+.ct .sp { font-size: .8rem; color: var(--muted); }
+.ct ol { margin: 8px 0 0; padding-left: 20px; }
+.ct li { display: list-item; padding: 3px 0; }
+.ct li span { float: right; font-family: var(--f-mono); }
+.sponsors { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 28px; }
+.sponsors div { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px; text-align: center; font-weight: 600; min-height: 64px; display: grid; place-items: center; }
+.sponsors img { max-width: 100%; max-height: 44px; }
+.empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+.flash { background: var(--flag); color: var(--on-flag); padding: 10px 16px; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="hdr"><div><h1 id="title">Leaderboard</h1><span class="label" id="sub"></span></div><span class="pill live pulse" id="pill">LIVE</span></div></header>
+<div class="flash" id="flash" hidden></div>
+<nav class="tabs" id="tabs"><button data-v="lb" aria-pressed="true">Leaderboard</button><button data-v="p3" aria-pressed="false">Par 3s</button><button data-v="ct" aria-pressed="false">Contests</button><button data-v="sk" aria-pressed="false" hidden>Skins</button></nav>
+<main id="main"><div class="empty">Loading the leaderboard…</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script type="module">
+import { leaderboard, fmtPar, holeStats, contestLeader, fmtDist, skins, mark, FORMATS } from '/golf/core.js';
+import { live, esc } from '/golf/client.js';
+
+let S = null, view = location.hash.startsWith('#hole-') ? 'p3' : 'lb', flight = '', openRow = null;
+const $ = (id) => document.getElementById(id);
+
+function camHtml(url, n) {
+  if (!url) return `<div class="none">No camera on this hole</div>`;
+  if (/\.m3u8(\?|$)/.test(url)) return `<video muted playsinline autoplay controls data-hls="${esc(url)}"></video><span class="tag">LIVE</span>`;
+  return `<iframe src="${esc(url)}" allow="autoplay; fullscreen" allowfullscreen title="Hole ${n} camera"></iframe><span class="tag">LIVE</span>`;
+}
+
+function lbView() {
+  const stab = S.format.type === 'stableford';
+  const lb = leaderboard(S, S.scores, { flight: flight || undefined });
+  const fund = S.fund?.on ? `<div class="fund"><div class="row"><span>${esc(S.fund.label || 'Raised today')}</span>${S.fund.give ? `<a href="${esc(S.fund.give)}" target="_blank" rel="noopener">Give now</a>` : ''}</div>
+    <div class="amt">$${Math.round(S.fund.raised).toLocaleString()}${S.fund.goal ? `<span class="label" style="font-family:var(--f-mono)"> of $${Math.round(S.fund.goal).toLocaleString()}</span>` : ''}</div>${S.fund.goal ? `<div class="bar"><i style="width:${Math.min(100, S.fund.raised / S.fund.goal * 100)}%"></i></div>` : ''}</div>` : '';
+  const fl = S.flights.length > 1 ? `<div class="flights">${['', ...S.flights].map((f) => `<button data-fl="${esc(f)}" aria-pressed="${f === flight}">${f ? `Flight ${esc(f)}` : 'All'}</button>`).join('')}</div>` : '';
+  if (!lb.length) return fund + fl + `<div class="empty">No teams yet.</div>`;
+  return fund + fl + `<table class="lb"><thead><tr><th>Pos</th><th>${S.format.type === 'stroke' ? 'Player' : 'Team'}</th><th class="num">${stab ? 'Pts' : 'To par'}</th><th class="num">Thru</th></tr></thead><tbody>${lb.map((l) => `
+    <tr class="r ${openRow === l.key ? 'open' : ''}" data-k="${esc(l.key)}"><td class="pos">${esc(l.pos)}</td><td class="nm"><b>${esc(l.name)}</b>${l.sub && l.sub !== l.name ? `<span>${esc(l.sub)}</span>` : ''}</td>
+    <td class="num tp ${!stab && l.played && l.score < 0 ? 'under' : ''}">${l.played ? fmtPar(l.score, stab).replace(' pts', '') : '—'}</td><td class="num">${esc(l.thru)}</td></tr>
+    ${openRow === l.key ? `<tr class="cardrow"><td colspan="4"><div class="wrap">${cardTable(l)}</div></td></tr>` : ''}`).join('')}</tbody></table>
+    <p class="label" style="margin-top:10px">${esc(FORMATS[S.format.type])} · ${stab ? 'points' : S.format.show === 'gross' ? 'gross' : 'net'}${S.locked ? ' · final results' : ''} · tap a team for its card</p>`;
+}
+
+function cardTable(l) {
+  const H = S.course.holes, t = l.team, scr = S.format.type === 'scramble';
+  const who = scr ? [{ id: 'T', name: t.name || 'Team' }] : t.players;
+  const sc = S.scores[l.teamId] || {};
+  return `<table><tr><th>Hole</th>${H.map((h) => `<th>${h.n}</th>`).join('')}</tr><tr><th>Par</th>${H.map((h) => `<th>${h.par}</th>`).join('')}</tr>
+    ${who.map((p) => `<tr><td>${esc(p.name)}</td>${H.map((h, i) => { const v = (sc[p.id] || [])[i]; return `<td>${v == null ? '' : v === 0 ? 'PU' : `<span class="sc ${mark(v, h.par)}">${v}</span>`}</td>`; }).join('')}</tr>`).join('')}</table>`;
+}
+
+function contestBox(c) {
+  const l = contestLeader(c);
+  return `<div class="ct"><h3>${esc(c.label || (c.kind === 'ld' ? 'Long drive' : 'Closest to the pin'))} · Hole ${c.hole}</h3>${c.sponsor ? `<div class="sp">Presented by ${esc(c.sponsor)}</div>` : ''}
+    ${l.length ? `<ol>${l.slice(0, 5).map((e) => `<li>${esc(e.name)} <span>${fmtDist(c, e.dist)}</span></li>`).join('')}</ol>` : '<p class="sp" style="margin:6px 0 0">No one on the board yet.</p>'}</div>`;
+}
+
+function p3View() {
+  const holes = S.course.holes.filter((h) => h.par === 3);
+  if (!holes.length) return `<div class="empty">No par 3s set for this course.</div>`;
+  return holes.map((h) => {
+    const st = holeStats(S, S.scores, h.n), sp = S.sponsors.find((s) => s.holes.includes(h.n));
+    return `<article class="p3" id="hole-${h.n}"><div class="cam">${camHtml(S.cams[h.n], h.n)}</div><div class="body">
+      <h2>Hole ${h.n}</h2><div class="facts">Par 3${h.yds ? ` · ${h.yds} yds` : ''} · SI ${h.hcp}${st.avg ? ` · avg ${st.avg.toFixed(2)}` : ''}${sp ? ` · presented by ${esc(sp.name)}` : ''}</div>
+      ${st.aces.length ? `<p style="margin:10px 0 0;font-weight:600" class="under">Hole in one: ${st.aces.map((a) => esc(a.name)).join(', ')}</p>` : ''}
+      <div class="stats"><div><b>${st.aces.length}</b><span>Aces</span></div><div><b>${st.birdie + st.eagle - st.aces.length}</b><span>Birdies</span></div><div><b>${st.par0}</b><span>Pars</span></div><div><b>${st.bogey + st.worse}</b><span>Over</span></div></div>
+      ${S.contests.filter((c) => c.hole === h.n).map(contestBox).join('')}</div></article>`;
+  }).join('');
+}
+
+function ctView() { return S.contests.length ? S.contests.map(contestBox).join('') : `<div class="empty">No contests in this tournament.</div>`; }
+function skView() {
+  return `<table class="lb"><thead><tr><th>Hole</th><th>Skin</th><th class="num">Score</th></tr></thead><tbody>${skins(S, S.scores).map((x) => `<tr><td class="pos">${x.hole}</td><td>${x.won ? `<b>${esc(x.won.name)}</b>${x.worth > 1 ? ` · ${x.worth} skins` : ''}` : x.tied ? 'Tied, carries over' : '<span class="label">Still playing</span>'}</td><td class="num">${x.score ?? ''}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function render(keepVideo) {
+  if (!S) return;
+  $('title').textContent = S.screens?.title || S.name;
+  $('sub').textContent = [S.club, S.course.name && S.course.name !== S.club ? S.course.name : '', S.date].filter(Boolean).join(' · ');
+  document.title = `${S.screens?.title || S.name} · Leaderboard`;
+  $('flash').hidden = !(S.flash && Date.now() - S.flash.at < 30 * 60e3); if (S.flash) $('flash').textContent = S.flash.text;
+  document.querySelector('[data-v="sk"]').hidden = !S.screens?.skins || S.format.type === 'scramble';
+  for (const b of document.querySelectorAll('#tabs button')) b.setAttribute('aria-pressed', b.dataset.v === view);
+  if (view === 'p3' && keepVideo && document.querySelector('.p3')) { // update the numbers, keep the video playing
+    const tmp = document.createElement('div'); tmp.innerHTML = p3View();
+    tmp.querySelectorAll('.p3').forEach((n) => { const cur = document.getElementById(n.id); if (cur) cur.querySelector('.body').replaceWith(n.querySelector('.body')); });
+    return;
+  }
+  const main = $('main');
+  main.querySelectorAll('video').forEach((v) => v._hls && v._hls.destroy());
+  main.innerHTML = view === 'p3' ? p3View() : view === 'ct' ? ctView() : view === 'sk' ? skView() : lbView();
+  for (const v of main.querySelectorAll('video[data-hls]')) {
+    if (v.canPlayType('application/vnd.apple.mpegurl')) v.src = v.dataset.hls;
+    else if (window.Hls && Hls.isSupported()) { const h = new Hls(); h.loadSource(v.dataset.hls); h.attachMedia(v); v._hls = h; }
+  }
+  if (view === 'p3' && location.hash.startsWith('#hole-') && !render.jumped) { render.jumped = true; document.querySelector(location.hash)?.scrollIntoView(); }
+}
+
+document.addEventListener('click', (e) => {
+  const tb = e.target.closest('#tabs button'); if (tb) { view = tb.dataset.v; render(); scrollTo(0, 0); return; }
+  const fb = e.target.closest('[data-fl]'); if (fb) { flight = fb.dataset.fl; render(); return; }
+  const r = e.target.closest('tr.r'); if (r) { openRow = openRow === r.dataset.k ? null : r.dataset.k; render(); }
+});
+
+live((s) => { const had = !!S; S = s; render(had); }, (on) => { $('pill').textContent = on ? 'LIVE' : 'RECONNECTING'; $('pill').className = `pill ${on ? 'live pulse' : 'off'}`; });
+</script>
+</body>
+</html>
