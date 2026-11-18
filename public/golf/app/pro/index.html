@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Golf pro · Flagcast</title>
+<meta name="theme-color" content="#123628">
+<link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/golf/golf.css">
+<style>
+body { min-height: 100vh; padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+.topbar { padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+.hdr { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hdr a { color: var(--on-green-muted); text-decoration: none; font-size: .85rem; }
+.hdr h1 { font-size: 1.25rem; margin-top: 4px; }
+main { max-width: 640px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left, 0px)); }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 20; }
+.tabs button { border: 0; background: none; padding: 10px 4px 12px; font-size: .78rem; font-weight: 600; color: var(--muted); display: grid; justify-items: center; gap: 3px; }
+.tabs button svg { width: 22px; height: 22px; }
+.tabs button[aria-current="page"] { color: var(--ink); }
+.tabs button[aria-current="page"] svg { color: var(--red); }
+h2 { font-size: 1.5rem; margin: 6px 0 10px; }
+h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.list { display: grid; gap: 8px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row > input, .row > select { flex: 1 1 0; min-width: 0; width: auto; }
+input, select, textarea { padding: 11px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.team { display: grid; grid-template-columns: 2.2em 1fr auto auto; gap: 10px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.team .pos { font-family: var(--f-mono); color: var(--muted); }
+.team b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team small { color: var(--muted); font-size: .76rem; }
+.team .tp { font-family: var(--f-mono); font-weight: 600; text-align: right; min-width: 3em; }
+.team .btn { padding: 7px 10px; font-size: .82rem; }
+.stale { color: var(--warn); }
+.grid { overflow-x: auto; }
+.grid table { border-collapse: collapse; font-family: var(--f-mono); font-size: .82rem; }
+.grid th, .grid td { padding: 0; text-align: center; border-bottom: 1px solid var(--line); }
+.grid th { color: var(--muted); font-weight: 500; padding: 4px 0; min-width: 34px; }
+.grid th:first-child, .grid td:first-child { text-align: left; padding-right: 8px; white-space: nowrap; font-family: var(--f-body); font-weight: 600; position: sticky; left: 0; background: var(--paper); }
+.grid td button { width: 34px; height: 38px; border: 0; background: none; font: inherit; color: var(--ink); }
+.grid td button:empty::after { content: "·"; color: var(--line); }
+.log { font-size: .82rem; color: var(--muted); display: grid; gap: 4px; margin-top: 8px; }
+.screen { display: grid; gap: 8px; }
+.screen .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.screen .top b { font-size: 1.05rem; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 6px; }
+.dot.on { background: var(--ok); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font-size: .85rem; }
+.chips button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--on-green); }
+.sheet { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; z-index: 50; }
+.sheet > div { background: var(--card); width: 100%; max-width: 520px; margin: 0 auto; border-radius: 16px 16px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px)); }
+.pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+.pad button { padding: 14px 0; font-family: var(--f-mono); font-size: 1.2rem; border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); }
+.pad button.wide { grid-column: span 2; font-family: var(--f-body); font-size: .95rem; }
+.center { text-align: center; padding: 40px 16px; }
+.center p { color: var(--muted); }
+.help { color: var(--muted); font-size: .85rem; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="hdr"><div><a href="/golf/app/">‹ Home</a><h1 id="evname">Golf pro</h1></div><span class="pill live pulse" id="pill">LIVE</span></div><div class="label" id="who"></div></header>
+<main id="main"><div class="center"><h2>Loading</h2></div></main>
+<nav class="tabs" id="tabs" aria-label="Sections" hidden></nav>
+<div class="toast" id="toast" hidden></div>
+<div class="sheet" id="sheet" hidden><div id="sheetBody"></div></div>
+
+<script type="module">
+import { leaderboard, fmtPar, contestLeader, fmtDist } from '/golf/core.js';
+import { eventId, post, live, esc } from '/golf/client.js';
+const $ = (id) => document.getElementById(id);
+const id = eventId();
+const pin = sessionStorage.getItem(`flagcast:pin:${id}`) || (() => { try { return localStorage.getItem(`flagcast:pin:${id}`); } catch { return null; } })();
+let S = null, me = null, tab = 'live', fixTeam = null, log = [];
+const ICON = {
+  live: '<path d="M3 12h4l3-8 4 16 3-8h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+  scores: '<rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="2"/>',
+  screens: '<rect x="2" y="4" width="20" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2"/>',
+  contests: '<path d="M6 21V3l11 4-11 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+};
+const TABS_PRO = [['live', 'Live'], ['scores', 'Scores'], ['screens', 'Screens'], ['contests', 'Contests']];
+
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), 3000); }
+async function op(body, ok) {
+  try { const r = await post('pro', { pin, ...body }); if (ok) toast(ok); return r; }
+  catch (e) { toast(e.message); if (e.status === 403 && /PIN/.test(e.message)) signOut(); throw e; }
+}
+function signOut() { sessionStorage.removeItem(`flagcast:pin:${id}`); try { localStorage.removeItem(`flagcast:pin:${id}`); } catch {} location.href = '/golf/app/'; }
+
+function drawTabs() {
+  const tabs = me.role === 'pro' ? TABS_PRO : [['contests', 'Contests']];
+  if (!tabs.find((t) => t[0] === tab)) tab = tabs[0][0];
+  $('tabs').hidden = tabs.length < 2;
+  $('tabs').innerHTML = tabs.map(([k, l]) => `<button data-tab="${k}" aria-current="${k === tab ? 'page' : 'false'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>${l}</button>`).join('');
+}
+$('tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; drawTabs(); render(); if (tab === 'scores') loadLog(); });
+
+
+function render() {
+  if (!S || !me) return;
+  $('evname').textContent = S.name || 'Tournament';
+  const m = $('main');
+  if (tab === 'live') m.innerHTML = liveTab();
+  if (tab === 'scores') m.innerHTML = scoresTab();
+  if (tab === 'screens') m.innerHTML = screensTab();
+  if (tab === 'contests') m.innerHTML = contestsTab();
+}
+
+// LIVE: every cart, where it is, and a nudge; news to the screens; lock scoring; fundraising total
+function liveTab() {
+  const lb = leaderboard(S, S.scores), stab = S.format.type === 'stableford';
+  const rows = lb.map((l) => {
+    const t = l.team;
+    return `<div class="team"><span class="pos">${esc(l.pos)}</span><div><b>${esc(l.name)}</b><small>${l.sub ? `${esc(l.sub)} · ` : ''}Thru ${esc(l.thru)}</small></div><span class="tp ${!stab && l.score < 0 ? 'under' : ''}">${l.played ? esc(fmtPar(l.score, stab)) : '—'}</span><button class="btn" data-nudge="${t.id}">Nudge</button></div>`;
+  }).join('');
+  return `<h2>On the course</h2>
+  <div class="list">${rows || '<p class="help">No teams yet.</p>'}</div>
+  <h3>News on every screen</h3>
+  <div class="row"><input id="flash" maxlength="140" placeholder="Shotgun start in 10 minutes"><button class="btn dark" id="flashGo">Post</button></div>
+  ${(S.news || []).slice(-3).reverse().map((n) => `<p class="help">${new Date(n.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} · ${esc(n.text)}</p>`).join('')}
+  ${S.fund?.on ? `<h3>Fundraising</h3><div class="row"><input id="raised" type="number" min="0" value="${Number(S.fund.raised) || 0}"><button class="btn dark" id="raisedGo">Update total</button></div>` : ''}
+  <h3>Scoring</h3>
+  <div class="row"><button class="btn ${S.locked ? 'primary' : 'danger'}" id="lockGo">${S.locked ? 'Open scoring again' : 'Close scoring (results final)'}</button></div>
+  <div class="row" style="margin-top:22px"><button class="btn" id="signOut">Sign out</button></div>`;
+}
+
+// SCORES: fix any score; every fix is logged with who made it
+function scoresTab() {
+  const t = S.teams.find((x) => x.id === fixTeam) || S.teams[0];
+  if (!t) return '<p class="help">No teams yet.</p>';
+  fixTeam = t.id;
+  const sc = S.scores[t.id] || {};
+  const rows = S.format.type === 'scramble' ? [{ id: 'T', name: 'Team' }] : t.players;
+  return `<h2>Fix a score</h2>
+  <select id="fixTeam" style="width:100%">${S.teams.map((x) => `<option value="${x.id}" ${x.id === t.id ? 'selected' : ''}>${esc(x.name || x.players.map((p) => p.name).join(' / '))}</option>`).join('')}</select>
+  <p class="help">Tap a hole to change it. PU means picked up.</p>
+  <div class="grid" style="margin-top:10px"><table><thead><tr><th>Hole</th>${S.course.holes.map((h) => `<th>${h.n}</th>`).join('')}</tr><tr><th>Par</th>${S.course.holes.map((h) => `<th>${h.par}</th>`).join('')}</tr></thead>
+  <tbody>${rows.map((p) => `<tr><td>${esc(p.name.split(' ')[0])}</td>${S.course.holes.map((h, i) => { const v = (sc[p.id] || [])[i]; return `<td><button data-fix="${p.id}" data-h="${h.n}" aria-label="${esc(p.name)} hole ${h.n}">${v == null ? '' : v === 0 ? 'PU' : v}</button></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
+  <h3>Changes today</h3><div class="log" id="log">${logHtml()}</div>`;
+}
+const logHtml = () => log.slice(-20).reverse().map((x) => `<div>${new Date(x.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} · ${esc(x.by)} · ${esc(x.player)} (${esc(x.team)}) hole ${x.h}: ${x.from ?? '–'} → ${x.to ?? 'cleared'}</div>`).join('') || 'No changes yet.';
+async function loadLog() { try { const r = await op({ op: 'stats' }); log = r.log || []; const el = $('log'); if (el) el.innerHTML = logHtml(); } catch {} }
+
+function openPad(p, h) {
+  const t = S.teams.find((x) => x.id === fixTeam);
+  const who = p === 'T' ? 'Team' : (t.players.find((x) => x.id === p) || {}).name;
+  const par = S.course.holes[h - 1].par;
+  $('sheetBody').innerHTML = `<div class="label">${esc(t.name || '')}</div><h2 style="margin:4px 0 0">${esc(who)} · Hole ${h}</h2><p class="help">Par ${par}</p>
+  <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<button data-v="${n}">${n}</button>`).join('')}<button class="wide" data-v="0">Picked up</button><button class="wide" data-v="null">Clear</button><button data-v="cancel">✕</button></div>`;
+  $('sheet').hidden = false;
+  $('sheet').onclick = async (e) => {
+    if (e.target === $('sheet')) { $('sheet').hidden = true; return; }
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    $('sheet').hidden = true;
+    if (b.dataset.v === 'cancel') return;
+    const v = b.dataset.v === 'null' ? null : Number(b.dataset.v);
+    try { await op({ op: 'fix', team: fixTeam, p, h, v }, 'Score fixed'); loadLog(); } catch {}
+  };
+}
+
+// SCREENS: switch one screen to a page, or take over every screen
+const PAGES = [['lb', 'Leaderboard'], ['p3', 'Par 3'], ['contests', 'Contests'], ['sponsors', 'Sponsors'], ['schedule', 'Schedule'], ['fund', 'Fundraising'], ['skins', 'Skins']];
+function screensTab() {
+  const ds = S.displays || [], force = S.live?.force || {}, p3 = S.course.holes.filter((h) => h.par === 3);
+  const scr = ds.map((d) => {
+    const f = force[d.id], on = (S.online || {})[d.id] > 0;
+    const chips = PAGES.map(([k, l]) => k === 'p3' ? p3.map((h) => `<button data-screen="${d.id}" data-k="p3" data-hole="${h.n}" aria-pressed="${!!(f && f.k === 'p3' && f.hole === h.n)}">Hole ${h.n} cam</button>`).join('') : `<button data-screen="${d.id}" data-k="${k}" aria-pressed="${!!(f && f.k === k)}">${l}</button>`).join('');
+    return `<div class="box screen"><div class="top"><b><span class="dot ${on ? 'on' : ''}"></span>${esc(d.name)}</b><button class="btn" data-screen="${d.id}" data-k="" ${f ? '' : 'disabled'}>Back to playlist</button></div><small class="help">${f ? 'Showing one page' : `Playing its list${d.playlist.length ? ` (${d.playlist.length} pages)` : ''}`}${on ? '' : ' · not connected'}</small><div class="chips">${chips}</div></div>`;
+  }).join('');
+  const sps = S.sponsors || [], take = S.live?.take;
+  return `<h2>Take over every screen</h2>
+  <div class="box"><div class="row"><input id="takeText" maxlength="140" placeholder="Announcement (for example: Awards in 10 minutes)"></div>
+  <div class="row" style="margin-top:8px"><button class="btn dark" data-take="msg">Announcement</button><button class="btn primary" data-take="ace">Hole in one!</button></div>
+  ${sps.length ? `<div class="row" style="margin-top:8px"><select id="takeSp">${sps.map((x) => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select><button class="btn" data-take="sponsor">Sponsor moment</button></div>` : ''}
+  <div class="row" style="margin-top:8px"><label class="help" style="display:flex;gap:6px;align-items:center">Seconds <input id="takeSecs" type="number" min="5" max="120" value="25" style="width:80px"></label><button class="btn danger" data-take="clear">Clear and go back to playlists</button></div>
+  ${take ? `<p class="help">Last take-over: ${esc(take.kind)}${take.text ? ` · ${esc(take.text)}` : ''}</p>` : ''}</div>
+  <h3>Screens</h3><div class="list">${scr || '<p class="help">No screens yet. Add them in the Manager.</p>'}</div>`;
+}
+
+// CONTESTS: closest to the pin and long drive results
+function contestsTab() {
+  const names = S.teams.flatMap((t) => t.players.map((p) => p.name));
+  return `<h2>Contests</h2>
+  <datalist id="names">${names.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
+  <div class="list">${(S.contests || []).map((c) => {
+    const lead = contestLeader(c);
+    return `<div class="box"><b>${c.kind === 'ld' ? 'Long drive' : 'Closest to the pin'} · Hole ${c.hole}</b>${c.sponsor ? `<div class="help">${esc(c.sponsor)}</div>` : ''}
+    <div class="log">${lead.slice(0, 5).map((e, i) => `<div>${i + 1}. ${esc(e.name)} · ${fmtDist(c, e.dist)}</div>`).join('') || 'No one yet.'}</div>
+    <div class="row" style="margin-top:10px"><input list="names" data-cname="${c.id}" placeholder="Player"><input type="number" step="${c.kind === 'ld' ? 1 : 0.1}" min="0" data-cdist="${c.id}" placeholder="${c.kind === 'ld' ? 'Yards' : 'Feet (6.5 = 6 ft 6 in)'}" inputmode="decimal"><button class="btn dark" data-ctp="${c.id}">Post</button></div></div>`;
+  }).join('') || '<p class="help">No contests set up.</p>'}</div>
+  ${me.role !== 'pro' ? '<div class="row" style="margin-top:22px"><button class="btn" id="signOut">Sign out</button></div>' : ''}`;
+}
+
+$('main').addEventListener('change', (e) => { if (e.target.id === 'fixTeam') { fixTeam = e.target.value; render(); } });
+$('main').addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'signOut') return signOut();
+  if (b.dataset.nudge) {
+    const t = S.teams.find((x) => x.id === b.dataset.nudge);
+    const text = prompt(`Message to ${t.name || 'this cart'}:`, 'Please keep up the pace of play. Thank you!');
+    if (text) op({ op: 'nudge', team: t.id, text }, 'Sent to their phone').catch(() => {});
+  }
+  if (b.id === 'flashGo') { const t = $('flash').value.trim(); if (!t) return; op({ op: 'flash', text: t }, 'On the screens').then(() => ($('flash').value = '')).catch(() => {}); }
+  if (b.id === 'raisedGo') op({ op: 'fund', raised: Number($('raised').value) || 0 }, 'Total updated').catch(() => {});
+  if (b.id === 'lockGo') { if (!S.locked && !confirm('Close scoring? Players won’t be able to change scores.')) return; op({ op: 'lock', locked: !S.locked }, S.locked ? 'Scoring open' : 'Scoring closed').catch(() => {}); }
+  if (b.dataset.fix) openPad(b.dataset.fix, Number(b.dataset.h));
+  if (b.dataset.screen !== undefined && b.dataset.k !== undefined) {
+    const k = b.dataset.k;
+    op({ op: 'screen', display: b.dataset.screen, page: k ? { k, hole: Number(b.dataset.hole) || 0 } : null }, k ? 'Screen switched' : 'Back to its playlist').catch(() => {});
+  }
+  if (b.dataset.take) {
+    const kind = b.dataset.take, text = ($('takeText') || {}).value || '', secs = Number(($('takeSecs') || {}).value) || 25;
+    if (kind === 'msg' && !text.trim()) return toast('Type the announcement first.');
+    op({ op: 'take', kind, text, sponsor: kind === 'sponsor' ? $('takeSp').value : '', secs }, kind === 'clear' ? 'Screens back to normal' : 'On every screen').catch(() => {});
+  }
+  if (b.dataset.ctp) {
+    const name = document.querySelector(`[data-cname="${b.dataset.ctp}"]`).value.trim(), dist = Number(document.querySelector(`[data-cdist="${b.dataset.ctp}"]`).value);
+    if (!name || !(dist > 0)) return toast('Type the player and the distance.');
+    op({ op: 'ctp', id: b.dataset.ctp, name, dist }, 'Posted').catch(() => {});
+  }
+});
+
+async function start() {
+  if (!id || !pin) { location.href = '/golf/app/'; return; }
+  try { me = await post('pro', { pin, op: 'hello' }); }
+  catch (e) { if (e.status === 403 || e.status === 404) return signOut(); $('main').innerHTML = `<div class="center"><h2>No signal</h2><p>${esc(e.message)}</p></div>`; return; }
+  $('who').textContent = `${me.name} · ${me.role === 'pro' ? 'Golf pro' : 'Marshal'}`;
+  drawTabs();
+  live((s) => {
+    S = s;
+    // don't redraw under someone typing
+    const a = document.activeElement;
+    if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT') && $('main').contains(a)) { $('evname').textContent = S.name; return; }
+    render();
+  }, (on) => { $('pill').textContent = on ? 'LIVE' : 'OFFLINE'; $('pill').className = `pill ${on ? 'live pulse' : 'off'}`; });
+}
+start();
+</script>
+</body>
+</html>

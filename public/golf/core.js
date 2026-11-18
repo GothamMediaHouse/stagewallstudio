@@ -1,4 +1,4 @@
-// Sunday Pin: the scoring math, shared by every golf page (the cart, the screens, the desk and the live page).
+// Flagcast: the scoring math, shared by every golf page (the cart, the screens, the desk and the live page).
 // The server only stores what was entered; each page works out the leaderboard from it with these functions,
 // so they all show the same numbers.
 //

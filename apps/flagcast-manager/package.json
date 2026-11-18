@@ -1,0 +1,29 @@
+{
+  "name": "flagcast-manager",
+  "productName": "Flagcast Manager",
+  "version": "1.0.0",
+  "description": "Set up and run Flagcast golf tournaments: teams, sponsors, screens, staff and reports.",
+  "main": "main.js",
+  "author": "Flagcast",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac --arm64 --x64",
+    "dist:win": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "38.8.6",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "app.flagcast.manager",
+    "productName": "Flagcast Manager",
+    "files": ["main.js", "preload.js", "home.html", "logo.svg", "build/icon.png"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "mac": { "category": "public.app-category.sports", "target": ["dmg", "zip"], "icon": "build/icon.png" },
+    "win": { "target": ["nsis"], "icon": "build/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "Flagcast-Manager-Setup-${version}.exe" },
+    "dmg": { "artifactName": "Flagcast-Manager-${version}-${arch}.dmg" }
+  }
+}

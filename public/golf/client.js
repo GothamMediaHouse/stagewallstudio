@@ -1,4 +1,4 @@
-// Sunday Pin pages: which tournament this page is for, and its live state from the server.
+// Flagcast pages: which tournament this page is for, and its live state from the server.
 export const eventId = () => (location.pathname.match(/^\/g\/([a-z0-9]{8})/) || [])[1] || new URLSearchParams(location.search).get('e') || '';
 export const api = (op) => `/golf/api/${eventId()}/${op}`;
 

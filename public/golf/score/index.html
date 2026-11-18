@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#123628">
-<title>Scorecard · Sunday Pin</title>
+<title>Scorecard · Flagcast</title>
 <link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -65,6 +65,13 @@ main { padding: 18px max(16px, env(safe-area-inset-left, 0px)) 120px; max-width:
 .center h2 { font-size: 2rem; margin-bottom: 10px; }
 .center p { color: var(--muted); }
 .locked { background: var(--red); color: #fff; text-align: center; padding: 8px; font-weight: 600; font-size: .9rem; }
+.spoffer { display: inline-block; margin-top: 4px; font-weight: 600; color: var(--green-2); }
+@media (prefers-color-scheme: dark) { .spoffer { color: var(--flag); } }
+.nudge { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: grid; place-items: center; z-index: 60; padding: 20px; }
+.nudge > div { background: var(--card); border-radius: 16px; padding: 22px; max-width: 360px; width: 100%; text-align: center; }
+.nudge h2 { font-size: 1.8rem; margin-top: 6px; }
+.nudge p { font-size: 1.1rem; }
+.nudge .btn { width: 100%; padding: 14px; }
 </style>
 </head>
 <body>
@@ -80,9 +87,12 @@ main { padding: 18px max(16px, env(safe-area-inset-left, 0px)) 120px; max-width:
   <button class="btn primary" id="next">Next hole</button>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="nudge" id="nudge" role="alertdialog" aria-labelledby="nudgeH" hidden><div><span class="label">From the pro shop</span><h2 id="nudgeH">A note for your cart</h2><p id="nudgeText"></p><button class="btn primary" onclick="this.closest('.nudge').hidden=true">OK</button></div></div>
 <script type="module">
 import { leaderboard, teamCard, strokesOn, playing, fmtPar, mark, contestLeader, fmtDist } from '/golf/core.js';
 import { eventId, post, live, esc } from '/golf/client.js';
+import { appBar, remember } from '/golf/appbar.js';
+appBar('score');
 
 const code = (location.pathname.match(/\/s\/([A-Z0-9]{6})/) || [])[1] || '';
 const KEY = `golf:${eventId()}:${code}`;
@@ -137,6 +147,33 @@ function syncLabel() {
   else { el.textContent = 'All saved'; el.className = ''; }
 }
 
+// sponsors: logo, line and offer on the hole; views and taps are counted for the sponsor report
+const hitSeen = new Set(); let hitQ = [];
+function hit(s, k, once) {
+  if (once) { if (hitSeen.has(once)) return; hitSeen.add(once); }
+  hitQ.push({ s, k, n: 1 });
+  clearTimeout(hit.t); hit.t = setTimeout(() => { const list = hitQ.splice(0, 50); if (list.length) post('hit', { list }).catch(() => {}); }, 4000);
+}
+function spHtml(x, lead) {
+  const name = x.logo ? `<img src="${esc(x.logo)}" alt="${esc(x.name)}" style="height:26px;width:auto;max-width:140px;object-fit:contain;vertical-align:middle">` : `<b>${esc(x.name)}</b>`;
+  const offer = x.offer ? (x.url ? `<a class="spoffer" href="${esc(x.url)}" target="_blank" rel="noopener" data-sp="${esc(x.id)}">${esc(x.offer)}</a>` : `<span class="spoffer">${esc(x.offer)}</span>`) : (x.url ? `<a class="spoffer" href="${esc(x.url)}" target="_blank" rel="noopener" data-sp="${esc(x.id)}">Visit ${esc(x.name)}</a>` : '');
+  return `<div class="sponsor">${lead ? `${lead} ` : ''}${name}${x.line ? ` · ${esc(x.line)}` : ''}${offer ? `<br>${offer}` : ''}</div>`;
+}
+document.addEventListener('click', (e) => { const a = e.target.closest('a[data-sp]'); if (a) hit(a.dataset.sp, 'tap'); });
+
+// a message from the pro shop to this cart (for example, keep up the pace of play)
+const NKEY = `golf:${eventId()}:nudge`;
+function nudges() {
+  if (!S || !S.nudges) return;
+  const seen = Number(localStorage.getItem(NKEY) || Date.now() - 15 * 60000);
+  const mine = S.nudges.filter((n) => teams.includes(n.team) && n.at > seen);
+  if (!mine.length) return;
+  const n = mine[mine.length - 1];
+  try { localStorage.setItem(NKEY, String(n.at)); } catch {}
+  $('nudgeText').textContent = n.text; $('nudge').hidden = false;
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+
 function render() {
   if (!S) return;
   $('evname').textContent = S.screens?.title || S.name || 'Scorecard';
@@ -155,12 +192,15 @@ function render() {
     return `<button data-hole="${h}" class="${done ? 'done' : ''} ${par === 3 ? 'p3' : ''}" aria-current="${h === hole}">${h}<small>P${par}</small></button>`;
   }).join('');
   const H = holes[hole - 1];
-  const sponsor = (S.sponsors || []).find((s) => s.holes.includes(hole));
+  const sponsor = (S.sponsors || []).find((s) => s.spot === 'hole' && s.holes.includes(hole)) || (S.sponsors || []).find((s) => s.holes.includes(hole));
+  const turn = hole === 10 ? (S.sponsors || []).find((s) => s.spot === 'turn') : null;
+  if (sponsor) hit(sponsor.id, 'view', `${sponsor.id}:${hole}`); if (turn) hit(turn.id, 'view', `${turn.id}:turn`);
   const contests = (S.contests || []).filter((c) => c.hole === hole);
   const lb = leaderboard(S, sc).find((l) => l.teamId === t.id);
   $('main').innerHTML = `
     <div class="holehead"><h2>Hole ${hole}</h2><div class="facts"><b>Par ${H.par}</b><br>${H.yds ? `${H.yds} yds · ` : ''}SI ${H.hcp}</div></div>
-    ${sponsor ? `<div class="sponsor">Presented by <b>${esc(sponsor.name)}</b>${sponsor.line ? ` · ${esc(sponsor.line)}` : ''}</div>` : ''}
+    ${sponsor ? spHtml(sponsor, 'Presented by') : ''}
+    ${turn ? `<div class="note"><b>At the turn</b><br>${spHtml(turn, '')}</div>` : ''}
     ${contests.map((c) => { const top = contestLeader(c)[0]; return `<div class="note"><b>${c.kind === 'ld' ? 'Long drive' : 'Closest to the pin'}</b>${c.sponsor ? ` · ${esc(c.sponsor)}` : ''}<br>${top ? `Leader: ${esc(top.name)}, ${fmtDist(c, top.dist)}` : 'No one on the board yet.'} A marshal measures at the green.</div>`; }).join('')}
     ${S.cams && S.cams[hole] ? `<a class="btn cam" href="/g/${eventId()}#hole-${hole}">Watch the hole ${hole} camera</a>` : ''}
     <div class="players">${ps.map((p) => {
@@ -230,7 +270,7 @@ async function start() {
     if (e.status === 404) { $('main').innerHTML = `<div class="center"><h2>Code not found</h2><p>${esc(e.message)}</p></div>`; return; }
     // no signal: carry on with what this phone already knows
   }
-  live((s) => { S = s; store.set('state', s); render(); }, (on) => { online = on; syncLabel(); if (on) send(); });
+  live((s) => { S = s; store.set('state', s); remember(s.name, code); render(); nudges(); }, (on) => { online = on; syncLabel(); if (on) send(); });
   if (!S) { const saved = store.get('state', null); if (saved && teams.length) { S = saved; render(); } }
   send();
 }

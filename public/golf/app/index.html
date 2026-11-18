@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flagcast</title>
+<meta name="theme-color" content="#123628">
+<link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/golf/golf.css">
+<style>
+body { min-height: 100vh; background: var(--paper); }
+.hero { background: var(--green); color: var(--on-green); padding: calc(28px + env(safe-area-inset-top, 0px)) 20px 34px; text-align: center; }
+.hero img { height: 54px; width: auto; }
+.hero p { margin: 10px auto 0; color: var(--on-green-muted); max-width: 30ch; font-size: .95rem; }
+main { max-width: 480px; margin: -18px auto 0; padding: 0 16px calc(40px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.box h2 { font-size: 1.4rem; }
+.box p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
+.big { width: 100%; margin-top: 14px; padding: 15px; font-size: 1.05rem; }
+.or { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; color: var(--muted); font-size: .8rem; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.f { display: grid; gap: 4px; margin-top: 10px; font-size: .82rem; color: var(--muted); }
+.f input { width: 100%; min-width: 0; padding: 12px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--paper); font-family: var(--f-mono); font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+.two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px; }
+.err { color: var(--red); font-size: .88rem; margin-top: 8px; }
+.recent { display: grid; gap: 8px; margin-top: 10px; }
+.recent a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; color: var(--ink); background: var(--paper); }
+.recent a b { font-weight: 600; }
+.recent a span { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.scan { position: fixed; inset: 0; background: #000; z-index: 40; display: grid; grid-template-rows: 1fr auto; }
+.scan video { width: 100%; height: 100%; object-fit: cover; }
+.scan .frame { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.scan .frame i { width: min(68vw, 300px); aspect-ratio: 1; border: 3px solid var(--flag); border-radius: 18px; box-shadow: 0 0 0 100vmax rgba(0,0,0,.45); }
+.scan .bottom { background: #000; color: #fff; padding: 16px 20px calc(18px + env(safe-area-inset-bottom, 0px)); text-align: center; display: grid; gap: 10px; }
+.scan .bottom p { margin: 0; font-size: .95rem; }
+.foot { text-align: center; font-size: .78rem; color: var(--muted); }
+.foot a { color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="hero">
+  <img src="/golf/brand/wide-on-dark.svg" alt="Flagcast">
+  <p>Live scoring, leaderboards and par 3 cams for your tournament.</p>
+</header>
+<main>
+  <section class="box" aria-labelledby="h-play">
+    <h2 id="h-play">Playing today?</h2>
+    <p>Scan the QR code on the card in your cart.</p>
+    <button class="btn primary big" id="scanBtn">Scan the cart card</button>
+    <div class="or">or type the codes</div>
+    <form id="joinForm" novalidate>
+      <div class="two">
+        <label class="f">Tournament code<input id="ev" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345"></label>
+        <label class="f">Cart code<input id="cart" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Optional"></label>
+      </div>
+      <button class="btn dark big" style="margin-top:12px">Open</button>
+      <div class="err" id="joinErr" role="alert" hidden></div>
+    </form>
+  </section>
+
+  <section class="box" id="recentBox" hidden aria-labelledby="h-recent">
+    <h2 id="h-recent">Your tournaments</h2>
+    <div class="recent" id="recent"></div>
+  </section>
+
+  <section class="box" aria-labelledby="h-pro">
+    <h2 id="h-pro">Golf pro or marshal</h2>
+    <p>Sign in with the PIN the tournament desk gave you.</p>
+    <form id="proForm" novalidate>
+      <div class="two">
+        <label class="f">Tournament code<input id="pev" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+        <label class="f">PIN<input id="pin" maxlength="8" inputmode="numeric" autocomplete="off" type="password"></label>
+      </div>
+      <button class="btn dark big" style="margin-top:12px">Sign in</button>
+      <div class="err" id="proErr" role="alert" hidden></div>
+    </form>
+  </section>
+  <p class="foot"><a href="https://flagcast.app/">flagcast.app</a></p>
+</main>
+
+<div class="scan" id="scan" hidden>
+  <video id="cam" playsinline muted></video>
+  <div class="frame"><i></i></div>
+  <div class="bottom"><p id="scanMsg">Point your camera at the QR code on the cart card.</p><button class="btn" id="scanStop">Cancel</button></div>
+</div>
+
+<script type="module">
+import { esc } from '/golf/client.js';
+const $ = (id) => document.getElementById(id);
+const ID = /^[a-z0-9]{8}$/, CODE = /^[A-Z0-9]{6}$/;
+const RKEY = 'flagcast:recent';
+const recent = () => { try { return JSON.parse(localStorage.getItem(RKEY)) || []; } catch { return []; } };
+
+// remember where this phone has played, so it can go straight back in
+function drawRecent() {
+  const list = recent().slice(0, 6);
+  $('recentBox').hidden = !list.length;
+  $('recent').innerHTML = list.map((r) => `<a href="${r.code ? `/g/${r.id}/s/${r.code}` : `/g/${r.id}`}"><b>${esc(r.name || 'Tournament')}</b><span>${r.code ? `Cart ${esc(r.code)}` : 'Leaderboard'}</span></a>`).join('');
+}
+drawRecent();
+
+// any Flagcast link or code → where to go
+function route(text) {
+  const t = String(text || '').trim();
+  let m = t.match(/\/g\/([a-z0-9]{8})(?:\/s\/([A-Z0-9]{6}))?/i);
+  if (m) return m[2] ? `/g/${m[1].toLowerCase()}/s/${m[2].toUpperCase()}` : `/g/${m[1].toLowerCase()}`;
+  m = t.match(/^([a-z0-9]{8})$/i);
+  if (m) return `/g/${m[1].toLowerCase()}`;
+  return '';
+}
+
+async function check(id) {
+  const r = await fetch(`/golf/api/${id}/state`, { cache: 'no-store' });
+  if (!r.ok) throw new Error('We couldn’t find that tournament. Check the code on your cart card.');
+  return r.json();
+}
+
+$('joinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('ev').value.trim().toLowerCase(), code = $('cart').value.trim().toUpperCase();
+  const err = $('joinErr'); err.hidden = true;
+  if (!ID.test(id)) { err.textContent = 'The tournament code is 8 letters and numbers.'; err.hidden = false; return; }
+  if (code && !CODE.test(code)) { err.textContent = 'The cart code is 6 letters and numbers.'; err.hidden = false; return; }
+  try { await check(id); location.href = code ? `/g/${id}/s/${code}` : `/g/${id}`; }
+  catch (x) { err.textContent = x.message; err.hidden = false; }
+});
+
+$('proForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('pev').value.trim().toLowerCase(), pin = $('pin').value.trim();
+  const err = $('proErr'); err.hidden = true;
+  if (!ID.test(id)) { err.textContent = 'The tournament code is 8 letters and numbers.'; err.hidden = false; return; }
+  try {
+    const r = await fetch(`/golf/api/${id}/pro`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin, op: 'hello' }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'That didn’t work. Try again.');
+    sessionStorage.setItem(`flagcast:pin:${id}`, pin);
+    try { localStorage.setItem(`flagcast:pin:${id}`, pin); } catch {}
+    location.href = `/golf/app/pro/?e=${id}`;
+  } catch (x) { err.textContent = x.message; err.hidden = false; }
+});
+
+// QR scanning with the phone's camera (jsQR is loaded only when needed)
+let stream = null, scanning = false;
+async function startScan() {
+  $('scan').hidden = false; $('scanMsg').textContent = 'Point your camera at the QR code on the cart card.';
+  try {
+    if (!window.jsQR) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = '/golf/app/jsqr.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+  } catch {
+    $('scanMsg').textContent = 'The camera isn’t available. Allow camera access in Settings, or type the codes instead.'; return;
+  }
+  const v = $('cam'); v.srcObject = stream; await v.play().catch(() => {});
+  const c = document.createElement('canvas'), ctx = c.getContext('2d', { willReadFrequently: true });
+  scanning = true;
+  const tick = () => {
+    if (!scanning) return;
+    if (v.readyState >= 2) {
+      const w = 480, h = Math.round(w * v.videoHeight / v.videoWidth) || 360; c.width = w; c.height = h;
+      ctx.drawImage(v, 0, 0, w, h);
+      const hit = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'dontInvert' });
+      if (hit && hit.data) {
+        const to = route(hit.data);
+        if (to) { stopScan(); location.href = to; return; }
+        $('scanMsg').textContent = 'That QR code isn’t a Flagcast card.';
+      }
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
+}
+function stopScan() { scanning = false; if (stream) stream.getTracks().forEach((t) => t.stop()); stream = null; $('scan').hidden = true; }
+$('scanBtn').addEventListener('click', startScan);
+$('scanStop').addEventListener('click', stopScan);
+</script>
+</body>
+</html>
