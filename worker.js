@@ -5,7 +5,7 @@
 // rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js), and the Showcaller Link
 // relay, so a studio can let clients in without opening a port on its router (link-relay.js), and Showcaller Sessions'
 // remote recording rooms, with each guest's recording uploaded to cloud storage for the studio Mac (sessions.js), and
-// Clubhouse Live's live tournament scoring and leaderboard screens (golf.js).
+// Sunday Pin's live tournament scoring and leaderboard screens (golf.js).
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
@@ -56,7 +56,7 @@ export default {
     if (url.pathname === '/sessions' && request.method === 'GET') return Response.redirect(new URL('/sessions/account/', url), 302);
     if (url.pathname.startsWith('/sessions/') && !url.pathname.startsWith('/sessions/guest/')) return sessions(request, env);
     if (/^\/s\/[a-z0-9]{8,24}(\/edit\/t\d{2,4}|\/watch)?\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
-    // Clubhouse Live: live scoring for golf tournaments, one room per tournament (golf.js)
+    // Sunday Pin: live scoring for golf tournaments, one room per tournament (golf.js)
     if (url.pathname.startsWith('/golf/api/') || url.pathname.startsWith('/g/')) { const r = await golf(request, env); if (r) return r; }
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];

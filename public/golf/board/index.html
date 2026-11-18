@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaderboard screen · Clubhouse Live</title>
+<title>Leaderboard screen · Sunday Pin</title>
+<link rel="icon" href="/golf/brand/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="/golf/golf.css">
 <style>
@@ -79,6 +81,7 @@ header .pill { font-size: .9vw; padding: .2vw .7vw; }
 footer { display: flex; align-items: center; gap: 1.2vw; background: #07100c; border-top: 1px solid var(--rule); padding: 0 2.4vw; overflow: hidden; white-space: nowrap; font-size: 1.25vw; color: #c8d6cc; }
 footer .tag { background: #c8312b; color: #fff; font-family: var(--f-mono); font-size: .85vw; letter-spacing: .1em; padding: .2vw .6vw; border-radius: .2vw; }
 footer .run { overflow: hidden; flex: 1; }
+footer .brandlogo { height: 2.4vw; width: auto; flex: none; }
 footer .run span { display: inline-block; padding-left: 100%; animation: tick 40s linear infinite; }
 @keyframes tick { to { transform: translateX(-100%); } }
 .take { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; text-align: center; background: radial-gradient(circle at 50% 45%, #1d4a35, #07100c 75%); }
@@ -94,7 +97,7 @@ footer .run span { display: inline-block; padding-left: 100%; animation: tick 40
 <div class="frame">
   <header><h1 id="title">Leaderboard</h1><div class="right"><span id="clock"></span><span class="pill live pulse" id="livepill">LIVE</span></div></header>
   <div class="stage" id="stage"><div class="empty">Loading the tournament…</div></div>
-  <footer><span class="tag" id="tickTag">UPDATE</span><div class="run"><span id="ticker"></span></div></footer>
+  <footer><span class="tag" id="tickTag">UPDATE</span><div class="run"><span id="ticker"></span></div><img class="brandlogo" src="/golf/brand/wide-on-dark.svg" alt="Sunday Pin"></footer>
 </div>
 <div class="take" id="take" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
