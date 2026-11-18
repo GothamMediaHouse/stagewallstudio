@@ -46,6 +46,13 @@ for (const app of Object.keys(APPS)) ROUTES[`/api/${app}/latest`] ||= ['GET', la
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Sunday Pin's own domain (sundaypin.live, a custom domain on this worker): the brochure at /, the golf pages and
+    // tournament links as usual, anything else back to the brochure. www goes to the bare domain.
+    if (url.hostname === 'www.sundaypin.live') return Response.redirect('https://sundaypin.live' + url.pathname + url.search, 301);
+    if (url.hostname === 'sundaypin.live') {
+      if (url.pathname === '/') return env.ASSETS.fetch(new Request(new URL('/sundaypin/', url), request));
+      if (!/^\/(golf|g|sundaypin)(\/|$)/.test(url.pathname)) return Response.redirect(new URL('/', url), 302);
+    }
     if (url.pathname === '/api/gmh-inquiry') return gmhInquiry(request, env); // handles its own CORS and methods
     // Showcaller Intercom: crew joining from anywhere (intercom.js)
     if (url.pathname === '/intercom/host' || url.pathname === '/intercom/ws') return intercom(request, env);

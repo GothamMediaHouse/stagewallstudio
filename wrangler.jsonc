@@ -2,7 +2,8 @@
   "name": "stagewallstudio",
   "main": "worker.js",
   "compatibility_date": "2025-09-01",
-  "assets": { "directory": "./public", "binding": "ASSETS" },
+  // run_worker_first "/": so sundaypin.live/ can show the Sunday Pin brochure instead of the Showcaller homepage
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/"] },
   // Keep the variables set in the Cloudflare dashboard (CONTACT_TO, CONTACT_FROM) when this deploys
   "keep_vars": true,
   // Branch builds (pull requests) run `wrangler preview`, which needs this block; it can stay empty
