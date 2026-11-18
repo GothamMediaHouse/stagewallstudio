@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sunday Pin · Live golf for your tournament</title>
+<meta name="description" content="Sunday Pin brings live par 3 cameras, live scoring and big-screen leaderboards to member-guests, charity outings and club events.">
+<meta property="og:title" content="Sunday Pin · Live golf for your tournament">
+<meta property="og:description" content="Live par 3 cameras, live scoring and big-screen leaderboards for golf tournaments.">
+<meta property="og:image" content="https://sundaypin.live/sundaypin/img/course-wide.jpg">
+<meta property="og:url" content="https://sundaypin.live/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" href="/golf/brand/app-icon-180.png">
+<link rel="icon" href="/sundaypin/brand/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --paper:#f4f1e6; --paper-2:#ebe6d6; --ink:#14201a; --muted:#56625a; --line:#d8d2bf; --card:#fffdf6;
+  --green:#123628; --green-2:#1c4a37; --deep:#0b1a13; --on-green:#f4f1e6; --on-green-muted:#a9bcae;
+  --flag:#e8c547; --red:#c8312b;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f1713;--paper-2:#16211b;--ink:#e9eee6;--muted:#9fb0a5;--line:#2a3830;--card:#17231d;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f1713;--paper-2:#16211b;--ink:#e9eee6;--muted:#9fb0a5;--line:#2a3830;--card:#17231d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--f-body)}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.01em;line-height:.96;margin:0;text-wrap:balance}
+h2{font-size:clamp(2.3rem,5.4vw,3.8rem);font-weight:800}
+h3{font-size:1.4rem;font-weight:700}
+p{margin:0}
+.eyebrow{display:block;font:600 .76rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.lede{font-size:1.15rem;color:var(--muted);max-width:60ch;margin-top:16px}
+section{padding-block:88px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.06em;padding:13px 22px;border-radius:6px;text-decoration:none;border:0;cursor:pointer}
+.btn.primary{background:var(--flag);color:#1a1a10}
+.btn.ghost{border:1.5px solid currentColor;background:transparent;color:inherit}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(18,54,40,.96);backdrop-filter:blur(8px);color:var(--on-green)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:66px}
+.nav .logo img{height:40px;width:auto}
+.nav ul{display:flex;gap:22px;list-style:none;margin:0 0 0 auto;padding:0;font-weight:500;font-size:.95rem}
+.nav ul a{text-decoration:none;color:var(--on-green-muted)}
+.nav ul a:hover{color:var(--on-green)}
+.nav .btn{padding:9px 16px;font-size:.95rem}
+.menu{display:none;margin-left:auto;background:none;border:1.5px solid var(--on-green-muted);color:var(--on-green);border-radius:6px;padding:7px 12px;font:600 .9rem var(--f-body)}
+
+/* Hero */
+.hero{background:radial-gradient(1200px 500px at 85% 10%,#1d5a41 0,transparent 60%),var(--green);color:var(--on-green);padding-block:72px 96px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(3.4rem,8.6vw,6.8rem);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--flag)}
+.hero .lede{color:var(--on-green-muted)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.code{margin-top:34px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;max-width:470px}
+.code label{font-size:.9rem;color:var(--on-green-muted);flex:1 1 150px}
+.code label b{display:block;color:var(--on-green);font-weight:600}
+.code input{width:9.5em;background:var(--deep);border:1px solid #2d4a3b;border-radius:6px;color:var(--on-green);font:600 1rem var(--f-mono);letter-spacing:.14em;padding:9px 10px;text-transform:uppercase}
+.code button{background:var(--on-green);color:var(--green);border:0;border-radius:6px;font:700 .95rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;cursor:pointer}
+.stage{position:relative;padding:0 34px 40px 0}
+.tv{background:#050a07;border-radius:12px;padding:10px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);border:1px solid #26332b}
+.tv img{border-radius:5px}
+.tv-stand{width:30%;height:12px;margin:0 auto;background:#050a07;border-radius:0 0 8px 8px}
+.ph{position:absolute;right:-10px;bottom:-14px;width:24%;background:#050a07;border-radius:26px;padding:7px;box-shadow:0 30px 50px -20px rgba(0,0,0,.8)}
+.ph img{border-radius:20px;aspect-ratio:9/17;object-fit:cover;object-position:top}
+.livepill{position:absolute;left:18px;top:-14px;background:var(--red);color:#fff;font:600 .72rem var(--f-mono);letter-spacing:.12em;padding:5px 10px;border-radius:4px;display:flex;gap:7px;align-items:center}
+.livepill i{width:7px;height:7px;border-radius:50%;background:#fff}
+@media (prefers-reduced-motion:no-preference){.livepill i{animation:p 1.6s ease-in-out infinite}@keyframes p{50%{opacity:.3}}}
+
+/* Made for strip */
+.strip{background:var(--deep);color:var(--on-green-muted);padding-block:20px}
+.strip .wrap{display:flex;gap:10px 28px;flex-wrap:wrap;align-items:center;justify-content:center;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.08em}
+.strip b{color:var(--flag)}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px;counter-reset:s}
+.steps article{border-top:3px solid var(--ink);padding-top:16px;min-width:0}
+.steps article::before{counter-increment:s;content:"0" counter(s);display:block;font:600 .8rem var(--f-mono);letter-spacing:.12em;color:var(--red);margin-bottom:10px}
+.steps time{font:600 .78rem var(--f-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.steps p{color:var(--muted);margin-top:8px}
+
+/* Screens */
+.screens{background:var(--green);color:var(--on-green)}
+.screens .eyebrow,.screens .lede{color:var(--on-green-muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:36px}
+.tabs button{background:transparent;color:var(--on-green-muted);border:1.5px solid #2f5c48;border-radius:999px;padding:8px 16px;font:600 .95rem var(--f-body);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--flag);border-color:var(--flag);color:#1a1a10}
+.show{display:grid;grid-template-columns:1.6fr 1fr;gap:40px;align-items:center;margin-top:24px}
+.show .tv{padding:8px}
+.show h3{font-size:2rem}
+.show p{color:var(--on-green-muted);margin-top:12px}
+.show ul{margin:16px 0 0;padding-left:18px;color:var(--on-green-muted)}
+.show li{margin-top:6px}
+
+/* App */
+.app-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.phones{display:flex;gap:18px;justify-content:center;align-items:flex-end}
+.phones .ph2{width:46%;background:#0a0f0c;border-radius:30px;padding:8px;box-shadow:0 30px 60px -24px rgba(0,0,0,.55)}
+.phones .ph2:first-child{transform:translateY(-28px)}
+.phones .ph2 img{border-radius:23px;aspect-ratio:9/17;object-fit:cover;object-position:top}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+.mode .tag{display:inline-block;font:600 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--on-green);padding:3px 8px;border-radius:3px}
+.mode h3{margin-top:10px}
+.mode ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:.95rem}
+.stores{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;align-items:center}
+.store{display:flex;align-items:center;gap:10px;background:#0a0f0c;color:#fff;border-radius:10px;padding:8px 14px;text-decoration:none;min-width:160px}
+.store svg{width:22px;height:22px;flex:none}
+.store small{display:block;font-size:.66rem;opacity:.75;line-height:1.1}
+.store b{display:block;font-weight:600;font-size:1rem;line-height:1.15}
+.soon{font-size:.85rem;color:var(--muted)}
+
+/* Packages */
+.pk{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px;align-items:stretch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:28px;min-width:0;display:flex;flex-direction:column}
+.card.feature{border:2px solid var(--green);box-shadow:0 20px 40px -26px rgba(18,54,40,.6)}
+.card .lvl{font:600 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card h3{font-size:2.4rem;margin-top:6px}
+.card .for{color:var(--muted);margin-top:8px}
+.card ul{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:9px;flex:1}
+.card li{padding-left:24px;position:relative}
+.card li::before{content:"";position:absolute;left:2px;top:.5em;width:10px;height:10px;border-radius:50%;border:2px solid var(--red)}
+.card .q{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.card .q a{color:var(--green);text-decoration:none;border-bottom:2px solid var(--flag)}
+.badge{align-self:flex-start;background:var(--flag);color:#1a1a10;font:600 .66rem var(--f-mono);letter-spacing:.12em;padding:3px 8px;border-radius:3px;text-transform:uppercase;margin-bottom:10px}
+.addons{margin-top:26px;color:var(--muted);max-width:85ch}
+.addons b{color:var(--ink)}
+
+/* Sponsors + charity */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:44px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:30px;min-width:0}
+.panel ul{margin:16px 0 0;padding-left:18px;color:var(--muted)}
+.panel li{margin-top:7px}
+.thermo{margin-top:24px;background:var(--paper-2);border-radius:8px;padding:16px}
+.thermo-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font:600 .85rem var(--f-mono);font-variant-numeric:tabular-nums}
+.bar{height:14px;background:var(--line);border-radius:7px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:72%;background:var(--red)}
+.sp-demo{margin-top:22px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+
+/* FAQ */
+.faq{margin-top:36px;border-top:1px solid var(--line);max-width:860px}
+.faq details{border-bottom:1px solid var(--line);padding:18px 0}
+.faq summary{cursor:pointer;font-weight:600;font-size:1.08rem;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::after{content:"+";font:600 1.4rem/1 var(--f-mono);color:var(--red)}
+.faq details[open] summary::after{content:"−"}
+.faq p{color:var(--muted);margin-top:10px;max-width:70ch}
+
+/* Book */
+.book{background:var(--green);color:var(--on-green)}
+.book-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:start}
+.book .lede{color:var(--on-green-muted)}
+.book dl{margin:32px 0 0;display:grid;gap:14px}
+.book dt{font:600 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--on-green-muted)}
+.book dd{margin:2px 0 0;font-size:1.1rem}
+.book dd a{color:var(--on-green)}
+form{background:var(--card);color:var(--ink);border-radius:14px;padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+form label{display:grid;gap:5px;font-size:.86rem;font-weight:600;color:var(--muted);min-width:0}
+form .full{grid-column:1/-1}
+form input,form select,form textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:11px 12px;width:100%}
+form textarea{min-height:96px;resize:vertical}
+form .btn{justify-self:start}
+.sent{grid-column:1/-1;background:#e5f1e8;color:#1c4a37;border-radius:8px;padding:14px;font-weight:600;display:none}
+form.done .sent{display:block}
+
+footer{background:var(--deep);color:var(--on-green-muted);padding-block:44px;font-size:.92rem}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px}
+footer img{height:44px;width:auto}
+footer h4{font:700 1rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--on-green);margin:0 0 10px}
+footer ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+footer a{text-decoration:none}
+footer a:hover{color:var(--on-green)}
+.legal{margin-top:28px;font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+
+@media (max-width:960px){
+  .nav ul{display:none}
+  .nav ul.open{display:grid;position:absolute;top:66px;left:0;right:0;background:var(--green);padding:14px 16px 20px;gap:14px}
+  .menu{display:block}
+  .nav .btn{display:none}
+  .hero-grid,.show,.app-grid,.book-grid,.split{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .pk{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  section{padding-block:60px}
+  .steps,.modes,form{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr}
+  .ph{width:30%}
+}
+
+.hero{background:linear-gradient(90deg,rgba(11,26,19,.94) 0,rgba(18,54,40,.86) 48%,rgba(18,54,40,.55) 100%),url(/sundaypin/img/course-sunset.jpg) center/cover;}
+.photo-band{position:relative;min-height:clamp(260px,42vw,520px);background:center/cover no-repeat;display:flex;align-items:flex-end;color:#fff}
+.photo-band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(11,26,19,.75))}
+.photo-band .wrap{position:relative;z-index:1;padding-block:32px;width:100%}
+.photo-band p{margin:0;font:700 clamp(1.4rem,3.4vw,2.4rem)/1.15 var(--f-display);max-width:22ch;text-wrap:balance}
+.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px}
+.photo-pair img{width:100%;height:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px;display:block}
+@media (max-width:640px){.photo-pair{grid-template-columns:1fr}}
+.book{background:linear-gradient(rgba(11,26,19,.84),rgba(18,54,40,.9)),url(/sundaypin/img/course-green.jpg) center/cover}
+.scr{position:relative;line-height:0}
+.scr .cam{position:absolute;left:2.375%;top:12.78%;width:58.69%;height:78.33%;border-radius:.5%/.9%;overflow:hidden;background:#123628}
+.scr .cam video{width:100%;height:100%;object-fit:cover;display:block}
+.scr .cam .bug{position:absolute;left:1.7%;top:2.2%;font:600 clamp(5px,.72vw,9px)/1 var(--f-mono);letter-spacing:.1em;color:#fff;background:#c8302c;padding:.5em .7em;border-radius:3px}
+.scr .cam .bug.r{left:auto;right:1.7%;background:rgba(0,0,0,.55)}
+.scr .cam .bug.r i{display:inline-block;width:.6em;height:.6em;border-radius:50%;background:#e5483f;margin-right:.45em;vertical-align:-.02em;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.scr .cam .bug.r i{animation:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Sunday Pin home"><img src="/sundaypin/brand/wide-on-dark.svg" alt="Sunday Pin"></a>
+    <button class="menu" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    <ul id="navlinks">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#screens">The screens</a></li>
+      <li><a href="#app">The app</a></li>
+      <li><a href="#packages">Packages</a></li>
+      <li><a href="#sponsors">Sponsors</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a class="btn primary" href="#contact">Contact</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow" style="color:var(--on-green-muted)">Live golf for your tournament</span>
+      <h1>Every shot.<br>Every score.<br><em>On the big screen.</em></h1>
+      <p class="lede">Sunday Pin turns your member-guest, charity outing or club championship into a live event: cameras on the par 3s, scores from every cart, and leaderboards on every screen at the club.</p>
+      <div class="cta">
+        <a class="btn primary" href="#contact">Get in touch</a>
+        <a class="btn ghost" href="#how">See how it works</a>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="livepill"><i></i>LIVE</div>
+      <div class="tv"><img src="/sundaypin/img/board-leaderboard.jpg" alt="Clubhouse screen showing a live leaderboard" width="1600" height="900"></div>
+      <div class="tv-stand"></div>
+      <div class="ph"><img src="/sundaypin/img/phone-live.jpg" alt="The live leaderboard on a phone"></div>
+    </div>
+  </div>
+</header>
+
+<div class="strip" aria-label="Made for">
+  <div class="wrap"><span>Member-guests</span><b>·</b><span>Charity outings</span><b>·</b><span>Club championships</span><b>·</b><span>Corporate days</span><b>·</b><span>Pro-ams</span></div>
+</div>
+
+<div class="photo-band" style="background-image:url(/sundaypin/img/course-wide.jpg)" role="img" aria-label="A golf course fairway at sunrise">
+  <div class="wrap"><p>Your course, your players, live on every screen.</p></div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <span class="eyebrow">How it works</span>
+    <h2>You run the tournament.<br>We run the show.</h2>
+    <p class="lede">One call to plan it, and our crew handles the rest on the day. Nothing for your staff to set up or learn.</p>
+    <div class="steps">
+      <article><time>Weeks before</time><h3>Plan it</h3><p>Send us your format, field and sponsors. We map the camera spots, screens and run of show with your pro shop.</p></article>
+      <article><time>Morning of</time><h3>We set up</h3><p>Cameras on the par 3s, screens in the clubhouse and tent, a QR card on every cart. Done before the first group arrives.</p></article>
+      <article><time>On the course</time><h3>Play live</h3><p>One player per cart keeps score on their phone. Leaderboards update in seconds, and every par 3 shot plays on the screens.</p></article>
+      <article><time>Awards dinner</time><h3>The big finish</h3><p>Final results, contest winners, your sponsors, your fundraising total and a highlight reel of the day.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="screens" id="screens">
+  <div class="wrap">
+    <span class="eyebrow">The screens</span>
+    <h2>Something to watch at every turn</h2>
+    <p class="lede">Big screens around the club rotate through the leaderboard, the par 3 cams and your sponsors, and break in when something big happens.</p>
+    <div class="tabs" role="tablist" aria-label="Screen types">
+      <button role="tab" aria-selected="true" data-i="0">Leaderboard</button>
+      <button role="tab" aria-selected="false" data-i="1">Par 3 cam</button>
+      <button role="tab" aria-selected="false" data-i="2">Hole-in-one</button>
+    </div>
+    <div class="show" role="tabpanel">
+      <div class="tv"><div class="scr"><img id="showimg" src="/sundaypin/img/board-leaderboard.jpg" alt="" width="1600" height="900"><div id="showcam" hidden><div class="cam"><video src="/sundaypin/img/par3-cam.mp4" poster="/sundaypin/img/par3-cam.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Live tee shot on the par 3"></video><span class="bug">HOLE 7</span><span class="bug r"><i></i>LIVE</span></div></div></div></div>
+      <div><h3 id="showh">Live leaderboard</h3><p id="showp"></p><ul id="showl"></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="app">
+  <div class="wrap app-grid">
+    <div class="phones">
+      <div class="ph2"><img src="/sundaypin/img/phone-score.jpg" alt="Scorecard on a phone"></div>
+      <div class="ph2"><img src="/sundaypin/img/phone-live.jpg" alt="Live leaderboard on a phone"></div>
+    </div>
+    <div>
+      <span class="eyebrow">The Sunday Pin app</span>
+      <h2>Scoring players actually use</h2>
+      <p class="lede">Scan the card on the cart and you're in. No accounts and no passwords. It works in the phone's browser too, so nobody is left out.</p>
+      <div class="modes">
+        <div class="mode"><span class="tag">For players</span><h3>Player</h3><ul><li>Enter scores hole by hole</li><li>Live leaderboard by flight</li><li>Watch the par 3 cams</li><li>Sponsor offers on each hole</li></ul></div>
+        <div class="mode"><span class="tag">For the pro shop</span><h3>Golf pro</h3><ul><li>See every cart live</li><li>Fix a score in a tap</li><li>Post news to the screens</li><li>Final results file for the club</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="photo-band" style="background-image:url(/sundaypin/img/course-flag.jpg);background-position:center 60%" role="img" aria-label="A green with a red flag and bunkers">
+  <div class="wrap"><p>Every par 3 shot, on camera.</p></div>
+</div>
+
+<section id="packages" style="background:var(--paper-2)">
+  <div class="wrap">
+    <span class="eyebrow">Packages</span>
+    <h2>Pick your coverage</h2>
+    <p class="lede">Every event is different, so every quote is too. Every package is quoted for your day.</p>
+    <div class="pk">
+      <div class="card"><span class="lvl">Package 1</span><h3>Par</h3><p class="for">Live scoring and leaderboards, no cameras. Great for smaller outings.</p>
+        <ul><li>Scoring app for every cart, any format</li><li>Live leaderboard on up to 2 screens</li><li>Contest results and sponsor slides</li><li>Final results file for your club</li><li>1 operator on site</li></ul>
+        <div class="q">Quote on request</div></div>
+      <div class="card feature"><span class="lvl">Package 2</span><h3>Birdie</h3><p class="for">The full experience for a member-guest or charity outing.</p>
+        <ul><li>Everything in Par</li><li>Live cameras on 2 par 3s, with instant replay</li><li>Up to 4 screens around the club</li><li>Par 3 cams in the app</li><li>Highlight reel at the awards</li><li>2 crew on site</li></ul>
+        <div class="q">Quote on request</div></div>
+      <div class="card"><span class="lvl">Package 3</span><h3>Eagle</h3><p class="for">Every par 3 covered, plus a stream for everyone who couldn’t make it.</p>
+        <ul><li>Everything in Birdie</li><li>Cameras on every par 3, tee and green</li><li>LED wall for the tent or dinner</li><li>Live stream of the par 3s and awards</li><li>Edited event film within a week</li><li>Full production crew</li></ul>
+        <div class="q">Quote on request</div></div>
+    </div>
+    <p class="addons"><b>Add-ons:</b> an extra par 3 or long drive camera, drone flyovers of each hole, player interviews at the turn, a photo booth with an instant leaderboard print, and multi-day member-guest coverage.</p>
+  </div>
+</section>
+
+<section id="sponsors">
+  <div class="wrap">
+    <span class="eyebrow">Sponsors and charities</span>
+    <h2>More for sponsors.<br>More for the cause.</h2>
+    <div class="split">
+      <div class="panel">
+        <h3>Sponsors get seen, not just a sign on a stake</h3>
+        <ul>
+          <li>“Hole 7 presented by” on the camera feed every time someone tees off</li>
+          <li>Sponsor slides between leaderboard updates on every screen</li>
+          <li>Logo and offer on their hole in the app, with taps counted</li>
+          <li>A report after the event: screen time, views and taps</li>
+        </ul>
+        <div class="sp-demo"><div class="scr"><img src="/sundaypin/img/board-par3.jpg" alt="Par 3 screen with a hole sponsor credit"><div class="cam"><video src="/sundaypin/img/par3-cam.mp4" poster="/sundaypin/img/par3-cam.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Live tee shot on the par 3"></video><span class="bug">HOLE 7</span><span class="bug r"><i></i>LIVE</span></div></div></div>
+      </div>
+      <div class="panel">
+        <h3>Raise more for your charity</h3>
+        <ul>
+          <li>A live fundraising total on every screen</li>
+          <li>Text-to-give and QR codes on the leaderboard</li>
+          <li>Challenge holes and mulligans tracked in the app</li>
+          <li>The total revealed live at the dinner</li>
+        </ul>
+        <div class="thermo" aria-label="Example fundraising total">
+          <div class="thermo-row"><span>Raised so far</span><span>$36,200 of $50,000</span></div>
+          <div class="bar"><i></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="photo-pair"><img src="/sundaypin/img/course-aerial.jpg" alt="Aerial view of a fairway and green with bunkers" width="1800" height="1199"><img src="/sundaypin/img/course-sunset.jpg" alt="A putting green at sunset" width="2000" height="1334"></div>
+  </div>
+</section>
+
+<section id="faq" style="background:var(--paper-2)">
+  <div class="wrap">
+    <span class="eyebrow">Questions</span>
+    <h2>Good to know</h2>
+    <div class="faq">
+      <details><summary>Do players need to download anything?</summary><p>No. Players scan the QR code on their cart card and score in the phone's browser. </p></details>
+      <details><summary>What formats and handicaps do you handle?</summary><p>Stroke play, best ball, scramble, shamble, Stableford and match play, with full or percentage handicaps, multiple flights, net and gross.</p></details>
+      <details><summary>What if the course has poor cell signal?</summary><p>Scores are saved on the phone and sent as soon as there is signal, so nothing is lost. We bring our own network for the cameras and screens.</p></details>
+      <details><summary>Do you bring the screens?</summary><p>Yes. We bring TVs, stands and an LED wall on the Eagle package, or we can use the club’s own screens.</p></details>
+      <details><summary>Where do you work?</summary><p>We’re based in Pearl River, New York, and cover the tri-state area, Washington D.C. and Florida. Ask us about anywhere else.</p></details>
+      <details><summary>How far ahead should we book?</summary><p>Spring and summer weekends fill first, so two to three months ahead is best. We can sometimes do it with a couple of weeks’ notice.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="book" id="contact">
+  <div class="wrap" style="text-align:center;max-width:760px">
+    <span class="eyebrow" style="color:var(--on-green-muted)">Get in touch</span>
+    <h2>Put your tournament on the big screen</h2>
+    <p class="lede" style="margin-left:auto;margin-right:auto">Questions, dates or a quote: send us a note and we’ll get back to you.</p>
+    <dl style="display:flex;justify-content:center;gap:24px 56px;flex-wrap:wrap;text-align:left">
+      <div><dt>Email</dt><dd><a href="mailto:hello@sundaypin.live">hello@sundaypin.live</a></dd></div>
+      <div><dt>Based in</dt><dd>Pearl River, NY. Serving the tri-state area, D.C. and Florida.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><img src="/sundaypin/brand/wide-on-dark.svg" alt="Sunday Pin"><p style="margin-top:14px;max-width:34ch">Live cameras, live scoring and big-screen leaderboards for golf tournaments.</p></div>
+    <div><h4>Sunday Pin</h4><ul><li><a href="#how">How it works</a></li><li><a href="#packages">Packages</a></li><li><a href="#sponsors">Sponsors</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+    <div><h4>Contact</h4><ul><li><a href="mailto:hello@sundaypin.live">hello@sundaypin.live</a></li><li>Pearl River, NY</li></ul></div>
+  </div>
+  <div class="wrap legal">© 2026 Sunday Pin</div>
+</footer>
+
+<script>
+const S=[
+ {img:'/sundaypin/img/board-leaderboard.jpg',h:'Live leaderboard',p:'Scores land seconds after they’re entered on the course. Split by flight, net and gross.',l:['Movers marked as they climb','Rotates with sponsor slides','The same board on every phone']},
+ {img:'/sundaypin/img/board-par3.jpg',cam:1,h:'Par 3 cam',p:'Every tee shot on the par 3s plays live, with closest to the pin posted the moment it’s measured.',l:['Instant replay of every shot','Hole sponsor credit on screen','Hole stats: aces, birdies, average']},
+ {img:'/sundaypin/img/board-ace.jpg',h:'Hole-in-one',p:'When someone makes an ace, every screen at the club stops for it. Then it goes in the highlight reel.',l:['Take-over on every screen','Replay ready in seconds','Saved for the awards dinner']},
+];
+const tabs=[...document.querySelectorAll('.tabs button')];
+function show(i){const s=S[i];tabs.forEach((b,j)=>b.setAttribute('aria-selected',j===i));document.getElementById('showimg').src=s.img;document.getElementById('showimg').alt=s.h;const sc=document.getElementById('showcam');sc.hidden=!s.cam;const v=sc.querySelector('video');if(s.cam){v.play().catch(()=>{})}else v.pause();document.getElementById('showh').textContent=s.h;document.getElementById('showp').textContent=s.p;document.getElementById('showl').innerHTML=s.l.map(x=>'<li>'+x+'</li>').join('');}
+tabs.forEach((b,i)=>b.onclick=()=>show(i));show(0);
+const m=document.querySelector('.menu'),ul=document.getElementById('navlinks');
+m.onclick=()=>{const o=ul.classList.toggle('open');m.setAttribute('aria-expanded',o)};
+ul.querySelectorAll('a').forEach(a=>a.onclick=()=>{ul.classList.remove('open');m.setAttribute('aria-expanded',false)});
+</script>
+</body>
+</html>

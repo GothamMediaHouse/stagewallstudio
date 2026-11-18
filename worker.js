@@ -4,7 +4,8 @@
 // Showcaller Hub's app list with full downloads from GitHub releases (hub.js), and Showcaller Intercom's join-from-anywhere
 // rooms (intercom.js), and which apps each Hub has installed, for the Admin app (installs.js), and the Showcaller Link
 // relay, so a studio can let clients in without opening a port on its router (link-relay.js), and Showcaller Sessions'
-// remote recording rooms, with each guest's recording uploaded to cloud storage for the studio Mac (sessions.js).
+// remote recording rooms, with each guest's recording uploaded to cloud storage for the studio Mac (sessions.js), and
+// Sunday Pin's live tournament scoring and leaderboard screens (golf.js).
 import { contact, json } from './contact.js';
 import { checkout, webhook, orderStatus, storeOpen } from './store.js';
 import { gmhInquiry } from './gmh-inquiry.js';
@@ -16,11 +17,13 @@ import { intercom, intercomPage } from './intercom.js';
 import { hubReport, hubInstalls } from './installs.js';
 import { linkRelay } from './link-relay.js';
 import { sessions, sessionsPage, sessionsCleanup } from './sessions.js';
+import { golf } from './golf.js';
 
 export { IntercomRoom } from './intercom.js';
 export { HubInstalls } from './installs.js';
 export { LinkRelay } from './link-relay.js';
 export { SessionRoom } from './sessions.js';
+export { GolfEvent } from './golf.js';
 
 const ROUTES = {
   '/api/contact': ['POST', contact],
@@ -43,6 +46,13 @@ for (const app of Object.keys(APPS)) ROUTES[`/api/${app}/latest`] ||= ['GET', la
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Sunday Pin's own domain (sundaypin.live, a custom domain on this worker): the brochure at /, the golf pages and
+    // tournament links as usual, anything else back to the brochure. www goes to the bare domain.
+    if (url.hostname === 'www.sundaypin.live') return Response.redirect('https://sundaypin.live' + url.pathname + url.search, 301);
+    if (url.hostname === 'sundaypin.live') {
+      if (url.pathname === '/') return env.ASSETS.fetch(new Request(new URL('/sundaypin/', url), request));
+      if (!/^\/(golf|g|sundaypin)(\/|$)/.test(url.pathname)) return Response.redirect(new URL('/', url), 302);
+    }
     if (url.pathname === '/api/gmh-inquiry') return gmhInquiry(request, env); // handles its own CORS and methods
     // Showcaller Intercom: crew joining from anywhere (intercom.js)
     if (url.pathname === '/intercom/host' || url.pathname === '/intercom/ws') return intercom(request, env);
@@ -53,6 +63,8 @@ export default {
     if (url.pathname === '/sessions' && request.method === 'GET') return Response.redirect(new URL('/sessions/account/', url), 302);
     if (url.pathname.startsWith('/sessions/') && !url.pathname.startsWith('/sessions/guest/')) return sessions(request, env);
     if (/^\/s\/[a-z0-9]{8,24}(\/edit\/t\d{2,4}|\/watch)?\/?$/.test(url.pathname) && request.method === 'GET') return sessionsPage(request, env);
+    // Sunday Pin: live scoring for golf tournaments, one room per tournament (golf.js)
+    if (url.pathname.startsWith('/golf/api/') || url.pathname.startsWith('/g/')) { const r = await golf(request, env); if (r) return r; }
     if (url.pathname.startsWith('/download/') && (request.method === 'GET' || request.method === 'HEAD')) return download(request, env);
     const route = ROUTES[url.pathname];
     if (route) {

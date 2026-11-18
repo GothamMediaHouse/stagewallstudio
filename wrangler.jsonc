@@ -2,7 +2,8 @@
   "name": "stagewallstudio",
   "main": "worker.js",
   "compatibility_date": "2025-09-01",
-  "assets": { "directory": "./public", "binding": "ASSETS" },
+  // run_worker_first "/": so sundaypin.live/ can show the Sunday Pin brochure instead of the Showcaller homepage
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/"] },
   // Keep the variables set in the Cloudflare dashboard (CONTACT_TO, CONTACT_FROM) when this deploys
   "keep_vars": true,
   // Branch builds (pull requests) run `wrangler preview`, which needs this block; it can stay empty
@@ -11,8 +12,9 @@
   // Showcaller Hub: which apps each computer has installed, read by the Admin app (installs.js)
   // Showcaller Link: one relay per studio, so clients get in without a port opened at the studio (link-relay.js)
   // Showcaller Sessions: one room per recording session, guests join at /s/<room> (sessions.js); accounts live in the same class (sessions-accounts.js)
-  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }, { "name": "HUB_INSTALLS", "class_name": "HubInstalls" }, { "name": "LINK_RELAY", "class_name": "LinkRelay" }, { "name": "SESSIONS_ROOM", "class_name": "SessionRoom" }] },
-  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }, { "tag": "hub-installs-v1", "new_sqlite_classes": ["HubInstalls"] }, { "tag": "link-relay-v1", "new_sqlite_classes": ["LinkRelay"] }, { "tag": "sessions-v1", "new_sqlite_classes": ["SessionRoom"] }],
+  // Clubhouse Live (golf): one room per golf tournament, live scores and leaderboard screens at /g/<id> (golf.js)
+  "durable_objects": { "bindings": [{ "name": "INTERCOM", "class_name": "IntercomRoom" }, { "name": "HUB_INSTALLS", "class_name": "HubInstalls" }, { "name": "LINK_RELAY", "class_name": "LinkRelay" }, { "name": "SESSIONS_ROOM", "class_name": "SessionRoom" }, { "name": "GOLF", "class_name": "GolfEvent" }] },
+  "migrations": [{ "tag": "intercom-v1", "new_sqlite_classes": ["IntercomRoom"] }, { "tag": "hub-installs-v1", "new_sqlite_classes": ["HubInstalls"] }, { "tag": "link-relay-v1", "new_sqlite_classes": ["LinkRelay"] }, { "tag": "sessions-v1", "new_sqlite_classes": ["SessionRoom"] }, { "tag": "golf-v1", "new_sqlite_classes": ["GolfEvent"] }],
   // Showcaller Sessions: each guest's recording, uploaded in pieces until the studio Mac downloads it (sessions.js).
   // Create the bucket first (Cloudflare dashboard → R2 → Create bucket "showcaller-sessions"), or deploys fail.
   "r2_buckets": [{ "binding": "SESSIONS", "bucket_name": "showcaller-sessions" }],

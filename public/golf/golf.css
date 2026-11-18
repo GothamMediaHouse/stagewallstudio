@@ -1,0 +1,46 @@
+/* Sunday Pin: shared look for every golf page (fairway green, flag yellow, leaderboard red for under par) */
+:root {
+  --paper: #f2f4ef; --paper-2: #e6eae1; --card: #ffffff; --ink: #14201a; --muted: #56625a; --line: #d3dacf;
+  --green: #123628; --green-2: #1c4a37; --on-green: #eef3ec; --on-green-muted: #a9bdb0;
+  --flag: #e8c547; --on-flag: #1a1a10; --red: #c8312b; --ok: #2f8a57; --warn: #b7791f;
+  --f-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1713; --paper-2: #16211b; --card: #17231d; --ink: #e7ece5; --muted: #9aa89f; --line: #2a3830;
+    --green: #0b2219; --green-2: #143829; --on-green: #eef3ec; --on-green-muted: #a3b8aa;
+    --flag: #f0cf55; --red: #f06a5e; --ok: #5cc48a; --warn: #e0a64a; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--f-body); }
+h1, h2, h3 { font-family: var(--f-display); text-transform: uppercase; letter-spacing: .01em; line-height: 1; margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--flag); outline-offset: 2px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.under { color: var(--red); }
+.label { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--line); background: var(--card);
+  border-radius: 8px; padding: 10px 16px; font-weight: 600; text-decoration: none; color: var(--ink); }
+.btn.primary { background: var(--flag); border-color: var(--flag); color: var(--on-flag); }
+.btn.dark { background: var(--green); border-color: var(--green); color: var(--on-green); }
+.btn.danger { color: var(--red); }
+.btn:disabled { opacity: .5; cursor: default; }
+.topbar { background: var(--green); color: var(--on-green); padding: 14px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); }
+.topbar .label { color: var(--on-green-muted); }
+.pill { display: inline-block; font-family: var(--f-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+.pill.live { background: var(--flag); color: var(--on-flag); }
+.pill.off { background: var(--red); color: #fff; }
+.sc { display: inline-grid; place-items: center; min-width: 1.9em; height: 1.9em; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.sc.birdie { border: 1.5px solid var(--red); border-radius: 50%; color: var(--red); }
+.sc.eagle { border: 1.5px solid var(--red); border-radius: 50%; color: var(--red); box-shadow: 0 0 0 2px var(--card), 0 0 0 3.5px var(--red); }
+.sc.bogey { border: 1.5px solid currentColor; }
+.sc.double { border: 1.5px solid currentColor; box-shadow: 0 0 0 2px var(--card), 0 0 0 3.5px currentColor; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 8px; font-size: .92rem; z-index: 50; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .pulse { animation: pulse 2s ease-in-out infinite; } @keyframes pulse { 50% { opacity: .55; } } }
