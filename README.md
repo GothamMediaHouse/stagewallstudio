@@ -97,16 +97,3 @@ the app (`renderer/` in the Showcaller Sessions folder); keep the copies identic
 `showcaller-sessions` (location automatic). Optional: R2 → the bucket → Settings → Object lifecycle rules → delete
 objects after 90 days, as a safety net for sessions nobody downloads (the app deletes its own takes once they're down).
 Pieces live at `r/<room>/<take>/<pid>/<v|a|m>/<000000>`.
-
-## Flagcast (live tournament scoring)
-
-Live scoring for golf tournaments run by Gotham Media House: member-guests, charity outings, corporate days. One Durable Object per tournament (`GolfEvent` in `golf.js`) holds the setup and every score and pushes each change to the open pages over a WebSocket. The scoring math is in `public/golf/core.js` and runs in the pages.
-
-- `/golf/`: make a new tournament. Set `GOLF_CREATE_PASS` (secret) so only Gotham can make them; without it anyone with the address can.
-- `/g/<id>/desk#<key>`: the tournament desk (course, format and handicaps, teams, score fixes, contests, sponsors, par 3 camera links, fundraising total, announcements, lock results). Keep the link private.
-- `/g/<id>/cards#<key>`: printable cart cards with each team's QR code.
-- `/g/<id>/s/<code>`: a team's scorecard on a phone (from the QR code). Scores are kept on the phone with no signal and sent when it comes back.
-- `/g/<id>/board`: the big screens (16:9): leaderboards by flight, par 3 pages with the camera, contests, skins, fundraising and sponsors, hole-in-one takeover. `?hole=7` shows one par 3 only, `?show=leaderboard` just the standings, `?flight=A` one flight.
-- `/g/<id>`: the live leaderboard for phones, with each team's card, the par 3s and contests.
-
-Formats: best ball (1–3 balls count), scramble (team handicap), stroke play, Stableford, with a handicap allowance. A picked-up ball counts as net double bogey; ties are broken on the back 9, 6, 3 and last hole. Par 3 cameras are https links: HLS (`.m3u8`, played with hls.js) or any web player link such as VDO.Ninja.
