@@ -1,14 +1,20 @@
 {
- "written": "2026-11-17T20:58:07.638Z",
+ "written": "2026-11-21T15:57:45.562Z",
  "apps": {
-  "intercom": {
-   "version": "3.19.0",
+  "studio": {
+   "version": "7.8.4",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.19.0/Showcaller-Helios-Remote-3.19.0-mac-arm64.zip",
-     "sha256": "b4a22f935658219b789828f4b223b80963fec583eb986948a1bb8f8ba9d32a23",
-     "size": 130223125,
-     "version": "3.19.0"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.4/Showcaller-Screens-7.8.4-mac-arm64.zip",
+     "sha256": "7b233bc8d6e32fc29663c8a925c0ae6adfc6770ac90a691148736d4bc793ecb6",
+     "size": 135777149,
+     "version": "7.8.4"
+    },
+    "win-x64": {
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.4/Showcaller-Screens-7.8.4-win-x64.exe",
+     "sha256": "1a7b387680d78a7f3c7890fc58f71505454f1a696f3d5b31e0dec141bd6557e1",
+     "size": 117757065,
+     "version": "7.8.4"
     }
    }
   },
@@ -79,20 +85,14 @@
     }
    }
   },
-  "studio": {
-   "version": "7.8.3",
+  "intercom": {
+   "version": "3.19.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.3/Showcaller-Screens-7.8.3-mac-arm64.zip",
-     "sha256": "d0369b9988ad4287f83178915226ac8d8ad3bd1329a3a752a9f20ab7d74554f3",
-     "size": 135776384,
-     "version": "7.8.3"
-    },
-    "win-x64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/studio-7.8.3/Showcaller-Screens-7.8.3-win-x64.exe",
-     "sha256": "1a30134a0cf47ce002410f02967d08f0da7b10f4f71e90cca3e2274502e18f11",
-     "size": 117756378,
-     "version": "7.8.3"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/intercom-3.19.0/Showcaller-Helios-Remote-3.19.0-mac-arm64.zip",
+     "sha256": "b4a22f935658219b789828f4b223b80963fec583eb986948a1bb8f8ba9d32a23",
+     "size": 130223125,
+     "version": "3.19.0"
     }
    }
   },
