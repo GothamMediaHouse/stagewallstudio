@@ -11,6 +11,7 @@ export const APPS = {
   multiview: null, timer: null, testkit: null, // answered by multiview.js / tools.js first
   replay: TOOLS, iso: TOOLS, switcher: TOOLS, playback: TOOLS, intercom: 'https://showcallerstudio.com/intercom/', ndiwebcam: TOOLS, hub: TOOLS, graphics: TOOLS, stream: TOOLS, link: TOOLS,
   meters: 'https://showcallerstudio.com/apps/#meters', // Showcaller Meters (free RØDECaster / multichannel meters)
+  paint: 'https://showcallerstudio.com/apps/#paint', // Showcaller Paint (frame sync / colour for set screens)
   sessions: 'https://showcallerstudio.com/sessions/account/', // Showcaller Sessions (beta)
   // Helios (the intercom system): the Frame, Panel and Comms, Helios Hub, and the Helio beltpacks' firmware (helio)
   'intercom-frame': HELIOS, 'intercom-panel': HELIOS, 'intercom-comms': HELIOS, 'helios-hub': HELIOS, helio: HELIOS,
