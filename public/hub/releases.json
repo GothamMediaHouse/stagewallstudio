@@ -1,14 +1,14 @@
 {
- "written": "2026-11-23T16:26:01.904Z",
+ "written": "2026-11-23T19:38:20.359Z",
  "apps": {
   "paint": {
-   "version": "0.1.1",
+   "version": "0.2.0",
    "builds": {
     "mac-arm64": {
-     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/paint-0.1.1/Showcaller-Paint-0.1.1-mac-arm64.zip",
-     "sha256": "e846885d5d4b8397704a3eee87fe6dd8324f8435864ae3d0166483be44b58b57",
-     "size": 137034322,
-     "version": "0.1.1"
+     "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/paint-0.2.0/Showcaller-Paint-0.2.0-mac-arm64.zip",
+     "sha256": "b01e5080289a80a34b7769e87a349c4051d48ca2ec1ea3e9e0dd287a0fe32a84",
+     "size": 137036630,
+     "version": "0.2.0"
     },
     "win-x64": {
      "url": "https://github.com/GothamMediaHouse/stagewallstudio/releases/download/paint-0.1.1/Showcaller-Paint-0.1.1-win-x64.exe",
